@@ -1,6 +1,6 @@
 module github.com/Conv-AI/convai-cli
 
-go 1.25.0
+go 1.25.12
 
 require (
 	github.com/oapi-codegen/runtime v1.6.0

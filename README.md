@@ -24,7 +24,7 @@ All resource commands support `--output table|json|yaml`.
 
 ## Build
 
-Go 1.25 or newer:
+Go 1.25.12 or newer:
 
 ```bash
 make generate
