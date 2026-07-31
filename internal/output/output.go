@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/Conv-AI/convai-cli/internal/characterapi"
-	"gopkg.in/yaml.v3"
+	"sigs.k8s.io/yaml"
 )
 
 type Format string
@@ -38,10 +38,16 @@ func Structured(writer io.Writer, format Format, value any) error {
 		encoder.SetEscapeHTML(false)
 		return encoder.Encode(value)
 	case YAML:
-		encoder := yaml.NewEncoder(writer)
-		encoder.SetIndent(2)
-		defer encoder.Close()
-		return encoder.Encode(value)
+		jsonData, err := json.Marshal(value)
+		if err != nil {
+			return err
+		}
+		yamlData, err := yaml.JSONToYAML(jsonData)
+		if err != nil {
+			return err
+		}
+		_, err = writer.Write(yamlData)
+		return err
 	default:
 		return errors.New("structured output requires json or yaml")
 	}

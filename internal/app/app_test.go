@@ -136,6 +136,37 @@ func TestCharacterCreateFileValidatesRequiredFieldsBeforeNetwork(t *testing.T) {
 	}
 }
 
+func TestCharacterCreateValidatesOutputBeforeNetwork(t *testing.T) {
+	t.Parallel()
+	called := false
+	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		called = true
+	}))
+	defer server.Close()
+
+	_, _, err := execute(
+		t,
+		server,
+		strings.NewReader(""),
+		"character",
+		"create",
+		"--name",
+		"Ari",
+		"--voice",
+		"voice-1",
+		"--backstory",
+		"Backstory",
+		"--output",
+		"yml",
+	)
+	if err == nil || !strings.Contains(err.Error(), "output must be table, json, or yaml") {
+		t.Fatalf("error = %v", err)
+	}
+	if called {
+		t.Fatal("server was called for invalid output")
+	}
+}
+
 func TestCharacterListValidatesPaginationBeforeNetwork(t *testing.T) {
 	t.Parallel()
 	called := false
@@ -150,6 +181,44 @@ func TestCharacterListValidatesPaginationBeforeNetwork(t *testing.T) {
 	}
 	if called {
 		t.Fatal("server was called for invalid pagination")
+	}
+}
+
+func TestUnknownProfileFailsBeforeNetwork(t *testing.T) {
+	t.Parallel()
+	called := false
+	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		called = true
+	}))
+	defer server.Close()
+
+	cfgStore := &memoryConfigStore{cfg: config.Default()}
+	credentialStore := &memoryCredentialStore{
+		values: map[string]credential.Credential{
+			"stagin": {
+				Type:  config.CredentialAPIKey,
+				Value: "01234567890123456789012345678901",
+			},
+		},
+	}
+	root, err := New(Options{
+		Stdin:           strings.NewReader(""),
+		Stdout:          io.Discard,
+		Stderr:          io.Discard,
+		ConfigStore:     cfgStore,
+		CredentialStore: credentialStore,
+		HTTPClient:      server.Client(),
+	})
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	root.SetArgs([]string{"character", "list", "--profile", "stagin"})
+	err = root.Execute()
+	if err == nil || !strings.Contains(err.Error(), `profile "stagin" does not exist`) {
+		t.Fatalf("error = %v", err)
+	}
+	if called {
+		t.Fatal("server was called for unknown profile")
 	}
 }
 

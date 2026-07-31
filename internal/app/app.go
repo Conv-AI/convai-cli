@@ -426,6 +426,10 @@ func (a *application) characterCreateCommand() *cobra.Command {
 		Short: "Create a character",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
+			format, err := output.Parse(a.outputFlag)
+			if err != nil {
+				return err
+			}
 			request, err := a.createRequest(name, voice, backstory, inputFile)
 			if err != nil {
 				return err
@@ -435,10 +439,6 @@ func (a *application) characterCreateCommand() *cobra.Command {
 				return err
 			}
 			created, err := client.CreateCharacter(cmd.Context(), request)
-			if err != nil {
-				return err
-			}
-			format, err := output.Parse(a.outputFlag)
 			if err != nil {
 				return err
 			}
@@ -509,11 +509,11 @@ func (a *application) profile() (config.Config, string, config.Profile, error) {
 	}
 	profile, ok := cfg.Profiles[name]
 	if !ok {
-		profile = config.Profile{
-			APIURL:         config.DefaultAPIURL,
-			CredentialType: config.CredentialPAT,
-		}
-		cfg.Profiles[name] = profile
+		return config.Config{}, "", config.Profile{}, fmt.Errorf(
+			"profile %q does not exist; create it with `convai config set api-url URL --profile %s`",
+			name,
+			name,
+		)
 	}
 	if a.apiURLFlag != "" {
 		profile.APIURL, err = config.NormalizeAPIURL(a.apiURLFlag)
