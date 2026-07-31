@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/oapi-codegen/oapi-codegen/v2.8.0/configuration-schema.json
+package: characterapi
+output: internal/characterapi/client.gen.go
+generate:
+  models: true
+  client: true
+output-options:
+  response-type-suffix: Resp
+  include-operation-ids:
+    - character_list
+    - character_get
+    - character_create

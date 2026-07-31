@@ -1,0 +1,20 @@
+version: 1
+operations:
+  - operation_id: character_list
+    group: character
+    command: list
+    stability: beta
+    destructive: false
+    required_scopes: [character:read]
+  - operation_id: character_get
+    group: character
+    command: get
+    stability: beta
+    destructive: false
+    required_scopes: [character:read]
+  - operation_id: character_create
+    group: character
+    command: create
+    stability: beta
+    destructive: false
+    required_scopes: [character:write]
