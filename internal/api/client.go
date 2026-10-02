@@ -38,7 +38,8 @@ func (e *Error) Error() string {
 }
 
 func New(baseURL string, auth credential.Credential, httpClient *http.Client) (*Client, error) {
-	if _, err := config.NormalizeAPIURL(baseURL); err != nil {
+	baseURL, err := config.NormalizeAPIURL(baseURL)
+	if err != nil {
 		return nil, err
 	}
 	parsed, err := credential.Parse(auth.Value)

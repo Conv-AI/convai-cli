@@ -135,7 +135,7 @@ func (a *application) authLoginCommand() *cobra.Command {
 	var noVerify bool
 	command := &cobra.Command{
 		Use:   "login",
-		Short: "Store an API key or personal access token in the operating-system keychain",
+		Short: "Store an API key, PAT, or issued OAuth access token in the OS keychain",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			cfg, profileName, profile, err := a.profile()
@@ -618,7 +618,7 @@ func (a *application) readCredential(fromStdin bool) (string, error) {
 	if !ok || !term.IsTerminal(int(file.Fd())) {
 		return "", errors.New("stdin is not a terminal; use --token-stdin")
 	}
-	fmt.Fprint(a.stderr, "Convai API key or personal access token: ")
+	fmt.Fprint(a.stderr, "Convai API key, PAT, or issued OAuth access token: ")
 	value, err := a.readSecret(int(file.Fd()))
 	fmt.Fprintln(a.stderr)
 	if err != nil {
