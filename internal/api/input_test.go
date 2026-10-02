@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	contract "github.com/Conv-AI/convai-cli/api"
 	"github.com/Conv-AI/convai-cli/internal/characterapi"
 	"github.com/Conv-AI/convai-cli/internal/config"
 	"github.com/Conv-AI/convai-cli/internal/credential"
@@ -108,6 +109,25 @@ func TestInputDecodersRejectTrailingYAMLDocuments(t *testing.T) {
 		}
 		if _, err := DecodeCreateRequest(strings.NewReader(body), "yaml"); err == nil {
 			t.Errorf("typed decoder accepted trailing YAML: %q", trailing)
+		}
+	}
+}
+
+func TestInputValidationDoesNotRoundFractionalIntegers(t *testing.T) {
+	for _, number := range []string{"1.0000000000000000001", "2.0000000000000000001"} {
+		if err := contract.ValidateInput("character_create", nil, []byte(`{"charName":"Ari","backstory":"A guide.","curiosity_level":`+number+`}`)); err == nil {
+			t.Errorf("fractional integer passed validation: %s", number)
+		}
+	}
+}
+
+func TestYAMLRejectsNumbersThatWouldBeRounded(t *testing.T) {
+	for _, number := range []string{"18446744073709551616", "0.12345678901234567890123456789"} {
+		if _, err := DecodeInputObject(strings.NewReader("metadata_filter:\n  external_id: "+number+"\n"), "yaml"); err == nil || !strings.Contains(err.Error(), "use JSON") {
+			t.Fatalf("unsupported precision %s: error=%v", number, err)
+		}
+		if _, err := DecodeInputObject(strings.NewReader(`{"number":`+number+`}`), "json"); err != nil {
+			t.Fatalf("JSON exact number rejected: %v", err)
 		}
 	}
 }

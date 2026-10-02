@@ -1,12 +1,13 @@
 package contract
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"reflect"
 	"slices"
 	"strings"
+
+	"github.com/Conv-AI/convai-cli/internal/jsonwire"
 )
 
 // CheckUpstream is a reviewed-contract drift gate, not a semantic compatibility
@@ -17,14 +18,14 @@ func CheckUpstream(data []byte) error {
 		return err
 	}
 	var upstream Spec
-	if err := json.Unmarshal(data, &upstream); err != nil {
+	if err := jsonwire.Decode(data, &upstream); err != nil {
 		return fmt.Errorf("decode upstream OpenAPI: %w", err)
 	}
 	var oldRoot, newRoot map[string]any
-	if err := json.Unmarshal(Document, &oldRoot); err != nil {
+	if err := jsonwire.Decode(Document, &oldRoot); err != nil {
 		return err
 	}
-	if err := json.Unmarshal(data, &newRoot); err != nil {
+	if err := jsonwire.Decode(data, &newRoot); err != nil {
 		return err
 	}
 	for _, key := range []string{"openapi", "jsonSchemaDialect"} {

@@ -30,6 +30,12 @@ invalid pagination/sorting, invalid create fields, and Workspace conflicts with
 zero outbound requests. Accepted version selectors are forwarded unchanged.
 Create and catalog file inputs share a bounded parser that rejects trailing
 JSON/YAML documents rather than silently executing only the first document.
+Precision regressions preserve large integers in file-to-wire bindings,
+typed and catalog response maps, and JSON/YAML/table output. Validation and
+contract comparison decode numeric lexemes rather than rounding through floats.
+YAML input rejects scalars the YAML-to-JSON converter cannot represent exactly;
+use JSON for arbitrary-precision numbers. YAML output emits the JSON syntax tree
+without converting numeric scalars to floats.
 Generation is checked for committed reproducibility.
 
 These tests verify client behavior; they do not prove live entitlement policy.

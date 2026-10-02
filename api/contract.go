@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Conv-AI/convai-cli/internal/jsonwire"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -41,10 +43,10 @@ type Parameter struct {
 
 func (p *Parameter) UnmarshalJSON(data []byte) error {
 	type plain Parameter
-	if err := json.Unmarshal(data, (*plain)(p)); err != nil {
+	if err := jsonwire.Decode(data, (*plain)(p)); err != nil {
 		return err
 	}
-	return json.Unmarshal(data, &p.Raw)
+	return jsonwire.Decode(data, &p.Raw)
 }
 
 type PathItem struct {
@@ -71,7 +73,7 @@ func (p *PathItem) UnmarshalJSON(data []byte) error {
 		}
 	}
 	if servers, exists := fields["servers"]; exists {
-		if err := json.Unmarshal(servers, &p.Servers); err != nil {
+		if err := jsonwire.Decode(servers, &p.Servers); err != nil {
 			return err
 		}
 	}
@@ -110,10 +112,10 @@ type Operation struct {
 
 func (o *Operation) UnmarshalJSON(data []byte) error {
 	type plain Operation
-	if err := json.Unmarshal(data, (*plain)(o)); err != nil {
+	if err := jsonwire.Decode(data, (*plain)(o)); err != nil {
 		return err
 	}
-	return json.Unmarshal(data, &o.Raw)
+	return jsonwire.Decode(data, &o.Raw)
 }
 
 type SecurityRequirement map[string][]string
@@ -152,7 +154,7 @@ func Load() (Spec, []Command, error) {
 		return Spec{}, nil, fmt.Errorf("owner contract checksum mismatch")
 	}
 	var spec Spec
-	if err := json.Unmarshal(Document, &spec); err != nil {
+	if err := jsonwire.Decode(Document, &spec); err != nil {
 		return Spec{}, nil, err
 	}
 	var catalog struct {

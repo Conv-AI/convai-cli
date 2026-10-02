@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"math/big"
+	"strings"
 
 	yamlv3 "gopkg.in/yaml.v3"
 	"sigs.k8s.io/yaml"
@@ -29,6 +31,9 @@ func DecodeInputObject(reader io.Reader, format string) (map[string]any, error) 
 		if err := stream.Decode(&document); err != nil {
 			return nil, errors.New("invalid YAML object")
 		}
+		if err := validateYAMLNumbers(&document); err != nil {
+			return nil, err
+		}
 		if err := stream.Decode(&document); !errors.Is(err, io.EOF) {
 			return nil, errors.New("input must contain exactly one document")
 		}
@@ -42,6 +47,7 @@ func DecodeInputObject(reader io.Reader, format string) (map[string]any, error) 
 	}
 	var result map[string]any
 	decoder := json.NewDecoder(bytes.NewReader(body))
+	decoder.UseNumber()
 	if err := decoder.Decode(&result); err != nil || result == nil {
 		return nil, errors.New("input must be a JSON or YAML object")
 	}
@@ -50,4 +56,36 @@ func DecodeInputObject(reader io.Reader, format string) (map[string]any, error) 
 		return nil, errors.New("input must contain exactly one document")
 	}
 	return result, nil
+}
+
+func validateYAMLNumbers(node *yamlv3.Node) error {
+	if node.Kind == yamlv3.ScalarNode && (node.Tag == "!!int" || node.Tag == "!!float") {
+		var value any
+		if err := node.Decode(&value); err != nil {
+			return errors.New("unsupported YAML number; use JSON")
+		}
+		data, err := json.Marshal(value)
+		if err != nil {
+			return errors.New("unsupported YAML number; use JSON")
+		}
+		literal := strings.ReplaceAll(node.Value, "_", "")
+		var exact *big.Rat
+		if node.Tag == "!!int" {
+			if integer, ok := new(big.Int).SetString(literal, 0); ok {
+				exact = new(big.Rat).SetInt(integer)
+			}
+		} else {
+			exact, _ = new(big.Rat).SetString(literal)
+		}
+		encoded, ok := new(big.Rat).SetString(string(data))
+		if exact == nil || !ok || exact.Cmp(encoded) != 0 {
+			return errors.New("YAML number cannot be converted exactly; use JSON")
+		}
+	}
+	for _, child := range node.Content {
+		if err := validateYAMLNumbers(child); err != nil {
+			return err
+		}
+	}
+	return nil
 }

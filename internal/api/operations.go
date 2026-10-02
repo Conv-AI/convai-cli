@@ -14,6 +14,7 @@ func decodeQuery(values map[string]any, target any) error {
 		return err
 	}
 	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.UseNumber()
 	decoder.DisallowUnknownFields()
 	return decoder.Decode(target)
 }

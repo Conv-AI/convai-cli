@@ -17,6 +17,7 @@ import (
 	"github.com/Conv-AI/convai-cli/internal/characterapi"
 	"github.com/Conv-AI/convai-cli/internal/config"
 	"github.com/Conv-AI/convai-cli/internal/credential"
+	"github.com/Conv-AI/convai-cli/internal/jsonwire"
 	"github.com/google/uuid"
 )
 
@@ -191,7 +192,7 @@ func validateTypedInput(operation string, params, body any) error {
 		if err != nil {
 			return err
 		}
-		if err := json.Unmarshal(data, &query); err != nil {
+		if err := jsonwire.Decode(data, &query); err != nil {
 			return err
 		}
 	}
@@ -240,7 +241,7 @@ func (c *Client) decodeResponse(operationID string, response *http.Response, tar
 	if err := contract.ValidateResponse(operationID, strconv.Itoa(response.StatusCode), data); err != nil {
 		return c.safeError(&Error{StatusCode: response.StatusCode, Message: err.Error(), RequestID: response.Header.Get("X-Request-ID")})
 	}
-	if json.Unmarshal(data, target) != nil {
+	if jsonwire.Decode(data, target) != nil {
 		return errors.New("Convai API returned invalid JSON response")
 	}
 	return nil
@@ -291,6 +292,7 @@ func DecodeCreateRequest(reader io.Reader, format string) (characterapi.Characte
 	}
 	var request characterapi.CharacterCreate
 	decoder := json.NewDecoder(bytes.NewReader(body))
+	decoder.UseNumber()
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&request); err != nil {
 		return characterapi.CharacterCreate{}, errors.New("character input does not match the generated model")

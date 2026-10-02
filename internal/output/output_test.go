@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/Conv-AI/convai-cli/internal/characterapi"
+	"gopkg.in/yaml.v3"
 )
 
 func TestListOutputKeepsUnknownTotalUnknown(t *testing.T) {
@@ -53,5 +54,29 @@ func TestCharacterYAMLUsesAPIFieldNames(t *testing.T) {
 	}
 	if strings.Contains(value, "characterid:") {
 		t.Fatalf("YAML used Go field name:\n%s", value)
+	}
+}
+
+func TestResourceOutputPreservesLargeIntegers(t *testing.T) {
+	for _, format := range []Format{JSON, YAML, Table} {
+		for _, number := range []string{"9007199254740993", "18446744073709551616", "0.12345678901234567890123456789", "1e309", strings.Repeat("9", 400)} {
+			var writer bytes.Buffer
+			if err := Resource(&writer, format, map[string]any{"external_id": json.Number(number)}); err != nil {
+				t.Fatal(err)
+			}
+			if !strings.Contains(writer.String(), number) {
+				t.Fatalf("rounded %s output: %s", format, writer.String())
+			}
+			if format == YAML {
+				var document yaml.Node
+				if err := yaml.Unmarshal(writer.Bytes(), &document); err != nil {
+					t.Fatal(err)
+				}
+				value := document.Content[0].Content[1]
+				if value.Tag != "!!int" && value.Tag != "!!float" {
+					t.Fatalf("number became YAML string: %s", writer.String())
+				}
+			}
+		}
 	}
 }

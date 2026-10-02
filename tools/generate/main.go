@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	contract "github.com/Conv-AI/convai-cli/api"
+	"github.com/Conv-AI/convai-cli/internal/jsonwire"
 	"gopkg.in/yaml.v3"
 )
 
@@ -43,7 +44,7 @@ func main() {
 			fail(err)
 		}
 		var document map[string]any
-		if err := json.Unmarshal(contract.Document, &document); err != nil {
+		if err := jsonwire.Decode(contract.Document, &document); err != nil {
 			fail(err)
 		}
 		// Legacy camelCase/snake_case aliases remain distinct wire fields. Only

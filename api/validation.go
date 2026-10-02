@@ -1,13 +1,13 @@
 package contract
 
 import (
-	"encoding/json"
 	"fmt"
 	"slices"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/Conv-AI/convai-cli/internal/jsonwire"
 	"github.com/dlclark/regexp2"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 )
@@ -47,7 +47,7 @@ func initializeValidators() {
 		return
 	}
 	var root map[string]any
-	if err := json.Unmarshal(Document, &root); err != nil {
+	if err := jsonwire.Decode(Document, &root); err != nil {
 		validatorsErr = err
 		return
 	}
@@ -135,7 +135,7 @@ func ValidateResponse(id, status string, body []byte) error {
 		return fmt.Errorf("undeclared response contract")
 	}
 	var value any
-	if err := json.Unmarshal(body, &value); err != nil {
+	if err := jsonwire.Decode(body, &value); err != nil {
 		return fmt.Errorf("Convai API returned invalid JSON response")
 	}
 	if err := validator.Validate(value); err != nil {
@@ -166,7 +166,7 @@ func ValidateInput(id string, query map[string]any, body []byte) error {
 	}
 	if validator, ok := bodyValidators[id]; ok {
 		var value any
-		if err := json.Unmarshal(body, &value); err != nil {
+		if err := jsonwire.Decode(body, &value); err != nil {
 			return fmt.Errorf("request must be a JSON object")
 		}
 		if err := validator.Validate(value); err != nil {

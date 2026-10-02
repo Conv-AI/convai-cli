@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	contract "github.com/Conv-AI/convai-cli/api"
+	"github.com/Conv-AI/convai-cli/internal/jsonwire"
 )
 
 func TestUpstreamDriftGate(t *testing.T) {
@@ -16,6 +17,15 @@ func TestUpstreamDriftGate(t *testing.T) {
 		name   string
 		mutate func(map[string]any)
 	}{
+		{"sub-float precision constraint change", func(root map[string]any) {
+			operation := root["paths"].(map[string]any)["/character/list"].(map[string]any)["get"].(map[string]any)
+			for _, value := range operation["parameters"].([]any) {
+				parameter := value.(map[string]any)
+				if parameter["name"] == "limit" {
+					parameter["schema"].(map[string]any)["minimum"] = json.Number("1.0000000000000000001")
+				}
+			}
+		}},
 		{"root servers changed", func(root map[string]any) {
 			root["servers"] = []any{map[string]any{"url": "https://other.example/v2"}}
 		}},
@@ -205,7 +215,7 @@ func TestUpstreamDriftGate(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			var document map[string]any
-			if err := json.Unmarshal(contract.Document, &document); err != nil {
+			if err := jsonwire.Decode(contract.Document, &document); err != nil {
 				t.Fatal(err)
 			}
 			tc.mutate(document)
@@ -224,7 +234,7 @@ func TestEquivalentUpstreamServers(t *testing.T) {
 	for _, variant := range []string{"root default", "path default", "operation default", "empty operation", "path overrides root", "operation overrides path", "unrelated path"} {
 		t.Run(variant, func(t *testing.T) {
 			var document map[string]any
-			if err := json.Unmarshal(contract.Document, &document); err != nil {
+			if err := jsonwire.Decode(contract.Document, &document); err != nil {
 				t.Fatal(err)
 			}
 			defaults := []any{map[string]any{"url": "/"}}
@@ -274,7 +284,7 @@ func TestEquivalentUpstreamAuthentication(t *testing.T) {
 	for _, variant := range []string{"root inheritance", "alternative order", "referenced scheme"} {
 		t.Run(variant, func(t *testing.T) {
 			var document map[string]any
-			if err := json.Unmarshal(contract.Document, &document); err != nil {
+			if err := jsonwire.Decode(contract.Document, &document); err != nil {
 				t.Fatal(err)
 			}
 			operation := document["paths"].(map[string]any)["/character/list"].(map[string]any)["get"].(map[string]any)
@@ -306,7 +316,7 @@ func TestCompatiblePathItemParameters(t *testing.T) {
 	for _, variant := range []string{"move parameters to path", "operation override", "referenced inherited parameter", "unrelated schema", "operation documentation"} {
 		t.Run(variant, func(t *testing.T) {
 			var document map[string]any
-			if err := json.Unmarshal(contract.Document, &document); err != nil {
+			if err := jsonwire.Decode(contract.Document, &document); err != nil {
 				t.Fatal(err)
 			}
 			item := document["paths"].(map[string]any)["/character/list"].(map[string]any)

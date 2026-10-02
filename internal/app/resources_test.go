@@ -13,9 +13,66 @@ import (
 	"testing"
 
 	contract "github.com/Conv-AI/convai-cli/api"
+	"github.com/Conv-AI/convai-cli/internal/jsonwire"
 )
 
 const testUUID = "df076c58-43f5-11f1-a81f-42010a080006"
+
+func TestCreateAndUpdateFileInputsPreserveLargeIntegers(t *testing.T) {
+	for _, format := range []string{"json", "yaml"} {
+		for _, command := range []string{"create", "update"} {
+			t.Run(command+"/"+format, func(t *testing.T) {
+				const number = "9007199254740993"
+				body := `{"metadata_filter":{"external_id":` + number + `}}`
+				if format == "yaml" {
+					body = "metadata_filter:\n  external_id: " + number + "\n"
+				}
+				if command == "create" {
+					if format == "json" {
+						body = `{"charName":"Ari","backstory":"A guide.","personalised_prompt_config":{"external_id":` + number + `},"metadata_filter":{"external_id":` + number + `}}`
+					} else {
+						body += "charName: Ari\nbackstory: A guide.\npersonalised_prompt_config:\n  external_id: " + number + "\n"
+					}
+				}
+				path := filepath.Join(t.TempDir(), "body."+format)
+				if err := os.WriteFile(path, []byte(body), 0600); err != nil {
+					t.Fatal(err)
+				}
+				calls := 0
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					calls++
+					wire, err := io.ReadAll(r.Body)
+					if err != nil {
+						t.Error(err)
+					}
+					var value map[string]any
+					if err := jsonwire.Decode(wire, &value); err != nil {
+						t.Error(err)
+					}
+					for _, field := range []string{"metadata_filter", "personalised_prompt_config"} {
+						if field == "personalised_prompt_config" && command != "create" {
+							continue
+						}
+						got := value[field].(map[string]any)["external_id"]
+						if got != json.Number(number) {
+							t.Errorf("%s rounded on wire: %v", field, got)
+						}
+					}
+					writeOwnerResponse(t, w, "character_"+command)
+				}))
+				defer server.Close()
+				args := []string{"character", command}
+				if command == "update" {
+					args = append(args, testUUID, "--yes")
+				}
+				_, _, err := execute(t, server, strings.NewReader(""), append(args, "--file", path)...)
+				if err != nil || calls != 1 {
+					t.Fatalf("calls=%d, error=%v", calls, err)
+				}
+			})
+		}
+	}
+}
 
 func TestReviewedCommandCoverageAndWireRouting(t *testing.T) {
 	t.Parallel()

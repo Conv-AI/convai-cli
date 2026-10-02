@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/Conv-AI/convai-cli/internal/characterapi"
-	"sigs.k8s.io/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 type Format string
@@ -65,7 +66,29 @@ func Structured(writer io.Writer, format Format, value any) error {
 		if err != nil {
 			return err
 		}
-		yamlData, err := yaml.JSONToYAML(jsonData)
+		var document yaml.Node
+		if err := yaml.Unmarshal(jsonData, &document); err != nil {
+			return err
+		}
+		// Emit the JSON syntax tree without decoding scalars through floats.
+		// YAML's resolver otherwise tags very large JSON integers as floats.
+		var prepare func(*yaml.Node)
+		prepare = func(node *yaml.Node) {
+			// JSON strings are quoted. An unquoted scalar that YAML resolved
+			// as a string is a numeric literal beyond its resolver's range.
+			if node.Kind == yaml.ScalarNode && node.Style == 0 && node.Tag == "!!str" {
+				node.Tag = "!!float"
+			}
+			if node.Tag == "!!float" && !strings.ContainsAny(node.Value, ".eE") {
+				node.Tag = "!!int"
+			}
+			node.Style = 0
+			for _, child := range node.Content {
+				prepare(child)
+			}
+		}
+		prepare(&document)
+		yamlData, err := yaml.Marshal(&document)
 		if err != nil {
 			return err
 		}

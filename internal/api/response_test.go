@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -20,6 +21,30 @@ func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { retu
 type trackedBody struct {
 	io.Reader
 	closed bool
+}
+
+func TestTypedAndCatalogResponsesPreserveLargeIntegers(t *testing.T) {
+	const id = "df076c58-43f5-11f1-a81f-42010a080006"
+	const body = `{"user_id":"fixture","character_id":"fixture","character_name":null,"voice_type":null,"language_code":"en","description":null,"model_type":null,"is_narrative_driven":false,"timestamp":"2026-10-01T00:00:00","memory_settings":{},"character_traits":{},"metadata_filter":{"external_id":9007199254740993}}`
+	client, err := New("https://api2-stg.convai.com", credential.Credential{Type: config.CredentialAPIKey, Value: "01234567890123456789012345678901"}, &http.Client{
+		Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {
+			return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(body))}, nil
+		}),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	typed, err := client.GetCharacter(context.Background(), id)
+	if err != nil || typed.MetadataFilter["external_id"] != json.Number("9007199254740993") {
+		t.Fatalf("typed response rounded: %v, error=%v", typed.MetadataFilter, err)
+	}
+	value, err := client.Call(context.Background(), "character_get", map[string]any{"character_id": id}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := value.(map[string]any)["metadata_filter"].(map[string]any)["external_id"]; got != json.Number("9007199254740993") {
+		t.Fatalf("catalog response rounded: %v", got)
+	}
 }
 
 func (b *trackedBody) Close() error { b.closed = true; return nil }
