@@ -96,6 +96,10 @@ func Parse(value string) (Credential, error) {
 	kind := config.CredentialAPIKey
 	if strings.HasPrefix(value, "cvpat_") {
 		kind = config.CredentialPAT
+	} else if strings.HasPrefix(value, "cvoat_") {
+		kind = config.CredentialOAuth
+	} else if strings.HasPrefix(value, "cvort_") || strings.HasPrefix(value, "cvoac_") || strings.Count(value, ".") == 2 {
+		return Credential{}, errors.New("use an API key, PAT, or OAuth access token, not a refresh, authorization-code, or runtime token")
 	}
 	return Credential{Type: kind, Value: value}, nil
 }

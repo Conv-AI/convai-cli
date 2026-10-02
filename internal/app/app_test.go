@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -104,7 +105,7 @@ func TestCharacterCreateFromStdin(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		_, _ = w.Write([]byte(`{"charID":"character-1","character_id":"character-1"}`))
+		_, _ = w.Write([]byte(`{"charID":"character-1","character_id":"character-1","workspace_id":"fixture","revision_id":"fixture"}`))
 	}))
 	defer server.Close()
 
@@ -278,6 +279,120 @@ func TestAuthLoginRestoresPreviousCredentialWhenConfigSaveFails(t *testing.T) {
 	stored, _ := credentialStore.Get("default")
 	if stored != old {
 		t.Fatalf("credential = %#v, want %#v", stored, old)
+	}
+}
+
+func TestAuthLoginWorkspaceOverrideDoesNotChangeSavedSelection(t *testing.T) {
+	t.Parallel()
+	const savedWorkspace = "11111111-1111-4111-8111-111111111111"
+	const overrideWorkspace = "22222222-2222-4222-8222-222222222222"
+	for _, selection := range []string{"personal", overrideWorkspace} {
+		for _, verify := range []bool{true, false} {
+			t.Run(selection+"/verify="+fmt.Sprint(verify), func(t *testing.T) {
+				called := false
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					called = true
+					want := selection
+					if selection == "personal" {
+						want = ""
+					}
+					if r.URL.Query().Get("workspace_id") != want {
+						t.Errorf("verification workspace = %q, want %q", r.URL.Query().Get("workspace_id"), want)
+					}
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(`{"items":[],"total":0,"limit":1,"offset":0}`))
+				}))
+				defer server.Close()
+				cfg := config.Default()
+				profile := cfg.Profiles["default"]
+				profile.WorkspaceID = savedWorkspace
+				cfg.Profiles["default"] = profile
+				store := &memoryConfigStore{cfg: cfg}
+				root, err := New(Options{
+					Stdin:  strings.NewReader("01234567890123456789012345678901\n"),
+					Stdout: io.Discard, Stderr: io.Discard, ConfigStore: store,
+					CredentialStore: &memoryCredentialStore{values: map[string]credential.Credential{}},
+					HTTPClient:      server.Client(),
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				args := []string{"auth", "login", "--token-stdin", "--workspace", selection, "--api-url", server.URL}
+				if !verify {
+					args = append(args, "--no-verify")
+				}
+				root.SetArgs(args)
+				if err := root.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				stored := store.cfg.Profiles["default"]
+				if stored.WorkspaceID != savedWorkspace || stored.APIURL != server.URL || stored.CredentialType != config.CredentialAPIKey {
+					t.Fatalf("saved profile = %+v", stored)
+				}
+				if called != verify {
+					t.Fatalf("verification called = %v, want %v", called, verify)
+				}
+			})
+		}
+	}
+}
+
+func TestDefaultMetadataOutputShowsEffectiveWorkspace(t *testing.T) {
+	t.Parallel()
+	const workspace = "11111111-1111-4111-8111-111111111111"
+	for _, command := range [][]string{{"config", "get"}, {"auth", "status"}, {"doctor"}} {
+		for _, tc := range []struct {
+			name, saved, override, want string
+		}{
+			{"saved", workspace, "", workspace},
+			{"default personal", "", "", "personal"},
+			{"personal override", workspace, "personal", "personal"},
+		} {
+			t.Run(strings.Join(command, " ")+"/"+tc.name, func(t *testing.T) {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					want := tc.want
+					if want == "personal" {
+						want = ""
+					}
+					if r.URL.Query().Get("workspace_id") != want {
+						t.Errorf("verification workspace = %q, want %q", r.URL.Query().Get("workspace_id"), want)
+					}
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(`{"items":[],"total":0,"limit":1,"offset":0}`))
+				}))
+				defer server.Close()
+				cfg := config.Default()
+				profile := cfg.Profiles["default"]
+				profile.WorkspaceID, profile.APIURL = tc.saved, server.URL
+				cfg.Profiles["default"] = profile
+				var stdout bytes.Buffer
+				root, err := New(Options{
+					Stdin: strings.NewReader(""), Stdout: &stdout, Stderr: io.Discard,
+					ConfigStore: &memoryConfigStore{cfg: cfg},
+					CredentialStore: &memoryCredentialStore{values: map[string]credential.Credential{
+						"default": {Type: config.CredentialAPIKey, Value: "01234567890123456789012345678901"},
+					}}, HTTPClient: server.Client(),
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				args := append([]string{}, command...)
+				if tc.override != "" {
+					args = append(args, "--workspace", tc.override)
+				}
+				root.SetArgs(args)
+				if err := root.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				label := "Workspace: "
+				if command[0] == "doctor" {
+					label = "workspace\t"
+				}
+				if !strings.Contains(stdout.String(), label+tc.want+"\n") {
+					t.Fatalf("Workspace missing from default output: %s", stdout.String())
+				}
+			})
+		}
 	}
 }
 

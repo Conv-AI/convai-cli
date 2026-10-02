@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/Conv-AI/convai-cli/internal/app"
@@ -18,11 +17,10 @@ func main() {
 		Stderr:  os.Stderr,
 	})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "convai: %s\n", app.RedactError(err))
-		os.Exit(1)
+		os.Exit(app.ReportError(os.Stderr, "table", err))
 	}
 	if err := root.ExecuteContext(context.Background()); err != nil {
-		fmt.Fprintf(os.Stderr, "convai: %s\n", app.RedactError(err))
-		os.Exit(1)
+		format, _ := root.PersistentFlags().GetString("output")
+		os.Exit(app.ReportError(os.Stderr, format, err))
 	}
 }

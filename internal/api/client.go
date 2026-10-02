@@ -7,17 +7,26 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
+	contract "github.com/Conv-AI/convai-cli/api"
 	"github.com/Conv-AI/convai-cli/internal/characterapi"
 	"github.com/Conv-AI/convai-cli/internal/config"
 	"github.com/Conv-AI/convai-cli/internal/credential"
+	"github.com/Conv-AI/convai-cli/internal/jsonwire"
+	"github.com/google/uuid"
 )
 
 type Client struct {
-	generated *characterapi.ClientWithResponses
+	generated *characterapi.Client
+	secret    string
+	workspace string
+	sort      string
+	spec      contract.Spec
 }
 
 type Error struct {
@@ -34,12 +43,26 @@ func (e *Error) Error() string {
 }
 
 func New(baseURL string, auth credential.Credential, httpClient *http.Client) (*Client, error) {
+	baseURL, err := config.NormalizeAPIURL(baseURL)
+	if err != nil {
+		return nil, err
+	}
+	parsed, err := credential.Parse(auth.Value)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.Type != auth.Type {
+		return nil, errors.New("credential type does not match token")
+	}
 	if httpClient == nil {
 		httpClient = &http.Client{Timeout: 30 * time.Second}
 	}
+	copyClient := *httpClient
+	copyClient.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	httpClient = &copyClient
 	editor := func(_ context.Context, request *http.Request) error {
 		switch auth.Type {
-		case config.CredentialPAT:
+		case config.CredentialPAT, config.CredentialOAuth:
 			request.Header.Set("Authorization", "Bearer "+auth.Value)
 		case config.CredentialAPIKey:
 			request.Header.Set("CONVAI-API-KEY", auth.Value)
@@ -50,7 +73,7 @@ func New(baseURL string, auth credential.Credential, httpClient *http.Client) (*
 		request.Header.Set("User-Agent", "convai-cli")
 		return nil
 	}
-	generated, err := characterapi.NewClientWithResponses(
+	generated, err := characterapi.NewClient(
 		baseURL,
 		characterapi.WithHTTPClient(httpClient),
 		characterapi.WithRequestEditorFn(editor),
@@ -58,60 +81,181 @@ func New(baseURL string, auth credential.Credential, httpClient *http.Client) (*
 	if err != nil {
 		return nil, fmt.Errorf("create Character API client: %w", err)
 	}
-	return &Client{generated: generated}, nil
+	spec, _, err := contract.Load()
+	if err != nil {
+		return nil, err
+	}
+	return &Client{generated: generated, secret: auth.Value, spec: spec}, nil
 }
 
-func (c *Client) ListCharacters(ctx context.Context, limit, offset int) ([]characterapi.CharacterListItem, int, error) {
-	response, err := c.generated.CharacterListWithResponse(ctx, &characterapi.CharacterListParams{
-		Limit:  &limit,
-		Offset: &offset,
-	})
-	if err != nil {
-		return nil, 0, transportError(err)
+func (c *Client) WithWorkspace(value string) *Client {
+	copy := *c
+	copy.workspace = value
+	return &copy
+}
+
+func (c *Client) WithSort(value string) *Client { copy := *c; copy.sort = value; return &copy }
+
+func (c *Client) safeError(err error) error {
+	var apiErr *Error
+	if errors.As(err, &apiErr) {
+		copy := *apiErr
+		copy.Message = strings.ReplaceAll(copy.Message, c.secret, "[REDACTED]")
+		copy.RequestID = strings.ReplaceAll(copy.RequestID, c.secret, "[REDACTED]")
+		if len(copy.Message) > 500 {
+			copy.Message = copy.Message[:500]
+		}
+		return &copy
 	}
-	if response.JSON200 == nil {
-		return nil, 0, responseError(response.StatusCode(), response.Body, response.HTTPResponse)
+	return errors.New(strings.ReplaceAll(err.Error(), c.secret, "[REDACTED]"))
+}
+
+func (c *Client) ListCharacters(ctx context.Context, limit, offset int) ([]characterapi.CharacterListItem, *int, error) {
+	workspace, err := c.workspaceUUID()
+	if err != nil {
+		return nil, nil, err
+	}
+	params := &characterapi.CharacterListParams{
+		Limit:       &limit,
+		Offset:      &offset,
+		WorkspaceId: workspace,
+	}
+	if c.sort != "" {
+		sort := characterapi.CharacterListParamsSort(c.sort)
+		params.Sort = &sort
+	}
+	if err := validateTypedInput("character_list", params, nil); err != nil {
+		return nil, nil, c.safeError(err)
+	}
+	response, err := c.generated.CharacterList(ctx, params)
+	if err != nil {
+		return nil, nil, c.safeError(transportError(err))
+	}
+	var result characterapi.PageCharacterListItem
+	if err := c.decodeResponse("character_list", response, &result); err != nil {
+		return nil, nil, err
 	}
 	items := []characterapi.CharacterListItem{}
-	if response.JSON200.Items != nil {
-		items = *response.JSON200.Items
+	if result.Items != nil {
+		items = *result.Items
 	}
-	total := len(items)
-	if response.JSON200.Total != nil {
-		total = *response.JSON200.Total
-	}
-	return items, total, nil
+	return items, result.Total, nil
 }
 
 func (c *Client) GetCharacter(ctx context.Context, characterID string) (characterapi.CharacterResponse, error) {
-	response, err := c.generated.CharacterGetWithResponse(ctx, &characterapi.CharacterGetParams{
-		CharacterId: characterID,
-	})
+	workspace, err := c.workspaceUUID()
 	if err != nil {
-		return characterapi.CharacterResponse{}, transportError(err)
+		return characterapi.CharacterResponse{}, err
 	}
-	if response.JSON200 == nil {
-		return characterapi.CharacterResponse{}, responseError(
-			response.StatusCode(), response.Body, response.HTTPResponse,
-		)
+	params := &characterapi.CharacterGetParams{
+		CharacterId: characterID,
+		WorkspaceId: workspace,
 	}
-	return *response.JSON200, nil
+	if err := validateTypedInput("character_get", params, nil); err != nil {
+		return characterapi.CharacterResponse{}, c.safeError(err)
+	}
+	response, err := c.generated.CharacterGet(ctx, params)
+	if err != nil {
+		return characterapi.CharacterResponse{}, c.safeError(transportError(err))
+	}
+	var result characterapi.CharacterResponse
+	err = c.decodeResponse("character_get", response, &result)
+	return result, err
 }
 
 func (c *Client) CreateCharacter(
 	ctx context.Context,
 	request characterapi.CharacterCreate,
 ) (characterapi.CharacterCreateResponse, error) {
-	response, err := c.generated.CharacterCreateWithResponse(ctx, request)
+	if c.workspace != "" {
+		if request.WorkspaceId != nil && *request.WorkspaceId != c.workspace {
+			return characterapi.CharacterCreateResponse{}, errors.New("input workspace conflicts with selected workspace")
+		}
+		request.WorkspaceId = &c.workspace
+	}
+	if err := validateTypedInput("character_create", nil, request); err != nil {
+		return characterapi.CharacterCreateResponse{}, c.safeError(err)
+	}
+	response, err := c.generated.CharacterCreate(ctx, request)
 	if err != nil {
-		return characterapi.CharacterCreateResponse{}, transportError(err)
+		return characterapi.CharacterCreateResponse{}, c.safeError(transportError(err))
 	}
-	if response.JSON201 == nil {
-		return characterapi.CharacterCreateResponse{}, responseError(
-			response.StatusCode(), response.Body, response.HTTPResponse,
-		)
+	var result characterapi.CharacterCreateResponse
+	err = c.decodeResponse("character_create", response, &result)
+	return result, err
+}
+
+func validateTypedInput(operation string, params, body any) error {
+	var query map[string]any
+	if params != nil {
+		data, err := json.Marshal(params)
+		if err != nil {
+			return err
+		}
+		if err := jsonwire.Decode(data, &query); err != nil {
+			return err
+		}
 	}
-	return *response.JSON201, nil
+	var data []byte
+	if body != nil {
+		var err error
+		data, err = json.Marshal(body)
+		if err != nil {
+			return err
+		}
+	}
+	return contract.ValidateInput(operation, query, data)
+}
+
+const maxResponseBytes = 16 << 20
+
+// Every command uses the same bounded reader and redacted HTTP error path,
+// including the typed convenience methods used by auth and character commands.
+func (c *Client) decodeResponse(operationID string, response *http.Response, target any) error {
+	defer response.Body.Close()
+	data, err := io.ReadAll(io.LimitReader(response.Body, maxResponseBytes+1))
+	if err != nil {
+		return c.safeError(transportError(err))
+	}
+	if len(data) > maxResponseBytes {
+		if response.StatusCode < 200 || response.StatusCode >= 300 {
+			return c.safeError(&Error{StatusCode: response.StatusCode, Message: "response exceeds 16 MiB", RequestID: response.Header.Get("X-Request-ID")})
+		}
+		return errors.New("Convai response exceeds 16 MiB")
+	}
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return c.safeError(responseError(response.StatusCode, data, response))
+	}
+	operation, ok := c.spec.Find(operationID)
+	if !ok {
+		return errors.New("unapproved response operation")
+	}
+	declaredResponse, declared := operation.Responses[strconv.Itoa(response.StatusCode)]
+	if !declared {
+		return c.safeError(&Error{StatusCode: response.StatusCode, Message: "undeclared success response for " + operationID, RequestID: response.Header.Get("X-Request-ID")})
+	}
+	mediaType, _, err := mime.ParseMediaType(response.Header.Get("Content-Type"))
+	if _, declared := declaredResponse.Content[mediaType]; err != nil || !declared {
+		return c.safeError(&Error{StatusCode: response.StatusCode, Message: "undeclared response encoding for " + operationID, RequestID: response.Header.Get("X-Request-ID")})
+	}
+	if err := contract.ValidateResponse(operationID, strconv.Itoa(response.StatusCode), data); err != nil {
+		return c.safeError(&Error{StatusCode: response.StatusCode, Message: err.Error(), RequestID: response.Header.Get("X-Request-ID")})
+	}
+	if jsonwire.Decode(data, target) != nil {
+		return errors.New("Convai API returned invalid JSON response")
+	}
+	return nil
+}
+
+func (c *Client) workspaceUUID() (*uuid.UUID, error) {
+	if c.workspace == "" {
+		return nil, nil
+	}
+	value, err := uuid.Parse(c.workspace)
+	if err != nil {
+		return nil, errors.New("workspace must be a UUID")
+	}
+	return &value, nil
 }
 
 func transportError(err error) error {
@@ -130,9 +274,6 @@ func responseError(statusCode int, body []byte, response *http.Response) error {
 		}
 	}
 	message = strings.TrimSpace(message)
-	if len(message) > 500 {
-		message = message[:500]
-	}
 	requestID := ""
 	if response != nil {
 		requestID = response.Header.Get("X-Request-ID")
@@ -141,40 +282,20 @@ func responseError(statusCode int, body []byte, response *http.Response) error {
 }
 
 func DecodeCreateRequest(reader io.Reader, format string) (characterapi.CharacterCreate, error) {
-	const maxInputBytes = 1 << 20
-	body, err := io.ReadAll(io.LimitReader(reader, maxInputBytes+1))
+	input, err := DecodeInputObject(reader, format)
 	if err != nil {
-		return characterapi.CharacterCreate{}, fmt.Errorf("read character input: %w", err)
+		return characterapi.CharacterCreate{}, err
 	}
-	if len(body) > maxInputBytes {
-		return characterapi.CharacterCreate{}, errors.New("character input exceeds 1 MiB")
-	}
-	if len(body) == 0 {
-		return characterapi.CharacterCreate{}, errors.New("character input is empty")
+	body, err := json.Marshal(input)
+	if err != nil {
+		return characterapi.CharacterCreate{}, err
 	}
 	var request characterapi.CharacterCreate
-	switch format {
-	case "json":
-		decoder := json.NewDecoder(bytes.NewReader(body))
-		decoder.DisallowUnknownFields()
-		err = decoder.Decode(&request)
-		if err == nil {
-			var extra any
-			if extraErr := decoder.Decode(&extra); !errors.Is(extraErr, io.EOF) {
-				if extraErr == nil {
-					err = errors.New("input must contain exactly one JSON document")
-				} else {
-					err = extraErr
-				}
-			}
-		}
-	case "yaml", "yml":
-		err = unmarshalYAML(body, &request)
-	default:
-		return characterapi.CharacterCreate{}, fmt.Errorf("unsupported input format %q", format)
-	}
-	if err != nil {
-		return characterapi.CharacterCreate{}, fmt.Errorf("decode character input: %w", err)
+	decoder := json.NewDecoder(bytes.NewReader(body))
+	decoder.UseNumber()
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&request); err != nil {
+		return characterapi.CharacterCreate{}, errors.New("character input does not match the generated model")
 	}
 	return request, nil
 }

@@ -5,11 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
+	"strings"
 	"text/tabwriter"
-	"time"
 
 	"github.com/Conv-AI/convai-cli/internal/characterapi"
-	"sigs.k8s.io/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 type Format string
@@ -30,6 +31,29 @@ func Parse(value string) (Format, error) {
 	}
 }
 
+func Resource(writer io.Writer, format Format, value any) error {
+	if format != Table {
+		return Structured(writer, format, value)
+	}
+	if object, ok := value.(map[string]any); ok {
+		keys := make([]string, 0, len(object))
+		for key := range object {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		table := tabwriter.NewWriter(writer, 0, 4, 2, ' ', 0)
+		for _, key := range keys {
+			data, err := json.Marshal(object[key])
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(table, "%s\t%s\n", key, data)
+		}
+		return table.Flush()
+	}
+	return Structured(writer, JSON, value)
+}
+
 func Structured(writer io.Writer, format Format, value any) error {
 	switch format {
 	case JSON:
@@ -42,7 +66,29 @@ func Structured(writer io.Writer, format Format, value any) error {
 		if err != nil {
 			return err
 		}
-		yamlData, err := yaml.JSONToYAML(jsonData)
+		var document yaml.Node
+		if err := yaml.Unmarshal(jsonData, &document); err != nil {
+			return err
+		}
+		// Emit the JSON syntax tree without decoding scalars through floats.
+		// YAML's resolver otherwise tags very large JSON integers as floats.
+		var prepare func(*yaml.Node)
+		prepare = func(node *yaml.Node) {
+			// JSON strings are quoted. An unquoted scalar that YAML resolved
+			// as a string is a numeric literal beyond its resolver's range.
+			if node.Kind == yaml.ScalarNode && node.Style == 0 && node.Tag == "!!str" {
+				node.Tag = "!!float"
+			}
+			if node.Tag == "!!float" && !strings.ContainsAny(node.Value, ".eE") {
+				node.Tag = "!!int"
+			}
+			node.Style = 0
+			for _, child := range node.Content {
+				prepare(child)
+			}
+		}
+		prepare(&document)
+		yamlData, err := yaml.Marshal(&document)
 		if err != nil {
 			return err
 		}
@@ -53,7 +99,7 @@ func Structured(writer io.Writer, format Format, value any) error {
 	}
 }
 
-func CharacterList(writer io.Writer, format Format, items []characterapi.CharacterListItem, total int) error {
+func CharacterList(writer io.Writer, format Format, items []characterapi.CharacterListItem, total *int) error {
 	if format != Table {
 		return Structured(writer, format, map[string]any{
 			"items": items,
@@ -70,13 +116,17 @@ func CharacterList(writer io.Writer, format Format, items []characterapi.Charact
 			stringValue(item.CharacterName),
 			item.LanguageCode,
 			stringValue(item.VoiceType),
-			item.Timestamp.UTC().Format(time.RFC3339),
+			item.Timestamp,
 		)
 	}
 	if err := table.Flush(); err != nil {
 		return err
 	}
-	fmt.Fprintf(writer, "\n%d total\n", total)
+	if total == nil {
+		fmt.Fprintln(writer, "\nTotal: unknown")
+	} else {
+		fmt.Fprintf(writer, "\n%d total\n", *total)
+	}
 	return nil
 }
 
