@@ -26,6 +26,28 @@ func TestUpstreamDriftGate(t *testing.T) {
 		{"removed success response", func(root map[string]any) {
 			delete(root["paths"].(map[string]any)["/character/get"].(map[string]any)["get"].(map[string]any)["responses"].(map[string]any), "200")
 		}},
+		{"required output made optional", func(root map[string]any) {
+			schemas := root["components"].(map[string]any)["schemas"].(map[string]any)
+			response := schemas["CharacterResponse"].(map[string]any)
+			required := []any{}
+			for _, name := range response["required"].([]any) {
+				if name != "character_id" {
+					required = append(required, name)
+				}
+			}
+			response["required"] = required
+		}},
+		{"nested required output made optional", func(root map[string]any) {
+			schemas := root["components"].(map[string]any)["schemas"].(map[string]any)
+			response := schemas["CharacterListItem"].(map[string]any)
+			required := []any{}
+			for _, name := range response["required"].([]any) {
+				if name != "character_id" {
+					required = append(required, name)
+				}
+			}
+			response["required"] = required
+		}},
 		{"required field", func(root map[string]any) {
 			schemas := root["components"].(map[string]any)["schemas"].(map[string]any)
 			create := schemas["CharacterCreate"].(map[string]any)

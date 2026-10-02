@@ -209,6 +209,13 @@ func compatibleOutput(oldSpec, newSpec Spec, old, current map[string]any, path s
 	if !reflect.DeepEqual(old["type"], current["type"]) || !reflect.DeepEqual(old["anyOf"], current["anyOf"]) {
 		return fmt.Errorf("upstream changed output type at %s", path)
 	}
+	previousRequired, _ := old["required"].([]any)
+	currentRequired, _ := current["required"].([]any)
+	for _, name := range previousRequired {
+		if !slices.Contains(currentRequired, name) {
+			return fmt.Errorf("upstream made required output field %v optional at %s", name, path)
+		}
+	}
 	oldProperties, _ := old["properties"].(map[string]any)
 	newProperties, _ := current["properties"].(map[string]any)
 	for name, property := range oldProperties {
