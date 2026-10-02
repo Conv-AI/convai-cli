@@ -416,6 +416,21 @@ func TestYAMLResourceInputAndBounds(t *testing.T) {
 	if err != nil || value["actions_enabled"] != false {
 		t.Fatalf("value=%v, error=%v", value, err)
 	}
+	for _, args := range [][]string{
+		{"character", "create"},
+		{"character", "update", testUUID, "--yes"},
+	} {
+		if err := os.WriteFile(path, []byte("charName: Ari\nbackstory: A guide.\n---\ncharName: Other\n"), 0600); err != nil {
+			t.Fatal(err)
+		}
+		called := false
+		server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) { called = true }))
+		_, _, err := execute(t, server, strings.NewReader(""), append(args, "--file", path)...)
+		server.Close()
+		if err == nil || !strings.Contains(err.Error(), "exactly one document") || called {
+			t.Fatalf("args=%v, error=%v, called=%v", args, err, called)
+		}
+	}
 }
 
 func TestCreateAllowsServerDefaultVoice(t *testing.T) {

@@ -56,12 +56,12 @@ func TestGetCharacterForwardsPATAsBearer(t *testing.T) {
 		if got := r.Header.Get("CONVAI-API-KEY"); got != "" {
 			t.Errorf("CONVAI-API-KEY unexpectedly set")
 		}
-		if r.URL.Query().Get("character_id") != "character-1" {
+		if r.URL.Query().Get("character_id") != "df076c58-43f5-11f1-a81f-42010a080006" {
 			t.Errorf("character_id = %q", r.URL.Query().Get("character_id"))
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{
-			"character_id":"character-1",
+			"character_id":"df076c58-43f5-11f1-a81f-42010a080006",
 			"character_name":"Ari",
 			"character_traits":{},
 			"description":"",
@@ -81,11 +81,11 @@ func TestGetCharacterForwardsPATAsBearer(t *testing.T) {
 		Type:  config.CredentialPAT,
 		Value: "cvpat_0123456789012345678901234567890123456789",
 	})
-	character, err := client.GetCharacter(context.Background(), "character-1")
+	character, err := client.GetCharacter(context.Background(), "df076c58-43f5-11f1-a81f-42010a080006")
 	if err != nil {
 		t.Fatalf("GetCharacter: %v", err)
 	}
-	if character.CharacterId != "character-1" {
+	if character.CharacterId != "df076c58-43f5-11f1-a81f-42010a080006" {
 		t.Fatalf("character ID = %q", character.CharacterId)
 	}
 }

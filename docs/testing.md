@@ -24,6 +24,12 @@ their status-specific owner schemas, not merely parse as JSON. Response formats
 are annotations, retaining legacy string timestamps without timezone inference.
 Pagination tests cover optional
 totals, full/short/empty pages, changing total presence, offsets, and request caps.
+Typed list/get/create and catalog commands validate the same original owner
+schemas before any HTTP request. Tests reject malformed IDs/version selectors,
+invalid pagination/sorting, invalid create fields, and Workspace conflicts with
+zero outbound requests. Accepted version selectors are forwarded unchanged.
+Create and catalog file inputs share a bounded parser that rejects trailing
+JSON/YAML documents rather than silently executing only the first document.
 Generation is checked for committed reproducibility.
 
 These tests verify client behavior; they do not prove live entitlement policy.

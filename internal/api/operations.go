@@ -22,7 +22,7 @@ func decodeQuery(values map[string]any, target any) error {
 // null, false and empty collections must not turn into omitted update fields.
 func (c *Client) Call(ctx context.Context, operation string, query map[string]any, body []byte) (any, error) {
 	if err := contract.ValidateInput(operation, query, body); err != nil {
-		return nil, err
+		return nil, c.safeError(err)
 	}
 	response, err := c.dispatch(ctx, operation, query, body)
 	if err != nil {

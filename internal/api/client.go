@@ -123,6 +123,9 @@ func (c *Client) ListCharacters(ctx context.Context, limit, offset int) ([]chara
 		sort := characterapi.CharacterListParamsSort(c.sort)
 		params.Sort = &sort
 	}
+	if err := validateTypedInput("character_list", params, nil); err != nil {
+		return nil, nil, c.safeError(err)
+	}
 	response, err := c.generated.CharacterList(ctx, params)
 	if err != nil {
 		return nil, nil, c.safeError(transportError(err))
@@ -143,10 +146,14 @@ func (c *Client) GetCharacter(ctx context.Context, characterID string) (characte
 	if err != nil {
 		return characterapi.CharacterResponse{}, err
 	}
-	response, err := c.generated.CharacterGet(ctx, &characterapi.CharacterGetParams{
+	params := &characterapi.CharacterGetParams{
 		CharacterId: characterID,
 		WorkspaceId: workspace,
-	})
+	}
+	if err := validateTypedInput("character_get", params, nil); err != nil {
+		return characterapi.CharacterResponse{}, c.safeError(err)
+	}
+	response, err := c.generated.CharacterGet(ctx, params)
 	if err != nil {
 		return characterapi.CharacterResponse{}, c.safeError(transportError(err))
 	}
@@ -165,6 +172,9 @@ func (c *Client) CreateCharacter(
 		}
 		request.WorkspaceId = &c.workspace
 	}
+	if err := validateTypedInput("character_create", nil, request); err != nil {
+		return characterapi.CharacterCreateResponse{}, c.safeError(err)
+	}
 	response, err := c.generated.CharacterCreate(ctx, request)
 	if err != nil {
 		return characterapi.CharacterCreateResponse{}, c.safeError(transportError(err))
@@ -172,6 +182,28 @@ func (c *Client) CreateCharacter(
 	var result characterapi.CharacterCreateResponse
 	err = c.decodeResponse("character_create", response, &result)
 	return result, err
+}
+
+func validateTypedInput(operation string, params, body any) error {
+	var query map[string]any
+	if params != nil {
+		data, err := json.Marshal(params)
+		if err != nil {
+			return err
+		}
+		if err := json.Unmarshal(data, &query); err != nil {
+			return err
+		}
+	}
+	var data []byte
+	if body != nil {
+		var err error
+		data, err = json.Marshal(body)
+		if err != nil {
+			return err
+		}
+	}
+	return contract.ValidateInput(operation, query, data)
 }
 
 const maxResponseBytes = 16 << 20
@@ -249,40 +281,19 @@ func responseError(statusCode int, body []byte, response *http.Response) error {
 }
 
 func DecodeCreateRequest(reader io.Reader, format string) (characterapi.CharacterCreate, error) {
-	const maxInputBytes = 1 << 20
-	body, err := io.ReadAll(io.LimitReader(reader, maxInputBytes+1))
+	input, err := DecodeInputObject(reader, format)
 	if err != nil {
-		return characterapi.CharacterCreate{}, fmt.Errorf("read character input: %w", err)
+		return characterapi.CharacterCreate{}, err
 	}
-	if len(body) > maxInputBytes {
-		return characterapi.CharacterCreate{}, errors.New("character input exceeds 1 MiB")
-	}
-	if len(body) == 0 {
-		return characterapi.CharacterCreate{}, errors.New("character input is empty")
+	body, err := json.Marshal(input)
+	if err != nil {
+		return characterapi.CharacterCreate{}, err
 	}
 	var request characterapi.CharacterCreate
-	switch format {
-	case "json":
-		decoder := json.NewDecoder(bytes.NewReader(body))
-		decoder.DisallowUnknownFields()
-		err = decoder.Decode(&request)
-		if err == nil {
-			var extra any
-			if extraErr := decoder.Decode(&extra); !errors.Is(extraErr, io.EOF) {
-				if extraErr == nil {
-					err = errors.New("input must contain exactly one JSON document")
-				} else {
-					err = extraErr
-				}
-			}
-		}
-	case "yaml", "yml":
-		err = unmarshalYAML(body, &request)
-	default:
-		return characterapi.CharacterCreate{}, fmt.Errorf("unsupported input format %q", format)
-	}
-	if err != nil {
-		return characterapi.CharacterCreate{}, fmt.Errorf("decode character input: %w", err)
+	decoder := json.NewDecoder(bytes.NewReader(body))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&request); err != nil {
+		return characterapi.CharacterCreate{}, errors.New("character input does not match the generated model")
 	}
 	return request, nil
 }

@@ -2,11 +2,9 @@ package app
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"slices"
@@ -14,10 +12,10 @@ import (
 	"strings"
 
 	contract "github.com/Conv-AI/convai-cli/api"
+	"github.com/Conv-AI/convai-cli/internal/api"
 	"github.com/Conv-AI/convai-cli/internal/output"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
-	"sigs.k8s.io/yaml"
 )
 
 func (a *application) addResourceCommands(root *cobra.Command) {
@@ -218,31 +216,12 @@ func (a *application) inputObject(path string) (map[string]any, error) {
 		defer file.Close()
 		reader = file
 	}
-	const maxInput = 1 << 20
-	body, err := io.ReadAll(io.LimitReader(reader, maxInput+1))
-	if err != nil {
-		return nil, fmt.Errorf("read input: %w", err)
-	}
-	if len(body) > maxInput {
-		return nil, errors.New("input exceeds 1 MiB")
-	}
+	format := "json"
 	extension := strings.ToLower(filepath.Ext(path))
 	if extension == ".yaml" || extension == ".yml" {
-		body, err = yaml.YAMLToJSONStrict(body)
-		if err != nil {
-			return nil, errors.New("invalid YAML object")
-		}
+		format = "yaml"
 	}
-	var result map[string]any
-	decoder := json.NewDecoder(bytes.NewReader(body))
-	if err := decoder.Decode(&result); err != nil || result == nil {
-		return nil, errors.New("input must be a JSON or YAML object")
-	}
-	var extra any
-	if err := decoder.Decode(&extra); !errors.Is(err, io.EOF) {
-		return nil, errors.New("input must contain exactly one document")
-	}
-	return result, nil
+	return api.DecodeInputObject(reader, format)
 }
 
 func (a *application) confirm(cmd *cobra.Command, yes bool, targets ...map[string]any) error {

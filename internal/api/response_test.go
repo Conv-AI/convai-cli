@@ -37,7 +37,10 @@ func TestAllCommandPathsShareResponseSafety(t *testing.T) {
 		call   func(*Client) error
 	}{
 		{"list", 200, `{"items":[]}`, func(c *Client) error { _, _, err := c.ListCharacters(context.Background(), 1, 0); return err }},
-		{"get", 200, `{"user_id":"fixture","character_id":"fixture","character_name":null,"voice_type":null,"language_code":"en","description":null,"model_type":null,"is_narrative_driven":false,"timestamp":"2026-10-01T00:00:00","memory_settings":{},"character_traits":{},"metadata_filter":{}}`, func(c *Client) error { _, err := c.GetCharacter(context.Background(), "fixture"); return err }},
+		{"get", 200, `{"user_id":"fixture","character_id":"fixture","character_name":null,"voice_type":null,"language_code":"en","description":null,"model_type":null,"is_narrative_driven":false,"timestamp":"2026-10-01T00:00:00","memory_settings":{},"character_traits":{},"metadata_filter":{}}`, func(c *Client) error {
+			_, err := c.GetCharacter(context.Background(), "df076c58-43f5-11f1-a81f-42010a080006")
+			return err
+		}},
 		{"create", 201, `{"character_id":"fixture","charID":"fixture","workspace_id":"fixture","revision_id":"fixture"}`, func(c *Client) error {
 			_, err := c.CreateCharacter(context.Background(), characterapi.CharacterCreate{CharName: "Ari", Backstory: "A guide."})
 			return err
