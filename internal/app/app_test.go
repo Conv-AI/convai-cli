@@ -105,7 +105,7 @@ func TestCharacterCreateFromStdin(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		_, _ = w.Write([]byte(`{"charID":"character-1","character_id":"character-1"}`))
+		_, _ = w.Write([]byte(`{"charID":"character-1","character_id":"character-1","workspace_id":"fixture","revision_id":"fixture"}`))
 	}))
 	defer server.Close()
 

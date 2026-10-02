@@ -39,7 +39,7 @@ func TestListAllPreservesOptionalTotalsAndPageProgress(t *testing.T) {
 					w.WriteHeader(500)
 					return
 				}
-				page := tc.pages[calls]
+				page := listPageFixture(t, tc.pages[calls])
 				calls++
 				var decoded struct {
 					Items []any `json:"items"`
@@ -73,7 +73,7 @@ func TestUnknownTotalPaginationStillHasRequestBudget(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		calls++
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = io.WriteString(w, `{"items":[{"character_id":"fixture"}]}`)
+		_, _ = io.WriteString(w, listPageFixture(t, `{"items":[{"character_id":"fixture"}]}`))
 	}))
 	defer server.Close()
 	_, _, err := execute(t, server, strings.NewReader(""), "character", "list", "--all", "--limit", "1")

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"strconv"
 	"strings"
@@ -196,10 +197,18 @@ func (c *Client) decodeResponse(operationID string, response *http.Response, tar
 	if !ok {
 		return errors.New("unapproved response operation")
 	}
-	if _, declared := operation.Responses[strconv.Itoa(response.StatusCode)]; !declared {
+	declaredResponse, declared := operation.Responses[strconv.Itoa(response.StatusCode)]
+	if !declared {
 		return c.safeError(&Error{StatusCode: response.StatusCode, Message: "undeclared success response for " + operationID, RequestID: response.Header.Get("X-Request-ID")})
 	}
-	if bytes.Equal(bytes.TrimSpace(data), []byte("null")) || json.Unmarshal(data, target) != nil {
+	mediaType, _, err := mime.ParseMediaType(response.Header.Get("Content-Type"))
+	if _, declared := declaredResponse.Content[mediaType]; err != nil || !declared {
+		return c.safeError(&Error{StatusCode: response.StatusCode, Message: "undeclared response encoding for " + operationID, RequestID: response.Header.Get("X-Request-ID")})
+	}
+	if err := contract.ValidateResponse(operationID, strconv.Itoa(response.StatusCode), data); err != nil {
+		return c.safeError(&Error{StatusCode: response.StatusCode, Message: err.Error(), RequestID: response.Header.Get("X-Request-ID")})
+	}
+	if json.Unmarshal(data, target) != nil {
 		return errors.New("Convai API returned invalid JSON response")
 	}
 	return nil

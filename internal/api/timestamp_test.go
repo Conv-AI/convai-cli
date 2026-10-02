@@ -16,7 +16,7 @@ func TestListPreservesLegacyAndRFC3339Timestamps(t *testing.T) {
 	for _, value := range []string{"2026-09-17T20:59:22.109230", "2026-09-17T20:59:22.109230Z", "2026-09-17T20:59:22-07:00"} {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprintf(w, `{"items":[{"character_id":"fixture","timestamp":%q}],"total":1}`, value)
+			fmt.Fprintf(w, `{"items":[{"character_id":"fixture","character_name":"fixture","voice_type":null,"language_code":"en","last_interacted_with":%q,"timestamp":%q}],"total":1}`, value, value)
 		}))
 		client, err := New(server.URL, credential.Credential{Type: config.CredentialAPIKey, Value: "01234567890123456789012345678901"}, server.Client())
 		if err != nil {

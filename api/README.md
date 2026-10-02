@@ -24,6 +24,10 @@ fields or validation constraints are removed from the pinned owner artifact.
 Timestamps are displayed verbatim because legacy REST responses may omit an
 offset; the CLI does not infer their timezone. The original schemas, including
 `$ref` siblings, are used directly for local JSON Schema validation.
+Successful responses are validated against the status-specific owner schema
+before decoding/output, including required fields, types and reference branches.
+Response `format` remains an annotation (not an assertion), preserving the
+documented legacy timestamp behavior; input formats are asserted for fast feedback.
 
 `make contract-check` compares the reviewed operations to staging OpenAPI. CI
 and a daily scheduled workflow fail on any selected wire-contract change:

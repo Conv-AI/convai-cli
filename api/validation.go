@@ -16,6 +16,7 @@ var validatorsOnce sync.Once
 var validatorsErr error
 var bodyValidators map[string]*jsonschema.Schema
 var queryValidators map[string]*jsonschema.Schema
+var responseValidators map[string]map[string]*jsonschema.Schema
 
 type offlineLoader struct{}
 
@@ -76,8 +77,18 @@ func initializeValidators() {
 		validatorsErr = err
 		return
 	}
+	// Response format is a Draft 2020-12 annotation, not an assertion. Legacy
+	// timestamps without offsets remain valid string output and are not rewritten.
+	responses := jsonschema.NewCompiler()
+	responses.UseRegexpEngine(compileRegexp)
+	responses.UseLoader(offlineLoader{})
+	if err := responses.AddResource(location, root); err != nil {
+		validatorsErr = err
+		return
+	}
 	bodyValidators = map[string]*jsonschema.Schema{}
 	queryValidators = map[string]*jsonschema.Schema{}
+	responseValidators = map[string]map[string]*jsonschema.Schema{}
 	for path, item := range spec.Paths {
 		for method, op := range item.Operations {
 			if _, ok := queries[op.OperationID]; !ok {
@@ -95,8 +106,42 @@ func initializeValidators() {
 					return
 				}
 			}
+			responseValidators[op.OperationID] = map[string]*jsonschema.Schema{}
+			for status, response := range op.Responses {
+				if !strings.HasPrefix(status, "2") {
+					continue
+				}
+				if _, ok := response.Content["application/json"]; !ok {
+					validatorsErr = fmt.Errorf("unsupported response encoding for %s", op.OperationID)
+					return
+				}
+				responseValidators[op.OperationID][status], err = responses.Compile(location + "#/paths/" + pointer(path) + "/" + method + "/responses/" + status + "/content/application~1json/schema")
+				if err != nil {
+					validatorsErr = err
+					return
+				}
+			}
 		}
 	}
+}
+
+func ValidateResponse(id, status string, body []byte) error {
+	validatorsOnce.Do(initializeValidators)
+	if validatorsErr != nil {
+		return validatorsErr
+	}
+	validator, ok := responseValidators[id][status]
+	if !ok {
+		return fmt.Errorf("undeclared response contract")
+	}
+	var value any
+	if err := json.Unmarshal(body, &value); err != nil {
+		return fmt.Errorf("Convai API returned invalid JSON response")
+	}
+	if err := validator.Validate(value); err != nil {
+		return fmt.Errorf("response does not match the owner contract: %s", validationPaths(err))
+	}
+	return nil
 }
 
 func pointer(value string) string {

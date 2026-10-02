@@ -52,6 +52,8 @@ and Workspace. Every command shares a 16 MiB bounded response reader, with no
 automatic retries. Only explicitly declared successful statuses are accepted;
 an unexpected queued response is not completion. HTTP errors retain status and request IDs while redacting
 the exact supplied credential.
+Successful payloads are schema-validated before output; `format` remains an
+annotation for response strings so legacy timestamps are preserved verbatim.
 
 The CLI accepts existing audience-valid OAuth access tokens but does not acquire
 or refresh them. Browser PKCE login requires a dedicated registered CLI client,

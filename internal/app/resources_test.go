@@ -140,18 +140,14 @@ func TestReviewedCommandCoverageAndWireRouting(t *testing.T) {
 						t.Errorf("body=%v, want=%v", actual, body)
 					}
 				}
-				w.Header().Set("Content-Type", "application/json")
-				if _, ok := op.Responses["200"]; !ok {
-					w.WriteHeader(http.StatusCreated)
-				}
-				_, _ = io.WriteString(w, `{"ok":true}`)
+				writeOwnerResponse(t, w, definition.OperationID)
 			}))
 			defer server.Close()
 			stdout, _, err := execute(t, server, strings.NewReader(string(data)), args...)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if !called || !strings.Contains(stdout, `"ok": true`) {
+			if !called || !json.Valid([]byte(stdout)) {
 				t.Fatalf("called=%v, output=%s", called, stdout)
 			}
 			if op.Metadata.Tools[0].Safety.Destructive {
@@ -171,6 +167,51 @@ func TestReviewedCommandCoverageAndWireRouting(t *testing.T) {
 	}
 }
 
+func writeOwnerResponse(t *testing.T, w http.ResponseWriter, id string) {
+	t.Helper()
+	spec, _, err := contract.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	op, _ := spec.Find(id)
+	status := "200"
+	if _, ok := op.Responses[status]; !ok {
+		status = "201"
+	}
+	value := sampleValue(spec, op.Responses[status].Content["application/json"].Schema)
+	data, err := json.Marshal(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := contract.ValidateResponse(id, status, data); err != nil {
+		t.Error(err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if status == "201" {
+		w.WriteHeader(http.StatusCreated)
+	}
+	_, _ = w.Write(data)
+}
+
+func listPageFixture(t *testing.T, raw string) string {
+	t.Helper()
+	var page map[string]any
+	if err := json.Unmarshal([]byte(raw), &page); err != nil {
+		t.Fatal(err)
+	}
+	for _, value := range page["items"].([]any) {
+		item := value.(map[string]any)
+		for key, field := range map[string]any{"character_name": "fixture", "voice_type": nil, "language_code": "en", "last_interacted_with": "2026-10-01T00:00:00", "timestamp": "2026-10-01T00:00:00"} {
+			item[key] = field
+		}
+	}
+	data, err := json.Marshal(page)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(data)
+}
+
 func contains(values []string, name string) bool {
 	for _, v := range values {
 		if v == name {
@@ -182,6 +223,9 @@ func contains(values []string, name string) bool {
 
 func sampleValue(spec contract.Spec, schema map[string]any) any {
 	schema = spec.Resolve(schema)
+	if value, exists := schema["const"]; exists {
+		return value
+	}
 	if values, ok := schema["enum"].([]any); ok {
 		return values[0]
 	}
@@ -230,8 +274,7 @@ func TestUpdatePreservesClearsAndWorkspace(t *testing.T) {
 		if _, exists := body["backstory"]; exists {
 			t.Error("omitted field was added")
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = io.WriteString(w, `{"ok":true}`)
+		writeOwnerResponse(t, w, "character_update")
 	}))
 	defer server.Close()
 	_, _, err := execute(t, server, strings.NewReader(`{"speaking_style_description":null,"actions_enabled":false,"pronunciations_to_delete":[]}`), "character", "update", testUUID, "--file", "-", "--yes", "--workspace", testUUID)
@@ -298,8 +341,7 @@ func TestAssociationCommandsUseOwnerRESTMapping(t *testing.T) {
 					if item["id"] != "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" || item["status"] != status {
 						t.Error("wrong association payload")
 					}
-					w.Header().Set("Content-Type", "application/json")
-					_, _ = io.WriteString(w, `{"ok":true}`)
+					writeOwnerResponse(t, w, "character_update")
 				}))
 				defer server.Close()
 				_, _, err := execute(t, server, strings.NewReader(""), group, mode, testUUID, "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "--yes")
@@ -342,11 +384,11 @@ func TestVersionCommandsSendIntentExplicitly(t *testing.T) {
 				if value, exists := body[tc.field]; !exists || value != tc.value {
 					t.Errorf("explicit %s = %v (present=%v), want %v", tc.field, value, exists, tc.value)
 				}
-				w.Header().Set("Content-Type", "application/json")
+				id := "character_version_deprecate"
 				if tc.command == "release" {
-					w.WriteHeader(http.StatusCreated)
+					id = "character_version_create"
 				}
-				_, _ = io.WriteString(w, `{"ok":true}`)
+				writeOwnerResponse(t, w, id)
 			}))
 			defer server.Close()
 			args := []string{"character", "version", tc.command, testUUID, "1.0", "--yes", "--output", "json"}
@@ -388,7 +430,7 @@ func TestCreateAllowsServerDefaultVoice(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		_, _ = io.WriteString(w, `{"charID":"new","character_id":"new"}`)
+		_, _ = io.WriteString(w, `{"charID":"new","character_id":"new","workspace_id":"fixture","revision_id":"fixture"}`)
 	}))
 	defer server.Close()
 	if _, _, err := execute(t, server, strings.NewReader(""), "character", "create", "--name", "Ari", "--backstory", "A helpful guide."); err != nil {
@@ -411,7 +453,7 @@ func TestListAllPreservesWorkspaceSortAndOffset(t *testing.T) {
 					_, _ = io.WriteString(w, `{"items":[],"total":2}`)
 					return
 				}
-				fmt.Fprintf(w, `{"items":[{"character_id":"fixture-%d"}],"total":2}`, calls)
+				_, _ = io.WriteString(w, listPageFixture(t, fmt.Sprintf(`{"items":[{"character_id":"fixture-%d"}],"total":2}`, calls)))
 			}))
 			defer server.Close()
 			stdout, _, err := execute(t, server, strings.NewReader(""), "character", "list", "--all", "--limit", "1", "--sort", "last_updated", "--workspace", testUUID, "--output", "json")

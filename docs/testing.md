@@ -19,7 +19,10 @@ serialization, unknown owner rules, removed constraints, and additive changes.
 All command paths test the same response limit, malformed/null/empty responses,
 body closure, redacted request IDs, and single-request/no-retry behavior.
 Successful HTTP statuses must be explicitly declared by the selected operation;
-an unexpected `202` is not mutation completion. Pagination tests cover optional
+an unexpected `202` is not mutation completion. Successful payloads must match
+their status-specific owner schemas, not merely parse as JSON. Response formats
+are annotations, retaining legacy string timestamps without timezone inference.
+Pagination tests cover optional
 totals, full/short/empty pages, changing total presence, offsets, and request caps.
 Generation is checked for committed reproducibility.
 
