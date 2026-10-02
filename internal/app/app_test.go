@@ -337,6 +337,65 @@ func TestAuthLoginWorkspaceOverrideDoesNotChangeSavedSelection(t *testing.T) {
 	}
 }
 
+func TestDefaultMetadataOutputShowsEffectiveWorkspace(t *testing.T) {
+	t.Parallel()
+	const workspace = "11111111-1111-4111-8111-111111111111"
+	for _, command := range [][]string{{"config", "get"}, {"auth", "status"}, {"doctor"}} {
+		for _, tc := range []struct {
+			name, saved, override, want string
+		}{
+			{"saved", workspace, "", workspace},
+			{"default personal", "", "", "personal"},
+			{"personal override", workspace, "personal", "personal"},
+		} {
+			t.Run(strings.Join(command, " ")+"/"+tc.name, func(t *testing.T) {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					want := tc.want
+					if want == "personal" {
+						want = ""
+					}
+					if r.URL.Query().Get("workspace_id") != want {
+						t.Errorf("verification workspace = %q, want %q", r.URL.Query().Get("workspace_id"), want)
+					}
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(`{"items":[],"total":0,"limit":1,"offset":0}`))
+				}))
+				defer server.Close()
+				cfg := config.Default()
+				profile := cfg.Profiles["default"]
+				profile.WorkspaceID, profile.APIURL = tc.saved, server.URL
+				cfg.Profiles["default"] = profile
+				var stdout bytes.Buffer
+				root, err := New(Options{
+					Stdin: strings.NewReader(""), Stdout: &stdout, Stderr: io.Discard,
+					ConfigStore: &memoryConfigStore{cfg: cfg},
+					CredentialStore: &memoryCredentialStore{values: map[string]credential.Credential{
+						"default": {Type: config.CredentialAPIKey, Value: "01234567890123456789012345678901"},
+					}}, HTTPClient: server.Client(),
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				args := append([]string{}, command...)
+				if tc.override != "" {
+					args = append(args, "--workspace", tc.override)
+				}
+				root.SetArgs(args)
+				if err := root.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				label := "Workspace: "
+				if command[0] == "doctor" {
+					label = "workspace\t"
+				}
+				if !strings.Contains(stdout.String(), label+tc.want+"\n") {
+					t.Fatalf("Workspace missing from default output: %s", stdout.String())
+				}
+			})
+		}
+	}
+}
+
 func TestRedactErrorRemovesPAT(t *testing.T) {
 	t.Parallel()
 	message := RedactError(errors.New("failed cvpat_abcDEF0123_more at upstream"))

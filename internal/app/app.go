@@ -231,7 +231,7 @@ func (a *application) authStatusCommand() *cobra.Command {
 				return err
 			}
 			if format == output.Table {
-				fmt.Fprintf(cmd.OutOrStdout(), "Profile: %s\nAPI URL: %s\nCredential: %s (%s)\n", profileName, profile.APIURL, resolved.Type, source)
+				fmt.Fprintf(cmd.OutOrStdout(), "Profile: %s\nAPI URL: %s\nWorkspace: %s\nCredential: %s (%s)\n", profileName, profile.APIURL, workspaceLabel(profile.WorkspaceID), resolved.Type, source)
 				if check {
 					fmt.Fprintln(cmd.OutOrStdout(), "Verified: true")
 				}
@@ -295,7 +295,7 @@ func (a *application) configGetCommand() *cobra.Command {
 				return err
 			}
 			if format == output.Table {
-				fmt.Fprintf(cmd.OutOrStdout(), "Profile: %s\nAPI URL: %s\nCredential type: %s\n", name, profile.APIURL, profile.CredentialType)
+				fmt.Fprintf(cmd.OutOrStdout(), "Profile: %s\nAPI URL: %s\nWorkspace: %s\nCredential type: %s\n", name, profile.APIURL, workspaceLabel(profile.WorkspaceID), profile.CredentialType)
 				return nil
 			}
 			return output.Structured(cmd.OutOrStdout(), format, value)
@@ -537,13 +537,14 @@ func (a *application) doctorCommand() *cobra.Command {
 				"api_url":           profile.APIURL,
 				"credential_type":   resolved.Type,
 				"credential_source": source,
+				"workspace_id":      profile.WorkspaceID,
 			}
 			format, err := output.Parse(a.outputFlag)
 			if err != nil {
 				return err
 			}
 			if format == output.Table {
-				fmt.Fprintf(cmd.OutOrStdout(), "status\tok\nprofile\t%s\napi_url\t%s\ncredential\t%s (%s)\n", name, profile.APIURL, resolved.Type, source)
+				fmt.Fprintf(cmd.OutOrStdout(), "status\tok\nprofile\t%s\napi_url\t%s\nworkspace\t%s\ncredential\t%s (%s)\n", name, profile.APIURL, workspaceLabel(profile.WorkspaceID), resolved.Type, source)
 				return nil
 			}
 			return output.Structured(cmd.OutOrStdout(), format, result)
@@ -587,6 +588,13 @@ func (a *application) profile() (config.Config, string, config.Profile, error) {
 		return config.Config{}, "", config.Profile{}, err
 	}
 	return cfg, name, profile, nil
+}
+
+func workspaceLabel(value string) string {
+	if value == "" {
+		return "personal"
+	}
+	return value
 }
 
 func (a *application) apiClient() (*api.Client, error) {

@@ -88,6 +88,8 @@ Unsupported Workspace/resource combinations fail rather than silently using
 Personal Workspace. Workspace selection never bypasses server authorization.
 `--workspace` is command-scoped, including during login verification; only
 `config set workspace-id` changes the saved Workspace selection.
+`config get`, `auth status`, and `doctor` show the effective Workspace in their
+default output, using `personal` when no Workspace UUID is selected.
 
 ## Character Workflows
 
