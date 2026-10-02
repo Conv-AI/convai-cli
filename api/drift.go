@@ -29,7 +29,7 @@ func CheckUpstream(data []byte) error {
 		if path != oldPath || method != oldMethod {
 			return fmt.Errorf("upstream changed route for %s", command.OperationID)
 		}
-		if !current.Metadata.Exposed || !reflect.DeepEqual(old.Metadata.Tools, current.Metadata.Tools) {
+		if !current.Metadata.Exposed || !reflect.DeepEqual(old.Metadata.Raw, current.Metadata.Raw) {
 			return fmt.Errorf("upstream changed tool approval, scopes, or safety for %s", command.OperationID)
 		}
 		if current.RequestBody.Required && !old.RequestBody.Required {
@@ -101,7 +101,7 @@ func compatibleInput(oldSpec, newSpec Spec, old, current map[string]any, path st
 	if old == nil || current == nil {
 		return fmt.Errorf("unresolved schema at %s", path)
 	}
-	for _, key := range []string{"pattern", "const", "type", "format", "not", "if", "then", "else", "dependentSchemas", "dependentRequired", "uniqueItems", "additionalProperties"} {
+	for _, key := range []string{"pattern", "const", "type", "format", "not", "if", "then", "else", "dependentSchemas", "dependentRequired", "uniqueItems", "additionalProperties", "propertyNames", "patternProperties", "contentEncoding", "contentMediaType", "contentSchema", "contains", "prefixItems", "unevaluatedProperties", "unevaluatedItems", "multipleOf"} {
 		// The owner artifact adds a scalar type to nullable query schemas for
 		// generators. The anyOf branches remain the authority in that case.
 		if key == "type" && (old["anyOf"] != nil || current["anyOf"] != nil) {
@@ -111,7 +111,7 @@ func compatibleInput(oldSpec, newSpec Spec, old, current map[string]any, path st
 			return fmt.Errorf("upstream changed %s at %s", key, path)
 		}
 	}
-	for _, key := range []string{"minimum", "exclusiveMinimum", "minLength", "minItems", "minProperties"} {
+	for _, key := range []string{"minimum", "exclusiveMinimum", "minLength", "minItems", "minProperties", "minContains"} {
 		if value, ok := current[key].(float64); ok {
 			previous, had := old[key].(float64)
 			if !had || value > previous {
@@ -119,12 +119,17 @@ func compatibleInput(oldSpec, newSpec Spec, old, current map[string]any, path st
 			}
 		}
 	}
-	for _, key := range []string{"maximum", "exclusiveMaximum", "maxLength", "maxItems", "maxProperties"} {
+	for _, key := range []string{"maximum", "exclusiveMaximum", "maxLength", "maxItems", "maxProperties", "maxContains", "x-convai-maxLines"} {
 		if value, ok := current[key].(float64); ok {
 			previous, had := old[key].(float64)
 			if !had || value < previous {
 				return fmt.Errorf("upstream tightened %s at %s", key, path)
 			}
+		}
+	}
+	for key, value := range current {
+		if strings.HasPrefix(key, "x-convai-") && key != "x-convai-maxLines" && !reflect.DeepEqual(old[key], value) {
+			return fmt.Errorf("upstream changed custom constraint %s at %s", key, path)
 		}
 	}
 	if values, ok := current["enum"].([]any); ok {
@@ -245,6 +250,13 @@ func compatibleOutput(oldSpec, newSpec Spec, old, current map[string]any, path s
 			return fmt.Errorf("upstream changed output items at %s", path)
 		}
 		return compatibleOutput(oldSpec, newSpec, items, updated, path+"/items")
+	}
+	if values, ok := old["additionalProperties"].(map[string]any); ok {
+		updated, ok := current["additionalProperties"].(map[string]any)
+		if !ok {
+			return fmt.Errorf("upstream changed output map values at %s", path)
+		}
+		return compatibleOutput(oldSpec, newSpec, values, updated, path+"/additionalProperties")
 	}
 	return nil
 }

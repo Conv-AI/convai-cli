@@ -51,16 +51,28 @@ type Operation struct {
 			Schema map[string]any `json:"schema"`
 		} `json:"content"`
 	} `json:"responses"`
-	Metadata struct {
-		Exposed bool `json:"exposed"`
-		Tools   []struct {
-			Name           string   `json:"name"`
-			RequiredScopes []string `json:"requiredScopes"`
-			Safety         struct {
-				Destructive bool `json:"destructiveHint"`
-			} `json:"safety"`
-		} `json:"tools"`
-	} `json:"x-convai-mcp"`
+	Metadata Metadata `json:"x-convai-mcp"`
+}
+
+type Metadata struct {
+	Exposed bool `json:"exposed"`
+	Tools   []struct {
+		Name           string   `json:"name"`
+		RequiredScopes []string `json:"requiredScopes"`
+		Safety         struct {
+			Destructive bool `json:"destructiveHint"`
+		} `json:"safety"`
+	} `json:"tools"`
+	Raw map[string]any `json:"-"`
+}
+
+// Keep typed access for command UX and the full contract for drift comparison.
+func (m *Metadata) UnmarshalJSON(data []byte) error {
+	type plain Metadata
+	if err := json.Unmarshal(data, (*plain)(m)); err != nil {
+		return err
+	}
+	return json.Unmarshal(data, &m.Raw)
 }
 
 type Spec struct {

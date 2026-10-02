@@ -30,6 +30,10 @@ and a daily scheduled workflow fail on withdrawn approval, changed scopes or
 safety, removed routes/inputs/success outputs, or tightened input constraints.
 Complex schema changes conservatively require review; this structural gate is
 not a substitute for E2E authorization or owner business-rule tests.
+All tool metadata is retained for comparison, including conditional scopes,
+association templates, transport support, and safety hints. Custom constraints
+such as `x-convai-maxLines` participate in drift checks; enforcement of custom
+keywords and business policy remains in REST rather than a separate CLI policy.
 
 To refresh: select an immutable owner commit, copy its reviewed artifact, update
 the lock checksum/provenance, regenerate, review the complete diff, and run native
