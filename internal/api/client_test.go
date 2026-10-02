@@ -42,8 +42,8 @@ func TestListCharactersForwardsAPIKeyAndPagination(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ListCharacters: %v", err)
 	}
-	if len(items) != 0 || total != 41 {
-		t.Fatalf("items = %d, total = %d", len(items), total)
+	if len(items) != 0 || total == nil || *total != 41 {
+		t.Fatalf("items = %d, total = %v", len(items), total)
 	}
 }
 

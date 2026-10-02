@@ -84,6 +84,10 @@ convai character list --all --sort last_updated
 convai character get CHARACTER_ID --workspace personal
 ```
 
+`--all` preserves a supplied total and otherwise continues to a short or empty
+page, with a 1000-page request budget. An absent total stays `null` in structured
+output (`unknown` in table output), rather than becoming the current page size.
+
 Unsupported Workspace/resource combinations fail rather than silently using
 Personal Workspace. Workspace selection never bypasses server authorization.
 `--workspace` is command-scoped, including during login verification; only

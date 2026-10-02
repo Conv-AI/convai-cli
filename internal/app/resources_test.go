@@ -141,6 +141,9 @@ func TestReviewedCommandCoverageAndWireRouting(t *testing.T) {
 					}
 				}
 				w.Header().Set("Content-Type", "application/json")
+				if _, ok := op.Responses["200"]; !ok {
+					w.WriteHeader(http.StatusCreated)
+				}
 				_, _ = io.WriteString(w, `{"ok":true}`)
 			}))
 			defer server.Close()
@@ -340,6 +343,9 @@ func TestVersionCommandsSendIntentExplicitly(t *testing.T) {
 					t.Errorf("explicit %s = %v (present=%v), want %v", tc.field, value, exists, tc.value)
 				}
 				w.Header().Set("Content-Type", "application/json")
+				if tc.command == "release" {
+					w.WriteHeader(http.StatusCreated)
+				}
 				_, _ = io.WriteString(w, `{"ok":true}`)
 			}))
 			defer server.Close()

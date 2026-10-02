@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
+	contract "github.com/Conv-AI/convai-cli/api"
 	"github.com/Conv-AI/convai-cli/internal/characterapi"
 	"github.com/Conv-AI/convai-cli/internal/config"
 	"github.com/Conv-AI/convai-cli/internal/credential"
@@ -22,6 +24,7 @@ type Client struct {
 	secret    string
 	workspace string
 	sort      string
+	spec      contract.Spec
 }
 
 type Error struct {
@@ -76,7 +79,11 @@ func New(baseURL string, auth credential.Credential, httpClient *http.Client) (*
 	if err != nil {
 		return nil, fmt.Errorf("create Character API client: %w", err)
 	}
-	return &Client{generated: generated, secret: auth.Value}, nil
+	spec, _, err := contract.Load()
+	if err != nil {
+		return nil, err
+	}
+	return &Client{generated: generated, secret: auth.Value, spec: spec}, nil
 }
 
 func (c *Client) WithWorkspace(value string) *Client {
@@ -101,10 +108,10 @@ func (c *Client) safeError(err error) error {
 	return errors.New(strings.ReplaceAll(err.Error(), c.secret, "[REDACTED]"))
 }
 
-func (c *Client) ListCharacters(ctx context.Context, limit, offset int) ([]characterapi.CharacterListItem, int, error) {
+func (c *Client) ListCharacters(ctx context.Context, limit, offset int) ([]characterapi.CharacterListItem, *int, error) {
 	workspace, err := c.workspaceUUID()
 	if err != nil {
-		return nil, 0, err
+		return nil, nil, err
 	}
 	params := &characterapi.CharacterListParams{
 		Limit:       &limit,
@@ -117,21 +124,17 @@ func (c *Client) ListCharacters(ctx context.Context, limit, offset int) ([]chara
 	}
 	response, err := c.generated.CharacterList(ctx, params)
 	if err != nil {
-		return nil, 0, c.safeError(transportError(err))
+		return nil, nil, c.safeError(transportError(err))
 	}
 	var result characterapi.PageCharacterListItem
-	if err := c.decodeResponse(response, &result); err != nil {
-		return nil, 0, err
+	if err := c.decodeResponse("character_list", response, &result); err != nil {
+		return nil, nil, err
 	}
 	items := []characterapi.CharacterListItem{}
 	if result.Items != nil {
 		items = *result.Items
 	}
-	total := len(items)
-	if result.Total != nil {
-		total = *result.Total
-	}
-	return items, total, nil
+	return items, result.Total, nil
 }
 
 func (c *Client) GetCharacter(ctx context.Context, characterID string) (characterapi.CharacterResponse, error) {
@@ -147,7 +150,7 @@ func (c *Client) GetCharacter(ctx context.Context, characterID string) (characte
 		return characterapi.CharacterResponse{}, c.safeError(transportError(err))
 	}
 	var result characterapi.CharacterResponse
-	err = c.decodeResponse(response, &result)
+	err = c.decodeResponse("character_get", response, &result)
 	return result, err
 }
 
@@ -166,7 +169,7 @@ func (c *Client) CreateCharacter(
 		return characterapi.CharacterCreateResponse{}, c.safeError(transportError(err))
 	}
 	var result characterapi.CharacterCreateResponse
-	err = c.decodeResponse(response, &result)
+	err = c.decodeResponse("character_create", response, &result)
 	return result, err
 }
 
@@ -174,7 +177,7 @@ const maxResponseBytes = 16 << 20
 
 // Every command uses the same bounded reader and redacted HTTP error path,
 // including the typed convenience methods used by auth and character commands.
-func (c *Client) decodeResponse(response *http.Response, target any) error {
+func (c *Client) decodeResponse(operationID string, response *http.Response, target any) error {
 	defer response.Body.Close()
 	data, err := io.ReadAll(io.LimitReader(response.Body, maxResponseBytes+1))
 	if err != nil {
@@ -188,6 +191,13 @@ func (c *Client) decodeResponse(response *http.Response, target any) error {
 	}
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		return c.safeError(responseError(response.StatusCode, data, response))
+	}
+	operation, ok := c.spec.Find(operationID)
+	if !ok {
+		return errors.New("unapproved response operation")
+	}
+	if _, declared := operation.Responses[strconv.Itoa(response.StatusCode)]; !declared {
+		return c.safeError(&Error{StatusCode: response.StatusCode, Message: "undeclared success response for " + operationID, RequestID: response.Header.Get("X-Request-ID")})
 	}
 	if bytes.Equal(bytes.TrimSpace(data), []byte("null")) || json.Unmarshal(data, target) != nil {
 		return errors.New("Convai API returned invalid JSON response")

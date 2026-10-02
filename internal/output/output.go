@@ -76,7 +76,7 @@ func Structured(writer io.Writer, format Format, value any) error {
 	}
 }
 
-func CharacterList(writer io.Writer, format Format, items []characterapi.CharacterListItem, total int) error {
+func CharacterList(writer io.Writer, format Format, items []characterapi.CharacterListItem, total *int) error {
 	if format != Table {
 		return Structured(writer, format, map[string]any{
 			"items": items,
@@ -99,7 +99,11 @@ func CharacterList(writer io.Writer, format Format, items []characterapi.Charact
 	if err := table.Flush(); err != nil {
 		return err
 	}
-	fmt.Fprintf(writer, "\n%d total\n", total)
+	if total == nil {
+		fmt.Fprintln(writer, "\nTotal: unknown")
+	} else {
+		fmt.Fprintf(writer, "\n%d total\n", *total)
+	}
 	return nil
 }
 

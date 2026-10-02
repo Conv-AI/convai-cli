@@ -420,7 +420,20 @@ func (a *application) characterListCommand() *cobra.Command {
 			}
 			if all {
 				pages := 1
-				for offset+len(items) < total {
+				pageSize := len(items)
+				for {
+					if total != nil && offset+len(items) >= *total {
+						break
+					}
+					if pageSize == 0 {
+						if total != nil {
+							return errors.New("pagination stopped before the reported total; retry with a stable dataset")
+						}
+						break
+					}
+					if total == nil && pageSize < limit {
+						break
+					}
 					if pages >= 1000 {
 						return errors.New("pagination exceeded 1000 pages; use explicit page offsets")
 					}
@@ -428,11 +441,9 @@ func (a *application) characterListCommand() *cobra.Command {
 					if err != nil {
 						return err
 					}
-					if len(page) == 0 {
-						return errors.New("pagination stopped before the reported total; retry with a stable dataset")
-					}
 					items = append(items, page...)
 					total = updatedTotal
+					pageSize = len(page)
 					pages++
 				}
 			}

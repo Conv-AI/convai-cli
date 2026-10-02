@@ -29,6 +29,6 @@ func (c *Client) Call(ctx context.Context, operation string, query map[string]an
 		return nil, c.safeError(transportError(err))
 	}
 	var result any
-	err = c.decodeResponse(response, &result)
+	err = c.decodeResponse(operation, response, &result)
 	return result, err
 }
