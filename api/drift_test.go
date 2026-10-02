@@ -48,6 +48,16 @@ func TestUpstreamDriftGate(t *testing.T) {
 			}
 			response["required"] = required
 		}},
+		{"union raw diff required output made optional", func(root map[string]any) {
+			schemas := root["components"].(map[string]any)["schemas"].(map[string]any)
+			response := schemas["CharacterVersionDiffResponse"].(map[string]any)
+			response["required"] = []any{}
+		}},
+		{"union semantic diff nested output type changed", func(root map[string]any) {
+			schemas := root["components"].(map[string]any)["schemas"].(map[string]any)
+			response := schemas["CharacterVersionSemanticDiffResponse"].(map[string]any)
+			response["properties"].(map[string]any)["character_id"].(map[string]any)["type"] = "integer"
+		}},
 		{"required field", func(root map[string]any) {
 			schemas := root["components"].(map[string]any)["schemas"].(map[string]any)
 			create := schemas["CharacterCreate"].(map[string]any)

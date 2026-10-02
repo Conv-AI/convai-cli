@@ -202,12 +202,24 @@ func inputSchema(spec Spec, schema map[string]any) map[string]any {
 }
 
 func compatibleOutput(oldSpec, newSpec Spec, old, current map[string]any, path string) error {
-	old, current = oldSpec.Resolve(old), newSpec.Resolve(current)
+	old, current = inputSchema(oldSpec, old), inputSchema(newSpec, current)
 	if old == nil || current == nil {
 		return fmt.Errorf("unresolved output schema at %s", path)
 	}
-	if !reflect.DeepEqual(old["type"], current["type"]) || !reflect.DeepEqual(old["anyOf"], current["anyOf"]) {
+	if !reflect.DeepEqual(old["type"], current["type"]) {
 		return fmt.Errorf("upstream changed output type at %s", path)
+	}
+	for _, key := range []string{"anyOf", "oneOf", "allOf"} {
+		previous, had := old[key].([]any)
+		updated, has := current[key].([]any)
+		if had != has || len(previous) != len(updated) {
+			return fmt.Errorf("upstream changed output %s at %s", key, path)
+		}
+		for i, branch := range previous {
+			if err := compatibleOutput(oldSpec, newSpec, branch.(map[string]any), updated[i].(map[string]any), fmt.Sprintf("%s/%s/%d", path, key, i)); err != nil {
+				return err
+			}
+		}
 	}
 	previousRequired, _ := old["required"].([]any)
 	currentRequired, _ := current["required"].([]any)
