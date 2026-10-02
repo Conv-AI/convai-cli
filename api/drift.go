@@ -189,6 +189,11 @@ func compatibleInput(oldSpec, newSpec Spec, old, current map[string]any, path st
 	if old == nil || current == nil {
 		return fmt.Errorf("unresolved schema at %s", path)
 	}
+	previousDefault, hadDefault := old["default"]
+	currentDefault, hasDefault := current["default"]
+	if hadDefault != hasDefault || !reflect.DeepEqual(previousDefault, currentDefault) {
+		return fmt.Errorf("upstream changed default at %s", path)
+	}
 	for _, key := range []string{"pattern", "const", "type", "format", "not", "if", "then", "else", "dependentSchemas", "dependentRequired", "uniqueItems", "additionalProperties", "propertyNames", "patternProperties", "contentEncoding", "contentMediaType", "contentSchema", "contains", "prefixItems", "unevaluatedProperties", "unevaluatedItems", "multipleOf"} {
 		// The owner artifact adds a scalar type to nullable query schemas for
 		// generators. The anyOf branches remain the authority in that case.

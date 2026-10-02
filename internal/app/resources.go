@@ -71,6 +71,18 @@ func (a *application) resourceCommand(definition contract.Command, operation con
 					return err
 				}
 			}
+			// Release and deprecate express an explicit action, not a mutable
+			// server default. Promotion still requires separate confirmation.
+			if operation.OperationID == "character_version_create" {
+				if _, exists := body["make_latest"]; !exists {
+					body["make_latest"] = false
+				}
+			}
+			if operation.OperationID == "character_version_deprecate" {
+				if _, exists := body["deprecated"]; !exists {
+					body["deprecated"] = true
+				}
+			}
 			query := map[string]any{}
 			for i, name := range definition.Arguments {
 				if slices.Contains(definition.BodyArguments, name) {

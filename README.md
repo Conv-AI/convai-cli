@@ -124,6 +124,9 @@ convai function-association disconnect CHARACTER_ID FUNCTION_ID --yes
 
 Update files preserve omitted fields, explicit nulls, false values, and empty
 collections. The CLI validates the reviewed owner JSON Schema before sending.
+Version release explicitly keeps `make_latest=false` unless requested in its
+input file; `true` requires confirmation. Deprecate explicitly sends
+`deprecated=true` unless overridden in its input file.
 KB commands modify character associations through Character API; they do not
 upload, process, or delete Knowledge Bank documents. Document lifecycle,
 multipart backstory generation, chat history, stored external-MCP management,

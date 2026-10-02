@@ -17,6 +17,18 @@ func TestUpstreamDriftGate(t *testing.T) {
 		mutate func(map[string]any)
 	}{
 		{"removed operation", func(root map[string]any) { delete(root["paths"].(map[string]any), "/character/delete") }},
+		{"release default becomes promotion", func(root map[string]any) {
+			root["components"].(map[string]any)["schemas"].(map[string]any)["CharacterVersionCreate"].(map[string]any)["properties"].(map[string]any)["make_latest"].(map[string]any)["default"] = true
+		}},
+		{"deprecation default becomes activation", func(root map[string]any) {
+			root["components"].(map[string]any)["schemas"].(map[string]any)["CharacterVersionDeprecate"].(map[string]any)["properties"].(map[string]any)["deprecated"].(map[string]any)["default"] = false
+		}},
+		{"default removed", func(root map[string]any) {
+			delete(root["components"].(map[string]any)["schemas"].(map[string]any)["CharacterVersionCreate"].(map[string]any)["properties"].(map[string]any)["make_latest"].(map[string]any), "default")
+		}},
+		{"default added", func(root map[string]any) {
+			root["components"].(map[string]any)["schemas"].(map[string]any)["CharacterVersionCreate"].(map[string]any)["properties"].(map[string]any)["version"].(map[string]any)["default"] = "1.0"
+		}},
 		{"required inherited query", func(root map[string]any) {
 			root["paths"].(map[string]any)["/character/list"].(map[string]any)["parameters"] = []any{map[string]any{"name": "tenant", "in": "query", "required": true, "schema": map[string]any{"type": "string"}}}
 		}},

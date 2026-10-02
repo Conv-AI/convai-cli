@@ -249,6 +249,41 @@ func TestAssociationCommandsUseOwnerRESTMapping(t *testing.T) {
 	}
 }
 
+func TestVersionCommandsSendIntentExplicitly(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		command, field, input string
+		value                 bool
+	}{
+		{"release", "make_latest", "", false},
+		{"release", "make_latest", `{"make_latest":true}`, true},
+		{"deprecate", "deprecated", "", true},
+		{"deprecate", "deprecated", `{"deprecated":false}`, false},
+	} {
+		t.Run(tc.command+"/"+fmt.Sprint(tc.value), func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				var body map[string]any
+				if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+					t.Error(err)
+				}
+				if value, exists := body[tc.field]; !exists || value != tc.value {
+					t.Errorf("explicit %s = %v (present=%v), want %v", tc.field, value, exists, tc.value)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = io.WriteString(w, `{"ok":true}`)
+			}))
+			defer server.Close()
+			args := []string{"character", "version", tc.command, testUUID, "1.0", "--yes", "--output", "json"}
+			if tc.input != "" {
+				args = append(args, "--file", "-")
+			}
+			if _, _, err := execute(t, server, strings.NewReader(tc.input), args...); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
 func TestYAMLResourceInputAndBounds(t *testing.T) {
 	t.Parallel()
 	a := &application{stdin: strings.NewReader(strings.Repeat("x", (1<<20)+1))}
