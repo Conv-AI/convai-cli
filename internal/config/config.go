@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/google/uuid"
 	"gopkg.in/yaml.v3"
 )
 
@@ -21,11 +22,13 @@ type CredentialType string
 const (
 	CredentialAPIKey CredentialType = "api_key"
 	CredentialPAT    CredentialType = "personal_access_token"
+	CredentialOAuth  CredentialType = "oauth_access_token"
 )
 
 type Profile struct {
 	APIURL         string         `yaml:"api_url" json:"api_url"`
 	CredentialType CredentialType `yaml:"credential_type" json:"credential_type"`
+	WorkspaceID    string         `yaml:"workspace_id,omitempty" json:"workspace_id,omitempty"`
 }
 
 type Config struct {
@@ -144,9 +147,25 @@ func Validate(cfg Config) error {
 		if _, err := NormalizeAPIURL(profile.APIURL); err != nil {
 			return fmt.Errorf("invalid profile %q API URL: %w", name, err)
 		}
-		if profile.CredentialType != CredentialAPIKey && profile.CredentialType != CredentialPAT {
+		if profile.CredentialType != CredentialAPIKey && profile.CredentialType != CredentialPAT && profile.CredentialType != CredentialOAuth {
 			return fmt.Errorf("invalid profile %q credential type", name)
 		}
+		if err := ValidateWorkspaceID(profile.WorkspaceID); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func ValidateWorkspaceID(value string) error {
+	if value == "" {
+		return nil
+	}
+	if len(value) != 36 {
+		return errors.New("workspace must be a UUID")
+	}
+	if _, err := uuid.Parse(value); err != nil {
+		return errors.New("workspace must be a UUID")
 	}
 	return nil
 }

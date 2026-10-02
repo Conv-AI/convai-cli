@@ -1,12 +1,46 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/oapi-codegen/oapi-codegen/v2.8.0/configuration-schema.json
-package: characterapi
-output: internal/characterapi/client.gen.go
 generate:
-  models: true
-  client: true
+    client: true
+    models: true
+output: internal/characterapi/client.gen.go
 output-options:
-  response-type-suffix: Resp
-  include-operation-ids:
-    - character_list
-    - character_get
-    - character_create
+    include-operation-ids:
+        - character_list
+        - character_get
+        - character_create
+        - character_update
+        - character_delete
+        - character_clone
+        - character_version_list
+        - character_version_create
+        - character_version_promote
+        - character_version_fork
+        - character_version_deprecate
+        - character_version_discard_draft
+        - character_version_revert_draft_change
+        - character_version_diff
+        - character_list_supported_models
+        - get_available_voices_tts_get_available_voices_get
+        - get_available_languages_tts_get_available_languages_get
+        - create_section_character_narrative_sections_create_post
+        - update_section_character_narrative_sections_update_post
+        - delete_section_character_narrative_sections_delete_post
+        - get_section_character_narrative_sections_get_get
+        - list_sections_character_narrative_sections_list_get
+        - create_trigger_character_narrative_triggers_create_post
+        - update_trigger_character_narrative_triggers_update_post
+        - delete_trigger_character_narrative_triggers_delete_post
+        - get_trigger_character_narrative_triggers_get_get
+        - list_triggers_character_narrative_triggers_list_get
+        - add_decision_character_narrative_add_decision_post
+        - edit_decision_character_narrative_edit_decision_post
+        - delete_decision_character_narrative_delete_decision_post
+        - update_start_section_id_character_narrative_update_start_section_id_post
+        - create_function_functions_create_post
+        - update_function_functions_update_post
+        - delete_function_functions_delete_post
+        - get_function_functions_get_post
+        - list_functions_functions_list_post
+        - list_templates_functions_templates_list_post
+        - test_function_functions_test_post
+    response-type-suffix: Resp
+package: characterapi

@@ -1,20 +1,40 @@
 version: 1
 operations:
-  - operation_id: character_list
-    group: character
-    command: list
-    stability: beta
-    destructive: false
-    required_scopes: [character:read]
-  - operation_id: character_get
-    group: character
-    command: get
-    stability: beta
-    destructive: false
-    required_scopes: [character:read]
-  - operation_id: character_create
-    group: character
-    command: create
-    stability: beta
-    destructive: false
-    required_scopes: [character:write]
+  - {operation_id: character_list, group: character, command: list, stability: beta, destructive: false, required_scopes: ['character:read']}
+  - {operation_id: character_get, group: character, command: get, stability: beta, destructive: false, required_scopes: ['character:read']}
+  - {operation_id: character_create, group: character, command: create, stability: beta, destructive: false, required_scopes: ['character:write']}
+  - {operation_id: character_update, group: character, command: update, arguments: [character_id], file_required: true}
+  - {operation_id: character_delete, group: character, command: delete, arguments: [character_id]}
+  - {operation_id: character_clone, group: character, command: clone, arguments: [character_id], body_arguments: [character_id]}
+  - {operation_id: character_version_list, group: character version, command: list, arguments: [character_id]}
+  - {operation_id: character_version_create, group: character version, command: release, arguments: [character_id, version], body_arguments: [version]}
+  - {operation_id: character_version_promote, group: character version, command: promote, arguments: [character_id, version], body_arguments: [version]}
+  - {operation_id: character_version_fork, group: character version, command: fork, arguments: [character_id, version], body_arguments: [version]}
+  - {operation_id: character_version_deprecate, group: character version, command: deprecate, arguments: [character_id, version], body_arguments: [version]}
+  - {operation_id: character_version_discard_draft, group: character version, command: discard-draft, arguments: [character_id], file_required: true}
+  - {operation_id: character_version_revert_draft_change, group: character version, command: revert, arguments: [character_id], file_required: true}
+  - {operation_id: character_version_diff, group: character version, command: diff, arguments: [character_id, from, to]}
+  - {operation_id: character_list_supported_models, group: model, command: list}
+  - {operation_id: get_available_voices_tts_get_available_voices_get, group: voice, command: list}
+  - {operation_id: get_available_languages_tts_get_available_languages_get, group: language, command: list}
+  - {operation_id: create_section_character_narrative_sections_create_post, group: narrative section, command: create, arguments: [character_id], file_required: true}
+  - {operation_id: update_section_character_narrative_sections_update_post, group: narrative section, command: update, arguments: [character_id, section_id], file_required: true}
+  - {operation_id: delete_section_character_narrative_sections_delete_post, group: narrative section, command: delete, arguments: [character_id, section_id]}
+  - {operation_id: get_section_character_narrative_sections_get_get, group: narrative section, command: get, arguments: [character_id, section_id]}
+  - {operation_id: list_sections_character_narrative_sections_list_get, group: narrative section, command: list, arguments: [character_id]}
+  - {operation_id: create_trigger_character_narrative_triggers_create_post, group: narrative trigger, command: create, arguments: [character_id], file_required: true}
+  - {operation_id: update_trigger_character_narrative_triggers_update_post, group: narrative trigger, command: update, arguments: [character_id, trigger_id], file_required: true}
+  - {operation_id: delete_trigger_character_narrative_triggers_delete_post, group: narrative trigger, command: delete, arguments: [character_id, trigger_id]}
+  - {operation_id: get_trigger_character_narrative_triggers_get_get, group: narrative trigger, command: get, arguments: [character_id, trigger_id]}
+  - {operation_id: list_triggers_character_narrative_triggers_list_get, group: narrative trigger, command: list, arguments: [character_id]}
+  - {operation_id: add_decision_character_narrative_add_decision_post, group: narrative decision, command: create, file_required: true}
+  - {operation_id: edit_decision_character_narrative_edit_decision_post, group: narrative decision, command: update, file_required: true}
+  - {operation_id: delete_decision_character_narrative_delete_decision_post, group: narrative decision, command: delete, file_required: true}
+  - {operation_id: update_start_section_id_character_narrative_update_start_section_id_post, group: narrative, command: start, arguments: [character_id], body_arguments: [character_id], file_required: true}
+  - {operation_id: create_function_functions_create_post, group: function, command: create, file_required: true}
+  - {operation_id: update_function_functions_update_post, group: function, command: update, arguments: [function_id], body_arguments: [function_id], file_required: true}
+  - {operation_id: delete_function_functions_delete_post, group: function, command: delete, arguments: [function_id], body_arguments: [function_id]}
+  - {operation_id: get_function_functions_get_post, group: function, command: get, arguments: [function_id], body_arguments: [function_id]}
+  - {operation_id: list_functions_functions_list_post, group: function, command: list}
+  - {operation_id: list_templates_functions_templates_list_post, group: function template, command: list}
+  - {operation_id: test_function_functions_test_post, group: function, command: test, file_required: true}

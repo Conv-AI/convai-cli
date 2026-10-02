@@ -12,44 +12,378 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/oapi-codegen/runtime"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for CharacterDocumentStatusUpdateRetrievalMode.
+const (
+	InPrompt CharacterDocumentStatusUpdateRetrievalMode = "in_prompt"
+	Legacy   CharacterDocumentStatusUpdateRetrievalMode = "legacy"
+)
+
+// Valid indicates whether the value is a known member of the CharacterDocumentStatusUpdateRetrievalMode enum.
+func (e CharacterDocumentStatusUpdateRetrievalMode) Valid() bool {
+	switch e {
+	case InPrompt:
+		return true
+	case Legacy:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CharacterDocumentStatusUpdateStatus.
+const (
+	CharacterDocumentStatusUpdateStatusActive   CharacterDocumentStatusUpdateStatus = "active"
+	CharacterDocumentStatusUpdateStatusInactive CharacterDocumentStatusUpdateStatus = "inactive"
+)
+
+// Valid indicates whether the value is a known member of the CharacterDocumentStatusUpdateStatus enum.
+func (e CharacterDocumentStatusUpdateStatus) Valid() bool {
+	switch e {
+	case CharacterDocumentStatusUpdateStatusActive:
+		return true
+	case CharacterDocumentStatusUpdateStatusInactive:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CharacterFunctionStatusUpdateStatus.
+const (
+	CharacterFunctionStatusUpdateStatusActive   CharacterFunctionStatusUpdateStatus = "active"
+	CharacterFunctionStatusUpdateStatusInactive CharacterFunctionStatusUpdateStatus = "inactive"
+)
+
+// Valid indicates whether the value is a known member of the CharacterFunctionStatusUpdateStatus enum.
+func (e CharacterFunctionStatusUpdateStatus) Valid() bool {
+	switch e {
+	case CharacterFunctionStatusUpdateStatusActive:
+		return true
+	case CharacterFunctionStatusUpdateStatusInactive:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CharacterMCPServerStatusUpdateStatus.
+const (
+	CharacterMCPServerStatusUpdateStatusActive   CharacterMCPServerStatusUpdateStatus = "active"
+	CharacterMCPServerStatusUpdateStatusInactive CharacterMCPServerStatusUpdateStatus = "inactive"
+)
+
+// Valid indicates whether the value is a known member of the CharacterMCPServerStatusUpdateStatus enum.
+func (e CharacterMCPServerStatusUpdateStatus) Valid() bool {
+	switch e {
+	case CharacterMCPServerStatusUpdateStatusActive:
+		return true
+	case CharacterMCPServerStatusUpdateStatusInactive:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CharacterResponseActionsEnablementSource.
+const (
+	DefaultOff      CharacterResponseActionsEnablementSource = "default_off"
+	Explicit        CharacterResponseActionsEnablementSource = "explicit"
+	LegacyInherited CharacterResponseActionsEnablementSource = "legacy_inherited"
+)
+
+// Valid indicates whether the value is a known member of the CharacterResponseActionsEnablementSource enum.
+func (e CharacterResponseActionsEnablementSource) Valid() bool {
+	switch e {
+	case DefaultOff:
+		return true
+	case Explicit:
+		return true
+	case LegacyInherited:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CharacterUpdateLanguageHardeningMode.
+const (
+	Custom  CharacterUpdateLanguageHardeningMode = "custom"
+	Default CharacterUpdateLanguageHardeningMode = "default"
+	Off     CharacterUpdateLanguageHardeningMode = "off"
+)
+
+// Valid indicates whether the value is a known member of the CharacterUpdateLanguageHardeningMode enum.
+func (e CharacterUpdateLanguageHardeningMode) Valid() bool {
+	switch e {
+	case Custom:
+		return true
+	case Default:
+		return true
+	case Off:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CharacterVersionDiffChangeChangeType.
+const (
+	CharacterVersionDiffChangeChangeTypeAdded    CharacterVersionDiffChangeChangeType = "added"
+	CharacterVersionDiffChangeChangeTypeModified CharacterVersionDiffChangeChangeType = "modified"
+	CharacterVersionDiffChangeChangeTypeRemoved  CharacterVersionDiffChangeChangeType = "removed"
+)
+
+// Valid indicates whether the value is a known member of the CharacterVersionDiffChangeChangeType enum.
+func (e CharacterVersionDiffChangeChangeType) Valid() bool {
+	switch e {
+	case CharacterVersionDiffChangeChangeTypeAdded:
+		return true
+	case CharacterVersionDiffChangeChangeTypeModified:
+		return true
+	case CharacterVersionDiffChangeChangeTypeRemoved:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CharacterVersionSemanticDiffChangeChangeType.
+const (
+	CharacterVersionSemanticDiffChangeChangeTypeAdded    CharacterVersionSemanticDiffChangeChangeType = "added"
+	CharacterVersionSemanticDiffChangeChangeTypeModified CharacterVersionSemanticDiffChangeChangeType = "modified"
+	CharacterVersionSemanticDiffChangeChangeTypeRemoved  CharacterVersionSemanticDiffChangeChangeType = "removed"
+)
+
+// Valid indicates whether the value is a known member of the CharacterVersionSemanticDiffChangeChangeType enum.
+func (e CharacterVersionSemanticDiffChangeChangeType) Valid() bool {
+	switch e {
+	case CharacterVersionSemanticDiffChangeChangeTypeAdded:
+		return true
+	case CharacterVersionSemanticDiffChangeChangeTypeModified:
+		return true
+	case CharacterVersionSemanticDiffChangeChangeTypeRemoved:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CharacterVersionSemanticDiffResponseView.
+const (
+	CharacterVersionSemanticDiffResponseViewSemantic CharacterVersionSemanticDiffResponseView = "semantic"
+)
+
+// Valid indicates whether the value is a known member of the CharacterVersionSemanticDiffResponseView enum.
+func (e CharacterVersionSemanticDiffResponseView) Valid() bool {
+	switch e {
+	case CharacterVersionSemanticDiffResponseViewSemantic:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for DecisionMutationResponseStatus.
+const (
+	Success DecisionMutationResponseStatus = "success"
+)
+
+// Valid indicates whether the value is a known member of the DecisionMutationResponseStatus enum.
+func (e DecisionMutationResponseStatus) Valid() bool {
+	switch e {
+	case Success:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SectionCreateParents1.
+const (
+	SectionCreateParents1Root SectionCreateParents1 = "root"
+)
+
+// Valid indicates whether the value is a known member of the SectionCreateParents1 enum.
+func (e SectionCreateParents1) Valid() bool {
+	switch e {
+	case SectionCreateParents1Root:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SectionUpdateParents1.
+const (
+	SectionUpdateParents1Root SectionUpdateParents1 = "root"
+)
+
+// Valid indicates whether the value is a known member of the SectionUpdateParents1 enum.
+func (e SectionUpdateParents1) Valid() bool {
+	switch e {
+	case SectionUpdateParents1Root:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CharacterListParamsSort.
+const (
+	Created        CharacterListParamsSort = "created"
+	LastInteracted CharacterListParamsSort = "last_interacted"
+	LastUpdated    CharacterListParamsSort = "last_updated"
+)
+
+// Valid indicates whether the value is a known member of the CharacterListParamsSort enum.
+func (e CharacterListParamsSort) Valid() bool {
+	switch e {
+	case Created:
+		return true
+	case LastInteracted:
+		return true
+	case LastUpdated:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CharacterVersionDiffParamsView.
+const (
+	CharacterVersionDiffParamsViewRaw      CharacterVersionDiffParamsView = "raw"
+	CharacterVersionDiffParamsViewSemantic CharacterVersionDiffParamsView = "semantic"
+)
+
+// Valid indicates whether the value is a known member of the CharacterVersionDiffParamsView enum.
+func (e CharacterVersionDiffParamsView) Valid() bool {
+	switch e {
+	case CharacterVersionDiffParamsViewRaw:
+		return true
+	case CharacterVersionDiffParamsViewSemantic:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ListTemplatesFunctionsTemplatesListPostJSONBodyLanguage.
+const (
+	Python ListTemplatesFunctionsTemplatesListPostJSONBodyLanguage = "python"
+)
+
+// Valid indicates whether the value is a known member of the ListTemplatesFunctionsTemplatesListPostJSONBodyLanguage enum.
+func (e ListTemplatesFunctionsTemplatesListPostJSONBodyLanguage) Valid() bool {
+	switch e {
+	case Python:
+		return true
+	default:
+		return false
+	}
+}
+
+// AvailableLanguagesResponse defines model for AvailableLanguagesResponse.
+type AvailableLanguagesResponse struct {
+	Languages []LanguageItem `json:"languages"`
+}
+
+// AvailableVoicesResponse defines model for AvailableVoicesResponse.
+type AvailableVoicesResponse struct {
+	Voices []VoiceItem `json:"voices"`
+}
+
+// BoostedWordInput defines model for BoostedWordInput.
+type BoostedWordInput struct {
+	PronouncedAs *string `json:"pronouncedAs,omitempty"`
+	SpelledAs    string  `json:"spelledAs"`
+}
+
+// CharacterCloneRequest defines model for CharacterCloneRequest.
+type CharacterCloneRequest struct {
+	CharacterId          string  `json:"character_id"`
+	IncludeKnowledgeBank *bool   `json:"include_knowledge_bank,omitempty"`
+	NewCharacterName     *string `json:"new_character_name,omitempty"`
+	WorkspaceId          *string `json:"workspace_id,omitempty"`
+}
+
+// CharacterCloneResponse defines model for CharacterCloneResponse.
+type CharacterCloneResponse struct {
+	CharacterId string  `json:"character_id"`
+	Message     *string `json:"message,omitempty"`
+	RevisionId  string  `json:"revision_id"`
+}
+
 // CharacterCreate defines model for CharacterCreate.
 type CharacterCreate struct {
-	AllowedModerationFilters     *[]string               `json:"allowed_moderation_filters,omitempty"`
-	Backstory                    string                  `json:"backstory"`
-	BlockedWords                 *[]string               `json:"blocked_words,omitempty"`
-	CharName                     string                  `json:"charName"`
-	CharacterActions             *[]string               `json:"character_actions,omitempty"`
-	CharacterTraits              *map[string]interface{} `json:"character_traits,omitempty"`
-	CollectionName               *string                 `json:"collection_name,omitempty"`
-	Description                  *string                 `json:"description,omitempty"`
-	DocumentStoreFileLink        *string                 `json:"document_store_file_link,omitempty"`
-	ExperienceId                 *openapi_types.UUID     `json:"experience_id,omitempty"`
-	GuardRails                   *map[string]interface{} `json:"guard_rails,omitempty"`
-	GuardrailMeta                *map[string]interface{} `json:"guardrail_meta,omitempty"`
-	LanguageCode                 *string                 `json:"languageCode,omitempty"`
-	LanguageCodes                *[]string               `json:"languageCodes,omitempty"`
-	LimitResponseLevel           *int                    `json:"limit_response_level,omitempty"`
-	Listing                      *string                 `json:"listing,omitempty"`
-	LlmName                      *string                 `json:"llm_name,omitempty"`
-	MemorySettings               *map[string]interface{} `json:"memory_settings,omitempty"`
-	MetadataFilter               *map[string]interface{} `json:"metadata_filter,omitempty"`
-	ModelGroupName               *string                 `json:"model_group_name,omitempty"`
-	ModelType                    *string                 `json:"model_type,omitempty"`
-	ModerationEnabled            *bool                   `json:"moderation_enabled,omitempty"`
-	PersonalisedPromptConfig     *map[string]interface{} `json:"personalised_prompt_config,omitempty"`
-	PersonalityEnabled           *bool                   `json:"personality_enabled,omitempty"`
-	SpeakingStyleDescription     *string                 `json:"speaking_style_description,omitempty"`
-	SpeakingStyleSampleDialogues *string                 `json:"speaking_style_sample_dialogues,omitempty"`
-	StateOfMindEnabled           *bool                   `json:"state_of_mind_enabled,omitempty"`
-	Temperature                  *float32                `json:"temperature,omitempty"`
-	Verbosity                    *int                    `json:"verbosity,omitempty"`
-	VoiceType                    string                  `json:"voiceType"`
+	// ActionsContract Multiline instructions defining the character's structured action and display output contract. Stored in personalised_prompt_config.ACTIONS_CONTRACT.
+	ActionsContract *string `json:"actions_contract,omitempty"`
+
+	// ActionsEnabled Controls whether Core enables the character's backend Actions prompt. Stored in personalised_prompt_config.ACTIONS_ENABLED.
+	ActionsEnabled           *bool     `json:"actions_enabled,omitempty"`
+	AllowedModerationFilters *[]string `json:"allowed_moderation_filters,omitempty"`
+
+	// AutoSelectAssets Automatically select a public avatar and scene when no experience or custom model is supplied.
+	AutoSelectAssets             *bool                                                           `json:"autoSelectAssets,omitempty"`
+	Backstory                    string                                                          `json:"backstory"`
+	BlockedWords                 *[]string                                                       `json:"blocked_words,omitempty"`
+	CatchPhrases                 *[]string                                                       `json:"catch_phrases,omitempty"`
+	CharName                     string                                                          `json:"charName"`
+	CharacterActions             *[]string                                                       `json:"character_actions,omitempty"`
+	CharacterTraits              *map[string]interface{}                                         `json:"character_traits,omitempty"`
+	CollectionName               *string                                                         `json:"collection_name,omitempty"`
+	CuriosityLevel               *int                                                            `json:"curiosity_level,omitempty"`
+	Description                  *string                                                         `json:"description,omitempty"`
+	DocumentStoreFileLink        *string                                                         `json:"document_store_file_link,omitempty"`
+	DynamicInfoTokenLimit        *int                                                            `json:"dynamic_info_token_limit,omitempty"`
+	EmbodimentClothesDescription *string                                                         `json:"embodiment_clothes_description,omitempty"`
+	EmbodimentLooksDescription   *string                                                         `json:"embodiment_looks_description,omitempty"`
+	ExperienceId                 *openapi_types.UUID                                             `json:"experience_id,omitempty"`
+	GuardRails                   *map[string]interface{}                                         `json:"guard_rails,omitempty"`
+	GuardrailMeta                *map[string]interface{}                                         `json:"guardrail_meta,omitempty"`
+	LanguageCode                 *string                                                         `json:"languageCode,omitempty"`
+	LanguageCodes                *[]string                                                       `json:"languageCodes,omitempty"`
+	LimitResponseLevel           *int                                                            `json:"limit_response_level,omitempty"`
+	Listing                      *string                                                         `json:"listing,omitempty"`
+	LlmName                      *string                                                         `json:"llm_name,omitempty"`
+	MemorySettings               *map[string]interface{}                                         `json:"memory_settings,omitempty"`
+	MetadataFilter               *map[string]CharacterCreate_MetadataFilter_AdditionalProperties `json:"metadata_filter,omitempty"`
+	ModelGroupName               *string                                                         `json:"model_group_name,omitempty"`
+	ModelLink                    *string                                                         `json:"model_link,omitempty"`
+	ModelPlaceholder             *string                                                         `json:"model_placeholder,omitempty"`
+	ModelType                    *string                                                         `json:"model_type,omitempty"`
+	ModerationEnabled            *bool                                                           `json:"moderation_enabled,omitempty"`
+	MultimodalKbEnabled          *bool                                                           `json:"multimodal_kb_enabled,omitempty"`
+	PersonalisedPromptConfig     *map[string]interface{}                                         `json:"personalised_prompt_config,omitempty"`
+	PersonalityEnabled           *bool                                                           `json:"personality_enabled,omitempty"`
+	PersonalityTraits            *map[string]interface{}                                         `json:"personality_traits,omitempty"`
+
+	// ShowFullUnfilteredLlmOutput Persisted authoring preference for requesting raw bot-llm-text output. False preserves the legacy chat behavior.
+	ShowFullUnfilteredLlmOutput  *bool    `json:"show_full_unfiltered_llm_output,omitempty"`
+	SpeakingStyle                *string  `json:"speaking_style,omitempty"`
+	SpeakingStyleDescription     *string  `json:"speaking_style_description,omitempty"`
+	SpeakingStyleSampleDialogues *string  `json:"speaking_style_sample_dialogues,omitempty"`
+	StateOfMindEnabled           *bool    `json:"state_of_mind_enabled,omitempty"`
+	Temperature                  *float32 `json:"temperature,omitempty"`
+	UncensoredAccessConsent      *bool    `json:"uncensored_access_consent,omitempty"`
+	Verbosity                    *int     `json:"verbosity,omitempty"`
+	VoiceType                    *string  `json:"voiceType,omitempty"`
+	WorkspaceId                  *string  `json:"workspace_id,omitempty"`
+}
+
+// CharacterCreateMetadataFilter0 defines model for CharacterCreate.MetadataFilter.0.
+type CharacterCreateMetadataFilter0 = string
+
+// CharacterCreateMetadataFilter1 defines model for CharacterCreate.MetadataFilter.1.
+type CharacterCreateMetadataFilter1 = int
+
+// CharacterCreate_MetadataFilter_AdditionalProperties defines model for CharacterCreate.metadata_filter.AdditionalProperties.
+type CharacterCreate_MetadataFilter_AdditionalProperties struct {
+	union json.RawMessage
 }
 
 // CharacterCreateResponse defines model for CharacterCreateResponse.
@@ -57,64 +391,568 @@ type CharacterCreateResponse struct {
 	CharID      string  `json:"charID"`
 	CharacterId string  `json:"character_id"`
 	Message     *string `json:"message,omitempty"`
+	RevisionId  string  `json:"revision_id"`
+	WorkspaceId string  `json:"workspace_id"`
 }
+
+// CharacterDocumentStatusUpdate defines model for CharacterDocumentStatusUpdate.
+type CharacterDocumentStatusUpdate struct {
+	Id            openapi_types.UUID                          `json:"id"`
+	RetrievalMode *CharacterDocumentStatusUpdateRetrievalMode `json:"retrieval_mode,omitempty"`
+	Status        CharacterDocumentStatusUpdateStatus         `json:"status"`
+}
+
+// CharacterDocumentStatusUpdateRetrievalMode defines model for CharacterDocumentStatusUpdate.RetrievalMode.
+type CharacterDocumentStatusUpdateRetrievalMode string
+
+// CharacterDocumentStatusUpdateStatus defines model for CharacterDocumentStatusUpdate.Status.
+type CharacterDocumentStatusUpdateStatus string
+
+// CharacterDraftDiscard defines model for CharacterDraftDiscard.
+type CharacterDraftDiscard struct {
+	ExpectedDraftRevisionId string `json:"expected_draft_revision_id"`
+}
+
+// CharacterDraftDiscardResponse defines model for CharacterDraftDiscardResponse.
+type CharacterDraftDiscardResponse struct {
+	CharacterId             string `json:"character_id"`
+	DraftParentRevisionId   string `json:"draft_parent_revision_id"`
+	DraftParentVersion      string `json:"draft_parent_version"`
+	DraftRevisionId         string `json:"draft_revision_id"`
+	PreviousDraftRevisionId string `json:"previous_draft_revision_id"`
+}
+
+// CharacterFunctionStatusUpdate defines model for CharacterFunctionStatusUpdate.
+type CharacterFunctionStatusUpdate struct {
+	Id     openapi_types.UUID                  `json:"id"`
+	Status CharacterFunctionStatusUpdateStatus `json:"status"`
+}
+
+// CharacterFunctionStatusUpdateStatus defines model for CharacterFunctionStatusUpdate.Status.
+type CharacterFunctionStatusUpdateStatus string
 
 // CharacterListItem defines model for CharacterListItem.
 type CharacterListItem struct {
-	CharacterId   string    `json:"character_id"`
-	CharacterName *string   `json:"character_name"`
-	LanguageCode  string    `json:"language_code"`
-	Timestamp     time.Time `json:"timestamp"`
-	VoiceType     *string   `json:"voice_type"`
+	Backstory           *string                 `json:"backstory,omitempty"`
+	CharacterId         string                  `json:"character_id"`
+	CharacterName       *string                 `json:"character_name"`
+	CreatedByUserId     *string                 `json:"created_by_user_id,omitempty"`
+	Description         *string                 `json:"description,omitempty"`
+	EditCharacterAccess *bool                   `json:"edit_character_access,omitempty"`
+	LanguageCode        string                  `json:"language_code"`
+	LanguageCodes       *[]string               `json:"language_codes,omitempty"`
+	LastInteractedWith  string                  `json:"last_interacted_with"`
+	Listing             *string                 `json:"listing,omitempty"`
+	ModelDetails        *map[string]interface{} `json:"model_details,omitempty"`
+	ModelType           *string                 `json:"model_type,omitempty"`
+	Timestamp           string                  `json:"timestamp"`
+	UpdatedAt           *string                 `json:"updated_at,omitempty"`
+	UpdatedByUserId     *string                 `json:"updated_by_user_id,omitempty"`
+	VoiceType           *string                 `json:"voice_type"`
+	WorkspaceId         *string                 `json:"workspace_id,omitempty"`
 }
+
+// CharacterMCPServerStatusUpdate defines model for CharacterMCPServerStatusUpdate.
+type CharacterMCPServerStatusUpdate struct {
+	Id     openapi_types.UUID                   `json:"id"`
+	Status CharacterMCPServerStatusUpdateStatus `json:"status"`
+}
+
+// CharacterMCPServerStatusUpdateStatus defines model for CharacterMCPServerStatusUpdate.Status.
+type CharacterMCPServerStatusUpdateStatus string
 
 // CharacterResponse defines model for CharacterResponse.
 type CharacterResponse struct {
-	Backstory                *string                   `json:"backstory,omitempty"`
-	BoostedWords             *[]map[string]string      `json:"boosted_words,omitempty"`
-	CharacterActions         *[]string                 `json:"character_actions,omitempty"`
-	CharacterId              string                    `json:"character_id"`
-	CharacterName            *string                   `json:"character_name"`
-	CharacterTraits          map[string]interface{}    `json:"character_traits"`
-	CollectionName           *string                   `json:"collection_name,omitempty"`
-	CustomGuardrailsEnabled  *bool                     `json:"custom_guardrails_enabled,omitempty"`
-	Description              *string                   `json:"description"`
-	DocumentStoreFileLink    *string                   `json:"document_store_file_link,omitempty"`
-	EditCharacterAccess      *bool                     `json:"edit_character_access,omitempty"`
-	GuardRails               *map[string]interface{}   `json:"guard_rails,omitempty"`
-	GuardrailMeta            *map[string]interface{}   `json:"guardrail_meta,omitempty"`
-	GuardrailsText           *string                   `json:"guardrails_text,omitempty"`
-	IsLatest                 *bool                     `json:"is_latest,omitempty"`
-	IsNarrativeDriven        bool                      `json:"is_narrative_driven"`
-	LanguageCode             string                    `json:"language_code"`
-	LanguageCodes            *[]string                 `json:"language_codes,omitempty"`
-	LastInteractedWith       *time.Time                `json:"last_interacted_with,omitempty"`
-	Listing                  *string                   `json:"listing,omitempty"`
-	LlmName                  *string                   `json:"llm_name,omitempty"`
-	MemorySettings           map[string]interface{}    `json:"memory_settings"`
-	MetadataFilter           map[string]interface{}    `json:"metadata_filter"`
-	MetadataVersion          *int                      `json:"metadata_version,omitempty"`
-	ModelDetails             *map[string]interface{}   `json:"model_details,omitempty"`
-	ModelGroupName           *string                   `json:"model_group_name,omitempty"`
-	ModelType                *string                   `json:"model_type"`
-	ModerationEnabled        *bool                     `json:"moderation_enabled,omitempty"`
-	PersonalisedPromptConfig *map[string]interface{}   `json:"personalised_prompt_config,omitempty"`
-	PersonalityEnabled       *bool                     `json:"personality_enabled,omitempty"`
-	PronunciationMetadata    *map[string]interface{}   `json:"pronunciation_metadata,omitempty"`
-	Pronunciations           *[]map[string]interface{} `json:"pronunciations,omitempty"`
-	ResolvedRevisionId       *string                   `json:"resolved_revision_id,omitempty"`
-	ResolvedVersion          *string                   `json:"resolved_version,omitempty"`
-	SpeakingStyle            *map[string]interface{}   `json:"speaking_style,omitempty"`
-	StateOfMindEnabled       *bool                     `json:"state_of_mind_enabled,omitempty"`
-	Temperature              *float32                  `json:"temperature,omitempty"`
-	Timestamp                time.Time                 `json:"timestamp"`
-	UserId                   string                    `json:"user_id"`
-	VoiceType                *string                   `json:"voice_type"`
+	// ActionsContract Multiline instructions stored in personalised_prompt_config.ACTIONS_CONTRACT.
+	ActionsContract *string `json:"actions_contract,omitempty"`
+
+	// ActionsEnabled Whether Core enables the character's backend Actions prompt. Missing configuration inherits enabled when legacy character actions exist.
+	ActionsEnabled *bool `json:"actions_enabled,omitempty"`
+
+	// ActionsEnablementSource Whether Actions enablement is explicitly persisted, inherited from legacy Embodied Actions definitions, or defaulted off.
+	ActionsEnablementSource   *CharacterResponseActionsEnablementSource `json:"actions_enablement_source,omitempty"`
+	Backstory                 *string                                   `json:"backstory,omitempty"`
+	BoostedWords              *[]map[string]string                      `json:"boosted_words,omitempty"`
+	CharacterActions          *[]string                                 `json:"character_actions,omitempty"`
+	CharacterId               string                                    `json:"character_id"`
+	CharacterName             *string                                   `json:"character_name"`
+	CharacterTraits           map[string]interface{}                    `json:"character_traits"`
+	CollectionName            *string                                   `json:"collection_name,omitempty"`
+	CreatedByUserId           *string                                   `json:"created_by_user_id,omitempty"`
+	CustomGuardrailsEnabled   *bool                                     `json:"custom_guardrails_enabled,omitempty"`
+	Description               *string                                   `json:"description"`
+	DocumentStoreFileLink     *string                                   `json:"document_store_file_link,omitempty"`
+	EditCharacterAccess       *bool                                     `json:"edit_character_access,omitempty"`
+	Embodiment                *string                                   `json:"embodiment,omitempty"`
+	EmbodimentData            *map[string]interface{}                   `json:"embodiment_data,omitempty"`
+	GuardRails                *map[string]interface{}                   `json:"guard_rails,omitempty"`
+	GuardrailMeta             *map[string]interface{}                   `json:"guardrail_meta,omitempty"`
+	GuardrailsText            *string                                   `json:"guardrails_text,omitempty"`
+	HasLanguageHardeningText  *bool                                     `json:"has_language_hardening_text,omitempty"`
+	IsLatest                  *bool                                     `json:"is_latest,omitempty"`
+	IsNarrativeDriven         bool                                      `json:"is_narrative_driven"`
+	LanguageCode              string                                    `json:"language_code"`
+	LanguageCodes             *[]string                                 `json:"language_codes,omitempty"`
+	LanguageHardeningMode     *string                                   `json:"language_hardening_mode,omitempty"`
+	LanguageHardeningText     *string                                   `json:"language_hardening_text,omitempty"`
+	LastInteractedWith        *string                                   `json:"last_interacted_with,omitempty"`
+	Listing                   *string                                   `json:"listing,omitempty"`
+	LlmName                   *string                                   `json:"llm_name,omitempty"`
+	MemorySettings            map[string]interface{}                    `json:"memory_settings"`
+	MetadataFilter            map[string]interface{}                    `json:"metadata_filter"`
+	MetadataVersion           *int                                      `json:"metadata_version,omitempty"`
+	ModelDetails              *map[string]interface{}                   `json:"model_details,omitempty"`
+	ModelGroupName            *string                                   `json:"model_group_name,omitempty"`
+	ModelType                 *string                                   `json:"model_type"`
+	ModerationEnabled         *bool                                     `json:"moderation_enabled,omitempty"`
+	NarrativeFullGraphContext *bool                                     `json:"narrative_full_graph_context,omitempty"`
+	PersonalisedPromptConfig  *map[string]interface{}                   `json:"personalised_prompt_config,omitempty"`
+	PersonalityEnabled        *bool                                     `json:"personality_enabled,omitempty"`
+	PronunciationMetadata     *map[string]interface{}                   `json:"pronunciation_metadata,omitempty"`
+	Pronunciations            *[]map[string]interface{}                 `json:"pronunciations,omitempty"`
+	ResolvedRevisionId        *string                                   `json:"resolved_revision_id,omitempty"`
+	ResolvedVersion           *string                                   `json:"resolved_version,omitempty"`
+
+	// ShowFullUnfilteredLlmOutput Persisted authoring preference only; clients must explicitly negotiate raw bot-llm-text delivery when connecting.
+	ShowFullUnfilteredLlmOutput *bool                   `json:"show_full_unfiltered_llm_output,omitempty"`
+	SpeakingStyle               *map[string]interface{} `json:"speaking_style,omitempty"`
+
+	// StartNarrativeSectionId Narrative section where a new conversation starts. Set it with POST /character/narrative/update-start-section-id; null means no start section.
+	StartNarrativeSectionId *string  `json:"start_narrative_section_id,omitempty"`
+	StateOfMindEnabled      *bool    `json:"state_of_mind_enabled,omitempty"`
+	Temperature             *float32 `json:"temperature,omitempty"`
+	Timestamp               string   `json:"timestamp"`
+	UpdatedByUserId         *string  `json:"updated_by_user_id,omitempty"`
+	UseLocalRag             *bool    `json:"use_local_rag,omitempty"`
+	UserId                  string   `json:"user_id"`
+	VoiceType               *string  `json:"voice_type"`
+	WorkspaceId             *string  `json:"workspace_id,omitempty"`
+}
+
+// CharacterResponseActionsEnablementSource Whether Actions enablement is explicitly persisted, inherited from legacy Embodied Actions definitions, or defaulted off.
+type CharacterResponseActionsEnablementSource string
+
+// CharacterUpdate defines model for CharacterUpdate.
+type CharacterUpdate struct {
+	ActionClasses *[]string `json:"actionClasses,omitempty"`
+	Actions       *[]string `json:"actions,omitempty"`
+
+	// ActionsContractWire616374696f6e73436f6e7472616374 Multiline instructions defining the character's structured action and display output contract. Empty string clears the stored contract.
+	ActionsContractWire616374696f6e73436f6e7472616374 *string `json:"actionsContract,omitempty"`
+
+	// ActionsEnabledWire616374696f6e73456e61626c6564 Controls whether Core enables the character's backend Actions prompt. Omit the field to preserve the stored setting.
+	ActionsEnabledWire616374696f6e73456e61626c6564 *bool `json:"actionsEnabled,omitempty"`
+
+	// ActionsContractWire616374696f6e735f636f6e7472616374 Multiline instructions defining the character's structured action and display output contract. Empty string clears the stored contract.
+	ActionsContractWire616374696f6e735f636f6e7472616374 *string `json:"actions_contract,omitempty"`
+
+	// ActionsEnabledWire616374696f6e735f656e61626c6564 Controls whether Core enables the character's backend Actions prompt. Omit the field to preserve the stored setting.
+	ActionsEnabledWire616374696f6e735f656e61626c6564                                 *bool                            `json:"actions_enabled,omitempty"`
+	AllowedModerationFiltersWire616c6c6f7765644d6f6465726174696f6e46696c74657273     *[]string                        `json:"allowedModerationFilters,omitempty"`
+	AllowedModerationFiltersWire616c6c6f7765645f6d6f6465726174696f6e5f66696c74657273 *[]string                        `json:"allowed_moderation_filters,omitempty"`
+	Backstory                                                                        *string                          `json:"backstory,omitempty"`
+	BlockedWordsWire626c6f636b6564576f726473                                         *[]string                        `json:"blockedWords,omitempty"`
+	BlockedWordsWire626c6f636b65645f776f726473                                       *[]string                        `json:"blocked_words,omitempty"`
+	BoostedWords                                                                     *[]BoostedWordInput              `json:"boosted_words,omitempty"`
+	CharID                                                                           *openapi_types.UUID              `json:"charID,omitempty"`
+	CharName                                                                         *string                          `json:"charName,omitempty"`
+	CharacterIdWire6368617261637465724964                                            *openapi_types.UUID              `json:"characterId,omitempty"`
+	CharacterTraitsWire636861726163746572547261697473                                *map[string]interface{}          `json:"characterTraits,omitempty"`
+	CharacterActions                                                                 *[]string                        `json:"character_actions,omitempty"`
+	CharacterIdWire6368617261637465725f6964                                          *openapi_types.UUID              `json:"character_id,omitempty"`
+	CharacterName                                                                    *string                          `json:"character_name,omitempty"`
+	CharacterTraitsWire6368617261637465725f747261697473                              *map[string]interface{}          `json:"character_traits,omitempty"`
+	CollectionNameWire636f6c6c656374696f6e4e616d65                                   *string                          `json:"collectionName,omitempty"`
+	CollectionNameWire636f6c6c656374696f6e5f6e616d65                                 *string                          `json:"collection_name,omitempty"`
+	CuriosityLevelWire637572696f736974794c6576656c                                   *int                             `json:"curiosityLevel,omitempty"`
+	CuriosityLevelWire637572696f736974795f6c6576656c                                 *int                             `json:"curiosity_level,omitempty"`
+	CustomGuardrailsEnabledWire637573746f6d47756172647261696c73456e61626c6564        *bool                            `json:"customGuardrailsEnabled,omitempty"`
+	CustomGuardrailsEnabledWire637573746f6d5f67756172647261696c735f656e61626c6564    *bool                            `json:"custom_guardrails_enabled,omitempty"`
+	Description                                                                      *string                          `json:"description,omitempty"`
+	Docs                                                                             *[]CharacterDocumentStatusUpdate `json:"docs,omitempty"`
+	DocumentStoreFileLinkWire646f63756d656e7453746f726546696c654c696e6b              *string                          `json:"documentStoreFileLink,omitempty"`
+	DocumentStoreFileLinkWire646f63756d656e745f73746f72655f66696c655f6c696e6b        *string                          `json:"document_store_file_link,omitempty"`
+	DynamicInfoTokenLimitWire64796e616d6963496e666f546f6b656e4c696d6974              *int                             `json:"dynamicInfoTokenLimit,omitempty"`
+	DynamicInfoTokenLimitWire64796e616d69635f696e666f5f746f6b656e5f6c696d6974        *int                             `json:"dynamic_info_token_limit,omitempty"`
+	EmbodimentClothesDescription                                                     *string                          `json:"embodiment_clothes_description,omitempty"`
+	EmbodimentLooksDescription                                                       *string                          `json:"embodiment_looks_description,omitempty"`
+
+	// ExpectedExperienceIdWire6578706563746564457870657269656e63654964 Optional compare-and-set precondition for experience_id. Explicit null requires the character to still be unlinked.
+	ExpectedExperienceIdWire6578706563746564457870657269656e63654964 *openapi_types.UUID `json:"expectedExperienceId,omitempty"`
+
+	// ExpectedExperienceIdWire65787065637465645f657870657269656e63655f6964 Optional compare-and-set precondition for experience_id. Explicit null requires the character to still be unlinked.
+	ExpectedExperienceIdWire65787065637465645f657870657269656e63655f6964                  *openapi_types.UUID                                             `json:"expected_experience_id,omitempty"`
+	ExperienceId                                                                          *openapi_types.UUID                                             `json:"experience_id,omitempty"`
+	Functions                                                                             *[]CharacterFunctionStatusUpdate                                `json:"functions,omitempty"`
+	GuardRailsWire67756172645261696c73                                                    *map[string]interface{}                                         `json:"guardRails,omitempty"`
+	GuardRailsWire67756172645f7261696c73                                                  *map[string]interface{}                                         `json:"guard_rails,omitempty"`
+	GuardrailMetaWire67756172647261696c4d657461                                           *map[string]interface{}                                         `json:"guardrailMeta,omitempty"`
+	GuardrailMetaWire67756172647261696c5f6d657461                                         *map[string]interface{}                                         `json:"guardrail_meta,omitempty"`
+	GuardrailsTextWire67756172647261696c7354657874                                        *string                                                         `json:"guardrailsText,omitempty"`
+	GuardrailsTextWire67756172647261696c735f74657874                                      *string                                                         `json:"guardrails_text,omitempty"`
+	IsNarrativeDrivenWire69734e617272617469766544726976656e                               *bool                                                           `json:"isNarrativeDriven,omitempty"`
+	IsNarrativeDrivenWire69735f6e61727261746976655f64726976656e                           *bool                                                           `json:"is_narrative_driven,omitempty"`
+	LanguageCodeWire6c616e6775616765436f6465                                              *string                                                         `json:"languageCode,omitempty"`
+	LanguageCodesWire6c616e6775616765436f646573                                           *[]string                                                       `json:"languageCodes,omitempty"`
+	LanguageHardeningModeWire6c616e677561676548617264656e696e674d6f6465                   *CharacterUpdateLanguageHardeningMode                           `json:"languageHardeningMode,omitempty"`
+	LanguageHardeningTextWire6c616e677561676548617264656e696e6754657874                   *string                                                         `json:"languageHardeningText,omitempty"`
+	LanguageCodeWire6c616e67756167655f636f6465                                            *string                                                         `json:"language_code,omitempty"`
+	LanguageCodesWire6c616e67756167655f636f646573                                         *[]string                                                       `json:"language_codes,omitempty"`
+	LanguageHardeningModeWire6c616e67756167655f68617264656e696e675f6d6f6465               *CharacterUpdateLanguageHardeningMode                           `json:"language_hardening_mode,omitempty"`
+	LanguageHardeningTextWire6c616e67756167655f68617264656e696e675f74657874               *string                                                         `json:"language_hardening_text,omitempty"`
+	LimitResponseLevelWire6c696d6974526573706f6e73654c6576656c                            *int                                                            `json:"limitResponseLevel,omitempty"`
+	LimitResponseLevelWire6c696d69745f726573706f6e73655f6c6576656c                        *int                                                            `json:"limit_response_level,omitempty"`
+	Listing                                                                               *string                                                         `json:"listing,omitempty"`
+	LlmNameWire6c6c6d4e616d65                                                             *string                                                         `json:"llmName,omitempty"`
+	LlmNameWire6c6c6d5f6e616d65                                                           *string                                                         `json:"llm_name,omitempty"`
+	McpServersWire6d637053657276657273                                                    *[]CharacterMCPServerStatusUpdate                               `json:"mcpServers,omitempty"`
+	McpServersWire6d63705f73657276657273                                                  *[]CharacterMCPServerStatusUpdate                               `json:"mcp_servers,omitempty"`
+	MemorySettingsWire6d656d6f727953657474696e6773                                        *map[string]interface{}                                         `json:"memorySettings,omitempty"`
+	MemorySettingsWire6d656d6f72795f73657474696e6773                                      *map[string]interface{}                                         `json:"memory_settings,omitempty"`
+	MetadataFilterWire6d6574616461746146696c746572                                        *map[string]CharacterUpdate_MetadataFilter_AdditionalProperties `json:"metadataFilter,omitempty"`
+	MetadataFilterWire6d657461646174615f66696c746572                                      *map[string]CharacterUpdate_MetadataFilter_AdditionalProperties `json:"metadata_filter,omitempty"`
+	ModelTypeWire6d6f64656c54797065                                                       *string                                                         `json:"modelType,omitempty"`
+	ModelGroupName                                                                        *string                                                         `json:"model_group_name,omitempty"`
+	ModelTypeWire6d6f64656c5f74797065                                                     *string                                                         `json:"model_type,omitempty"`
+	ModerationEnabledWire6d6f6465726174696f6e456e61626c6564                               *bool                                                           `json:"moderationEnabled,omitempty"`
+	ModerationEnabledWire6d6f6465726174696f6e5f656e61626c6564                             *bool                                                           `json:"moderation_enabled,omitempty"`
+	MultimodalKbEnabledWire6d756c74696d6f64616c4b62456e61626c6564                         *bool                                                           `json:"multimodalKbEnabled,omitempty"`
+	MultimodalKbEnabledWire6d756c74696d6f64616c5f6b625f656e61626c6564                     *bool                                                           `json:"multimodal_kb_enabled,omitempty"`
+	NarrativeDriven                                                                       *bool                                                           `json:"narrativeDriven,omitempty"`
+	NarrativeFullGraphContextWire6e617272617469766546756c6c4772617068436f6e74657874       *bool                                                           `json:"narrativeFullGraphContext,omitempty"`
+	NarrativeFullGraphContextWire6e61727261746976655f66756c6c5f67726170685f636f6e74657874 *bool                                                           `json:"narrative_full_graph_context,omitempty"`
+	NsfwModelSize                                                                         *string                                                         `json:"nsfw_model_size,omitempty"`
+	PersonalisedPromptConfigWire706572736f6e616c6973656450726f6d7074436f6e666967          *map[string]interface{}                                         `json:"personalisedPromptConfig,omitempty"`
+	PersonalisedPromptConfigWire706572736f6e616c697365645f70726f6d70745f636f6e666967      *map[string]interface{}                                         `json:"personalised_prompt_config,omitempty"`
+	PersonalityEnabledWire706572736f6e616c697479456e61626c6564                            *bool                                                           `json:"personalityEnabled,omitempty"`
+	PersonalityEnabledWire706572736f6e616c6974795f656e61626c6564                          *bool                                                           `json:"personality_enabled,omitempty"`
+	PronunciationsToAddWire70726f6e756e63696174696f6e73546f416464                         *[]PronunciationInput                                           `json:"pronunciationsToAdd,omitempty"`
+	PronunciationsToDeleteWire70726f6e756e63696174696f6e73546f44656c657465                *[]string                                                       `json:"pronunciationsToDelete,omitempty"`
+	PronunciationsToUpdateWire70726f6e756e63696174696f6e73546f557064617465                *[]PronunciationInput                                           `json:"pronunciationsToUpdate,omitempty"`
+	PronunciationsToAddWire70726f6e756e63696174696f6e735f746f5f616464                     *[]PronunciationInput                                           `json:"pronunciations_to_add,omitempty"`
+	PronunciationsToDeleteWire70726f6e756e63696174696f6e735f746f5f64656c657465            *[]string                                                       `json:"pronunciations_to_delete,omitempty"`
+	PronunciationsToUpdateWire70726f6e756e63696174696f6e735f746f5f757064617465            *[]PronunciationInput                                           `json:"pronunciations_to_update,omitempty"`
+
+	// ShowFullUnfilteredLlmOutputWire73686f7746756c6c556e66696c74657265644c6c6d4f7574707574 Persisted authoring preference for requesting raw bot-llm-text output. False preserves the legacy chat behavior.
+	ShowFullUnfilteredLlmOutputWire73686f7746756c6c556e66696c74657265644c6c6d4f7574707574 *bool `json:"showFullUnfilteredLlmOutput,omitempty"`
+
+	// ShowFullUnfilteredLlmOutputWire73686f775f66756c6c5f756e66696c74657265645f6c6c6d5f6f7574707574 Persisted authoring preference for requesting raw bot-llm-text output. False preserves the legacy chat behavior.
+	ShowFullUnfilteredLlmOutputWire73686f775f66756c6c5f756e66696c74657265645f6c6c6d5f6f7574707574 *bool    `json:"show_full_unfiltered_llm_output,omitempty"`
+	SpeakingStyleDescription                                                                      *string  `json:"speaking_style_description,omitempty"`
+	SpeakingStyleSampleDialogues                                                                  *string  `json:"speaking_style_sample_dialogues,omitempty"`
+	StateOfMindEnabledWire73746174654f664d696e64456e61626c6564                                    *bool    `json:"stateOfMindEnabled,omitempty"`
+	StateOfMindEnabledWire73746174655f6f665f6d696e645f656e61626c6564                              *bool    `json:"state_of_mind_enabled,omitempty"`
+	Temperature                                                                                   *float32 `json:"temperature,omitempty"`
+	UncensoredAccessConsentWire756e63656e736f726564416363657373436f6e73656e74                     *bool    `json:"uncensoredAccessConsent,omitempty"`
+	UncensoredAccessConsentWire756e63656e736f7265645f6163636573735f636f6e73656e74                 *bool    `json:"uncensored_access_consent,omitempty"`
+	UseLocalRagWire7573654c6f63616c526167                                                         *bool    `json:"useLocalRag,omitempty"`
+	UseLocalRagWire7573655f6c6f63616c5f726167                                                     *bool    `json:"use_local_rag,omitempty"`
+	Verbosity                                                                                     *int     `json:"verbosity,omitempty"`
+	Visibility                                                                                    *string  `json:"visibility,omitempty"`
+	VoiceTypeWire766f69636554797065                                                               *string  `json:"voiceType,omitempty"`
+	VoiceTypeWire766f6963655f74797065                                                             *string  `json:"voice_type,omitempty"`
+	WorkspaceId                                                                                   *string  `json:"workspace_id,omitempty"`
+}
+
+// CharacterUpdateLanguageHardeningMode defines model for CharacterUpdate.LanguageHardeningMode.
+type CharacterUpdateLanguageHardeningMode string
+
+// CharacterUpdateMetadataFilter0 defines model for CharacterUpdate.MetadataFilter.0.
+type CharacterUpdateMetadataFilter0 = string
+
+// CharacterUpdateMetadataFilter1 defines model for CharacterUpdate.MetadataFilter.1.
+type CharacterUpdateMetadataFilter1 = int
+
+// CharacterUpdate_MetadataFilter_AdditionalProperties defines model for CharacterUpdate.metadataFilter.AdditionalProperties.
+type CharacterUpdate_MetadataFilter_AdditionalProperties struct {
+	union json.RawMessage
+}
+
+// CharacterVersionCreate defines model for CharacterVersionCreate.
+type CharacterVersionCreate struct {
+	MakeLatest *bool  `json:"make_latest,omitempty"`
+	Version    string `json:"version"`
+}
+
+// CharacterVersionDeprecate defines model for CharacterVersionDeprecate.
+type CharacterVersionDeprecate struct {
+	Deprecated *bool  `json:"deprecated,omitempty"`
+	Version    string `json:"version"`
+}
+
+// CharacterVersionDiffChange defines model for CharacterVersionDiffChange.
+type CharacterVersionDiffChange struct {
+	After      interface{}                          `json:"after,omitempty"`
+	Before     interface{}                          `json:"before,omitempty"`
+	ChangeType CharacterVersionDiffChangeChangeType `json:"change_type"`
+	Path       string                               `json:"path"`
+}
+
+// CharacterVersionDiffChangeChangeType defines model for CharacterVersionDiffChange.ChangeType.
+type CharacterVersionDiffChangeChangeType string
+
+// CharacterVersionDiffReference defines model for CharacterVersionDiffReference.
+type CharacterVersionDiffReference struct {
+	IsLatest   bool    `json:"is_latest"`
+	RevisionId *string `json:"revision_id"`
+	Selector   string  `json:"selector"`
+	Version    *string `json:"version"`
+}
+
+// CharacterVersionDiffResponse defines model for CharacterVersionDiffResponse.
+type CharacterVersionDiffResponse struct {
+	ChangeCount int                           `json:"change_count"`
+	Changes     []CharacterVersionDiffChange  `json:"changes"`
+	CharacterId string                        `json:"character_id"`
+	From        CharacterVersionDiffReference `json:"from"`
+	To          CharacterVersionDiffReference `json:"to"`
+}
+
+// CharacterVersionFork defines model for CharacterVersionFork.
+type CharacterVersionFork struct {
+	ExpectedDraftRevisionId *string `json:"expected_draft_revision_id,omitempty"`
+	Version                 string  `json:"version"`
+}
+
+// CharacterVersionForkResponse defines model for CharacterVersionForkResponse.
+type CharacterVersionForkResponse struct {
+	CharacterId           string  `json:"character_id"`
+	DraftRevisionId       string  `json:"draft_revision_id"`
+	HasUnpublishedChanges bool    `json:"has_unpublished_changes"`
+	LatestRevisionId      *string `json:"latest_revision_id"`
+	SourceVersion         string  `json:"source_version"`
+}
+
+// CharacterVersionItem defines model for CharacterVersionItem.
+type CharacterVersionItem struct {
+	CreatedAt    string  `json:"created_at"`
+	CreatedBy    string  `json:"created_by"`
+	DeprecatedAt *string `json:"deprecated_at"`
+	IsDeprecated bool    `json:"is_deprecated"`
+	IsLatest     bool    `json:"is_latest"`
+	RevisionId   string  `json:"revision_id"`
+	Version      string  `json:"version"`
+}
+
+// CharacterVersionListResponse defines model for CharacterVersionListResponse.
+type CharacterVersionListResponse struct {
+	DraftParentRevisionId *string                `json:"draft_parent_revision_id"`
+	DraftParentVersion    *string                `json:"draft_parent_version"`
+	DraftRevisionId       *string                `json:"draft_revision_id"`
+	HasUnpublishedChanges bool                   `json:"has_unpublished_changes"`
+	Items                 []CharacterVersionItem `json:"items"`
+	LatestIsPromoted      bool                   `json:"latest_is_promoted"`
+	LatestRevisionId      *string                `json:"latest_revision_id"`
+	LatestVersion         *string                `json:"latest_version"`
+}
+
+// CharacterVersionPromote defines model for CharacterVersionPromote.
+type CharacterVersionPromote struct {
+	Version string `json:"version"`
+}
+
+// CharacterVersionRevertChange defines model for CharacterVersionRevertChange.
+type CharacterVersionRevertChange struct {
+	ChangeId                string `json:"change_id"`
+	ExpectedDraftRevisionId string `json:"expected_draft_revision_id"`
+	From                    string `json:"from"`
+}
+
+// CharacterVersionRevertChangeResponse defines model for CharacterVersionRevertChangeResponse.
+type CharacterVersionRevertChangeResponse struct {
+	CharacterId             string                               `json:"character_id"`
+	Diff                    CharacterVersionSemanticDiffResponse `json:"diff"`
+	DraftRevisionId         string                               `json:"draft_revision_id"`
+	PreviousDraftRevisionId string                               `json:"previous_draft_revision_id"`
+	RevertedChangeId        string                               `json:"reverted_change_id"`
+}
+
+// CharacterVersionSemanticDiffChange defines model for CharacterVersionSemanticDiffChange.
+type CharacterVersionSemanticDiffChange struct {
+	After                interface{}                                  `json:"after,omitempty"`
+	Before               interface{}                                  `json:"before,omitempty"`
+	CanRevert            bool                                         `json:"can_revert"`
+	Category             string                                       `json:"category"`
+	ChangeId             string                                       `json:"change_id"`
+	ChangeType           CharacterVersionSemanticDiffChangeChangeType `json:"change_type"`
+	IntegrityWarning     *string                                      `json:"integrity_warning,omitempty"`
+	Label                string                                       `json:"label"`
+	RevertDisabledReason *string                                      `json:"revert_disabled_reason,omitempty"`
+	SemanticKey          string                                       `json:"semantic_key"`
+	SourcePaths          []string                                     `json:"source_paths"`
+}
+
+// CharacterVersionSemanticDiffChangeChangeType defines model for CharacterVersionSemanticDiffChange.ChangeType.
+type CharacterVersionSemanticDiffChangeChangeType string
+
+// CharacterVersionSemanticDiffResponse defines model for CharacterVersionSemanticDiffResponse.
+type CharacterVersionSemanticDiffResponse struct {
+	ChangeCount           int                                       `json:"change_count"`
+	Changes               []CharacterVersionSemanticDiffChange      `json:"changes"`
+	CharacterId           string                                    `json:"character_id"`
+	DraftRevisionId       *string                                   `json:"draft_revision_id"`
+	From                  CharacterVersionDiffReference             `json:"from"`
+	SemanticSchemaVersion int                                       `json:"semantic_schema_version"`
+	To                    CharacterVersionDiffReference             `json:"to"`
+	View                  *CharacterVersionSemanticDiffResponseView `json:"view,omitempty"`
+}
+
+// CharacterVersionSemanticDiffResponseView defines model for CharacterVersionSemanticDiffResponse.View.
+type CharacterVersionSemanticDiffResponseView string
+
+// DecisionCreate defines model for DecisionCreate.
+type DecisionCreate struct {
+	CharacterId   string `json:"character_id"`
+	Criteria      string `json:"criteria"`
+	FromSectionId string `json:"from_section_id"`
+	Priority      *int   `json:"priority,omitempty"`
+	ToSectionId   string `json:"to_section_id"`
+}
+
+// DecisionDelete defines model for DecisionDelete.
+type DecisionDelete struct {
+	CharacterId   string  `json:"character_id"`
+	Criteria      *string `json:"criteria,omitempty"`
+	FromSectionId string  `json:"from_section_id"`
+	ToSectionId   string  `json:"to_section_id"`
+}
+
+// DecisionMutationResponse defines model for DecisionMutationResponse.
+type DecisionMutationResponse struct {
+	Decision      *map[string]interface{}        `json:"decision,omitempty"`
+	FromSectionId *string                        `json:"from_section_id,omitempty"`
+	SectionId     *string                        `json:"section_id,omitempty"`
+	Status        DecisionMutationResponseStatus `json:"status"`
+	ToSectionId   *string                        `json:"to_section_id,omitempty"`
+	UpdatedData   *map[string]interface{}        `json:"updated_data,omitempty"`
+}
+
+// DecisionMutationResponseStatus defines model for DecisionMutationResponse.Status.
+type DecisionMutationResponseStatus string
+
+// DecisionUpdate defines model for DecisionUpdate.
+type DecisionUpdate struct {
+	CharacterId   string                  `json:"character_id"`
+	Criteria      string                  `json:"criteria"`
+	FromSectionId string                  `json:"from_section_id"`
+	ToSectionId   string                  `json:"to_section_id"`
+	UpdatedData   *map[string]interface{} `json:"updated_data,omitempty"`
+}
+
+// FunctionCreate Body of POST /functions/create. Mirrors middleman required fields.
+type FunctionCreate struct {
+	Description      string `json:"description"`
+	InputDescription string `json:"input_description"`
+	Language         string `json:"language"`
+	Name             string `json:"name"`
+	SourceCode       string `json:"source_code"`
+}
+
+// FunctionCreateResponse defines model for FunctionCreateResponse.
+type FunctionCreateResponse struct {
+	Function      FunctionResponse `json:"function"`
+	TransactionID string           `json:"transactionID"`
+}
+
+// FunctionDetailResponse defines model for FunctionDetailResponse.
+type FunctionDetailResponse struct {
+	Function      FunctionResponse `json:"function"`
+	TransactionID string           `json:"transactionID"`
+}
+
+// FunctionExecutionResult defines model for FunctionExecutionResult.
+type FunctionExecutionResult struct {
+	LatencyCpuMs  *float32    `json:"latency_cpu_ms,omitempty"`
+	LatencyMs     *float32    `json:"latency_ms,omitempty"`
+	Message       *string     `json:"message,omitempty"`
+	Result        interface{} `json:"result,omitempty"`
+	Status        *string     `json:"status,omitempty"`
+	TransactionID string      `json:"transactionID"`
+}
+
+// FunctionIdRequest defines model for FunctionIdRequest.
+type FunctionIdRequest struct {
+	FunctionId string `json:"function_id"`
+}
+
+// FunctionListItem defines model for FunctionListItem.
+type FunctionListItem struct {
+	CreatedAt   string  `json:"created_at"`
+	Description string  `json:"description"`
+	FunctionId  string  `json:"function_id"`
+	Language    string  `json:"language"`
+	Name        string  `json:"name"`
+	Status      *string `json:"status,omitempty"`
+}
+
+// FunctionListRequest defines model for FunctionListRequest.
+type FunctionListRequest struct {
+	CharacterId *string `json:"character_id,omitempty"`
+	Page        *int    `json:"page,omitempty"`
+	PerPage     *int    `json:"per_page,omitempty"`
+}
+
+// FunctionListResponse defines model for FunctionListResponse.
+type FunctionListResponse struct {
+	Functions     []FunctionListItem `json:"functions"`
+	Page          *int               `json:"page,omitempty"`
+	PerPage       *int               `json:"per_page,omitempty"`
+	Total         *int               `json:"total,omitempty"`
+	TotalPages    *int               `json:"total_pages,omitempty"`
+	TransactionID string             `json:"transactionID"`
+}
+
+// FunctionResponse defines model for FunctionResponse.
+type FunctionResponse struct {
+	Base64SourceCode string `json:"base64_source_code"`
+	CreatedAt        string `json:"created_at"`
+	Description      string `json:"description"`
+	FunctionId       string `json:"function_id"`
+	InputDescription string `json:"input_description"`
+	Language         string `json:"language"`
+	Name             string `json:"name"`
+	SourceCode       string `json:"source_code"`
+	UserId           string `json:"user_id"`
+}
+
+// FunctionStatusResponse defines model for FunctionStatusResponse.
+type FunctionStatusResponse struct {
+	Status        *string `json:"status,omitempty"`
+	TransactionID string  `json:"transactionID"`
+}
+
+// FunctionTestRequest Body of POST /functions/test. `mode='manual'` requires `source_code`;
+// otherwise `function_id` is required.
+type FunctionTestRequest struct {
+	FunctionId *string                `json:"function_id,omitempty"`
+	Inputs     map[string]interface{} `json:"inputs"`
+	Mode       *string                `json:"mode,omitempty"`
+	SourceCode *string                `json:"source_code,omitempty"`
+}
+
+// FunctionUpdate Partial update — at least one field required (validated at service layer).
+type FunctionUpdate struct {
+	Description      *string `json:"description,omitempty"`
+	FunctionId       string  `json:"function_id"`
+	InputDescription *string `json:"input_description,omitempty"`
+	Name             *string `json:"name,omitempty"`
+	SourceCode       *string `json:"source_code,omitempty"`
 }
 
 // HTTPValidationError defines model for HTTPValidationError.
 type HTTPValidationError struct {
 	Detail *[]ValidationError `json:"detail,omitempty"`
+}
+
+// LanguageItem defines model for LanguageItem.
+type LanguageItem struct {
+	LangCode string  `json:"lang_code"`
+	LangName *string `json:"lang_name,omitempty"`
+}
+
+// Message defines model for Message.
+type Message struct {
+	Message string `json:"message"`
 }
 
 // PageCharacterListItem defines model for Page_CharacterListItem_.
@@ -123,6 +961,159 @@ type PageCharacterListItem struct {
 	Limit  *int                 `json:"limit,omitempty"`
 	Offset *int                 `json:"offset,omitempty"`
 	Total  *int                 `json:"total,omitempty"`
+}
+
+// PronunciationInput defines model for PronunciationInput.
+type PronunciationInput struct {
+	CustomPronunciation string `json:"customPronunciation"`
+	Word                string `json:"word"`
+}
+
+// SectionCreate defines model for SectionCreate.
+type SectionCreate struct {
+	BehaviorTreeCode *string                 `json:"behavior_tree_code,omitempty"`
+	BtConstants      *map[string]interface{} `json:"bt_constants,omitempty"`
+
+	// Decisions Outgoing links; these determine the section's graph edges.
+	Decisions    *[]map[string]interface{} `json:"decisions,omitempty"`
+	NodePosition *[]float32                `json:"node_position,omitempty"`
+	Objective    *string                   `json:"objective,omitempty"`
+
+	// Parents Incoming links are reconciled from other sections' decisions.
+	Parents              *[]SectionCreate_Parents_Item `json:"parents,omitempty"`
+	SectionName          string                        `json:"section_name"`
+	UpdatedCharacterData *map[string]interface{}       `json:"updated_character_data,omitempty"`
+}
+
+// SectionCreateParents0 defines model for SectionCreate.Parents.0.
+type SectionCreateParents0 = string
+
+// SectionCreateParents1 defines model for SectionCreate.Parents.1.
+type SectionCreateParents1 string
+
+// SectionCreate_Parents_Item defines model for SectionCreate.parents.Item.
+type SectionCreate_Parents_Item struct {
+	union json.RawMessage
+}
+
+// SectionResponse defines model for SectionResponse.
+type SectionResponse struct {
+	BehaviorTreeCode     *string                   `json:"behavior_tree_code"`
+	BtConstants          *map[string]interface{}   `json:"bt_constants"`
+	CharacterId          string                    `json:"character_id"`
+	Decisions            *[]map[string]interface{} `json:"decisions"`
+	NodePosition         *[]float32                `json:"node_position"`
+	Objective            *string                   `json:"objective"`
+	Parents              *[]string                 `json:"parents"`
+	SectionId            string                    `json:"section_id"`
+	SectionName          *string                   `json:"section_name"`
+	Triggers             *[]map[string]interface{} `json:"triggers"`
+	UpdatedCharacterData *map[string]interface{}   `json:"updated_character_data,omitempty"`
+}
+
+// SectionUpdate defines model for SectionUpdate.
+type SectionUpdate struct {
+	BehaviorTreeCode *string                 `json:"behavior_tree_code,omitempty"`
+	BtConstants      *map[string]interface{} `json:"bt_constants,omitempty"`
+
+	// Decisions Outgoing links; these determine the section's graph edges.
+	Decisions    *[]map[string]interface{} `json:"decisions,omitempty"`
+	NodePosition *[]float32                `json:"node_position,omitempty"`
+	Objective    *string                   `json:"objective,omitempty"`
+
+	// Parents Incoming links are reconciled from other sections' decisions.
+	Parents              *[]SectionUpdate_Parents_Item `json:"parents,omitempty"`
+	SectionName          *string                       `json:"section_name,omitempty"`
+	Triggers             *[]map[string]interface{}     `json:"triggers,omitempty"`
+	UpdatedCharacterData *map[string]interface{}       `json:"updated_character_data,omitempty"`
+}
+
+// SectionUpdateParents0 defines model for SectionUpdate.Parents.0.
+type SectionUpdateParents0 = string
+
+// SectionUpdateParents1 defines model for SectionUpdate.Parents.1.
+type SectionUpdateParents1 string
+
+// SectionUpdate_Parents_Item defines model for SectionUpdate.parents.Item.
+type SectionUpdate_Parents_Item struct {
+	union json.RawMessage
+}
+
+// SupportedModel defines model for SupportedModel.
+type SupportedModel struct {
+	Capabilities     *map[string]interface{} `json:"capabilities,omitempty"`
+	CategoryName     *string                 `json:"category_name,omitempty"`
+	DeprecatedReason *string                 `json:"deprecated_reason,omitempty"`
+	DisplayName      string                  `json:"display_name"`
+	IsActive         *bool                   `json:"is_active,omitempty"`
+	IsDeprecated     *bool                   `json:"is_deprecated,omitempty"`
+	IsUncensored     *bool                   `json:"is_uncensored,omitempty"`
+	Metadata         *map[string]interface{} `json:"metadata,omitempty"`
+	MinCreditCostE8  *int                    `json:"min_credit_cost_e8,omitempty"`
+	ModelGroupName   string                  `json:"model_group_name"`
+}
+
+// SupportedModelsResponse defines model for SupportedModelsResponse.
+type SupportedModelsResponse struct {
+	ReferenceID string           `json:"Reference_ID"`
+	STATUS      string           `json:"STATUS"`
+	Count       int              `json:"count"`
+	Models      []SupportedModel `json:"models"`
+}
+
+// TemplateListRequest Body of POST /functions/templates/list — language filter optional.
+type TemplateListRequest struct {
+	Language *string `json:"language,omitempty"`
+}
+
+// TemplateListResponse defines model for TemplateListResponse.
+type TemplateListResponse struct {
+	Templates     []TemplateResponse `json:"templates"`
+	TransactionID string             `json:"transactionID"`
+}
+
+// TemplateResponse defines model for TemplateResponse.
+type TemplateResponse struct {
+	CreatedAt        string `json:"created_at"`
+	Description      string `json:"description"`
+	FunctionName     string `json:"function_name"`
+	InputDescription string `json:"input_description"`
+	Language         string `json:"language"`
+	SourceCode       string `json:"source_code"`
+	TemplateId       string `json:"template_id"`
+	TemplateName     string `json:"template_name"`
+}
+
+// TriggerCreate defines model for TriggerCreate.
+type TriggerCreate struct {
+	DestinationSection *string    `json:"destination_section,omitempty"`
+	NodePosition       *[]float32 `json:"node_position,omitempty"`
+	TriggerMessage     *string    `json:"trigger_message,omitempty"`
+	TriggerName        string     `json:"trigger_name"`
+}
+
+// TriggerResponse defines model for TriggerResponse.
+type TriggerResponse struct {
+	CharacterId        string     `json:"character_id"`
+	DestinationSection *string    `json:"destination_section"`
+	NodePosition       *[]float32 `json:"node_position"`
+	TriggerId          string     `json:"trigger_id"`
+	TriggerMessage     string     `json:"trigger_message"`
+	TriggerName        *string    `json:"trigger_name"`
+}
+
+// TriggerUpdate defines model for TriggerUpdate.
+type TriggerUpdate struct {
+	DestinationSection *string    `json:"destination_section,omitempty"`
+	NodePosition       *[]float32 `json:"node_position,omitempty"`
+	TriggerMessage     *string    `json:"trigger_message,omitempty"`
+	TriggerName        *string    `json:"trigger_name,omitempty"`
+}
+
+// UpdateStartSectionRequest defines model for UpdateStartSectionRequest.
+type UpdateStartSectionRequest struct {
+	CharacterId             string  `json:"character_id"`
+	StartNarrativeSectionId *string `json:"start_narrative_section_id,omitempty"`
 }
 
 // ValidationError defines model for ValidationError.
@@ -145,19 +1136,578 @@ type ValidationError_Loc_Item struct {
 	union json.RawMessage
 }
 
+// VoiceItem defines model for VoiceItem.
+type VoiceItem struct {
+	Categorization  *string   `json:"categorization,omitempty"`
+	Gender          *string   `json:"gender,omitempty"`
+	LangCodes       *[]string `json:"lang_codes,omitempty"`
+	Provider        string    `json:"provider"`
+	VoiceName       string    `json:"voice_name"`
+	VoiceSampleLink *string   `json:"voice_sample_link,omitempty"`
+	VoiceValue      string    `json:"voice_value"`
+}
+
+// CharacterDeleteParams defines parameters for CharacterDelete.
+type CharacterDeleteParams struct {
+	CharacterId openapi_types.UUID  `form:"character_id" json:"character_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
 // CharacterGetParams defines parameters for CharacterGet.
 type CharacterGetParams struct {
-	CharacterId string `form:"character_id" json:"character_id"`
+	CharacterId string              `form:"character_id" json:"character_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
 }
 
 // CharacterListParams defines parameters for CharacterList.
 type CharacterListParams struct {
-	Limit  *int `form:"limit,omitempty" json:"limit,omitempty"`
-	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+	Limit       *int                `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset      *int                `form:"offset,omitempty" json:"offset,omitempty"`
+
+	// Sort Order of the page: `created` (default, newest first), `last_updated` (most recently edited) or `last_interacted` (most recently used).
+	Sort *CharacterListParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
 }
+
+// CharacterListParamsSort defines parameters for CharacterList.
+type CharacterListParamsSort string
+
+// AddDecisionCharacterNarrativeAddDecisionPostParams defines parameters for AddDecisionCharacterNarrativeAddDecisionPost.
+type AddDecisionCharacterNarrativeAddDecisionPostParams struct {
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// DeleteDecisionCharacterNarrativeDeleteDecisionPostParams defines parameters for DeleteDecisionCharacterNarrativeDeleteDecisionPost.
+type DeleteDecisionCharacterNarrativeDeleteDecisionPostParams struct {
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// EditDecisionCharacterNarrativeEditDecisionPostParams defines parameters for EditDecisionCharacterNarrativeEditDecisionPost.
+type EditDecisionCharacterNarrativeEditDecisionPostParams struct {
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// CreateSectionCharacterNarrativeSectionsCreatePostParams defines parameters for CreateSectionCharacterNarrativeSectionsCreatePost.
+type CreateSectionCharacterNarrativeSectionsCreatePostParams struct {
+	CharacterId string              `form:"character_id" json:"character_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// DeleteSectionCharacterNarrativeSectionsDeletePostParams defines parameters for DeleteSectionCharacterNarrativeSectionsDeletePost.
+type DeleteSectionCharacterNarrativeSectionsDeletePostParams struct {
+	CharacterId string              `form:"character_id" json:"character_id"`
+	SectionId   openapi_types.UUID  `form:"section_id" json:"section_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// GetSectionCharacterNarrativeSectionsGetGetParams defines parameters for GetSectionCharacterNarrativeSectionsGetGet.
+type GetSectionCharacterNarrativeSectionsGetGetParams struct {
+	CharacterId string              `form:"character_id" json:"character_id"`
+	SectionId   string              `form:"section_id" json:"section_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// ListSectionsCharacterNarrativeSectionsListGetParams defines parameters for ListSectionsCharacterNarrativeSectionsListGet.
+type ListSectionsCharacterNarrativeSectionsListGetParams struct {
+	CharacterId string              `form:"character_id" json:"character_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// UpdateSectionCharacterNarrativeSectionsUpdatePostParams defines parameters for UpdateSectionCharacterNarrativeSectionsUpdatePost.
+type UpdateSectionCharacterNarrativeSectionsUpdatePostParams struct {
+	CharacterId string              `form:"character_id" json:"character_id"`
+	SectionId   openapi_types.UUID  `form:"section_id" json:"section_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// CreateTriggerCharacterNarrativeTriggersCreatePostParams defines parameters for CreateTriggerCharacterNarrativeTriggersCreatePost.
+type CreateTriggerCharacterNarrativeTriggersCreatePostParams struct {
+	CharacterId string              `form:"character_id" json:"character_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// DeleteTriggerCharacterNarrativeTriggersDeletePostParams defines parameters for DeleteTriggerCharacterNarrativeTriggersDeletePost.
+type DeleteTriggerCharacterNarrativeTriggersDeletePostParams struct {
+	CharacterId string              `form:"character_id" json:"character_id"`
+	TriggerId   openapi_types.UUID  `form:"trigger_id" json:"trigger_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// GetTriggerCharacterNarrativeTriggersGetGetParams defines parameters for GetTriggerCharacterNarrativeTriggersGetGet.
+type GetTriggerCharacterNarrativeTriggersGetGetParams struct {
+	CharacterId string              `form:"character_id" json:"character_id"`
+	TriggerId   string              `form:"trigger_id" json:"trigger_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// ListTriggersCharacterNarrativeTriggersListGetParams defines parameters for ListTriggersCharacterNarrativeTriggersListGet.
+type ListTriggersCharacterNarrativeTriggersListGetParams struct {
+	CharacterId string              `form:"character_id" json:"character_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// UpdateTriggerCharacterNarrativeTriggersUpdatePostParams defines parameters for UpdateTriggerCharacterNarrativeTriggersUpdatePost.
+type UpdateTriggerCharacterNarrativeTriggersUpdatePostParams struct {
+	CharacterId string              `form:"character_id" json:"character_id"`
+	TriggerId   openapi_types.UUID  `form:"trigger_id" json:"trigger_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams defines parameters for UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost.
+type UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams struct {
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// CharacterListSupportedModelsParams defines parameters for CharacterListSupportedModels.
+type CharacterListSupportedModelsParams struct {
+	CharacterId *string             `form:"character_id,omitempty" json:"character_id,omitempty"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// CharacterUpdateParams defines parameters for CharacterUpdate.
+type CharacterUpdateParams struct {
+	CharacterId *string             `form:"character_id,omitempty" json:"character_id,omitempty"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// CharacterVersionCreateParams defines parameters for CharacterVersionCreate.
+type CharacterVersionCreateParams struct {
+	CharacterId string              `form:"character_id" json:"character_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// CharacterVersionDeprecateParams defines parameters for CharacterVersionDeprecate.
+type CharacterVersionDeprecateParams struct {
+	CharacterId openapi_types.UUID  `form:"character_id" json:"character_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// CharacterVersionDiffParams defines parameters for CharacterVersionDiff.
+type CharacterVersionDiffParams struct {
+	// CharacterId Bare character UUID without a version selector
+	CharacterId openapi_types.UUID `form:"character_id" json:"character_id"`
+
+	// From Source semantic version tag, latest, or draft
+	From string `form:"from" json:"from"`
+
+	// To Target semantic version tag, latest, or draft
+	To string `form:"to" json:"to"`
+
+	// View Raw returns storage-level JSON changes. Semantic collapses compatibility fields, compares collections by stable identity, and marks draft changes that can be reverted.
+	View        *CharacterVersionDiffParamsView `form:"view,omitempty" json:"view,omitempty"`
+	WorkspaceId *openapi_types.UUID             `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// CharacterVersionDiffParamsView defines parameters for CharacterVersionDiff.
+type CharacterVersionDiffParamsView string
+
+// CharacterVersionDiff200JSONResponseBody defines parameters for CharacterVersionDiff.
+type CharacterVersionDiff200JSONResponseBody struct {
+	union json.RawMessage
+}
+
+// CharacterVersionDiscardDraftParams defines parameters for CharacterVersionDiscardDraft.
+type CharacterVersionDiscardDraftParams struct {
+	// CharacterId Bare character UUID without a version selector
+	CharacterId openapi_types.UUID  `form:"character_id" json:"character_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// CharacterVersionForkParams defines parameters for CharacterVersionFork.
+type CharacterVersionForkParams struct {
+	CharacterId openapi_types.UUID  `form:"character_id" json:"character_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// CharacterVersionListParams defines parameters for CharacterVersionList.
+type CharacterVersionListParams struct {
+	CharacterId string              `form:"character_id" json:"character_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// CharacterVersionPromoteParams defines parameters for CharacterVersionPromote.
+type CharacterVersionPromoteParams struct {
+	CharacterId string              `form:"character_id" json:"character_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// CharacterVersionRevertDraftChangeParams defines parameters for CharacterVersionRevertDraftChange.
+type CharacterVersionRevertDraftChangeParams struct {
+	// CharacterId Bare character UUID without a version selector
+	CharacterId openapi_types.UUID  `form:"character_id" json:"character_id"`
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// CreateFunctionFunctionsCreatePostParams defines parameters for CreateFunctionFunctionsCreatePost.
+type CreateFunctionFunctionsCreatePostParams struct {
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// DeleteFunctionFunctionsDeletePostParams defines parameters for DeleteFunctionFunctionsDeletePost.
+type DeleteFunctionFunctionsDeletePostParams struct {
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// GetFunctionFunctionsGetPostParams defines parameters for GetFunctionFunctionsGetPost.
+type GetFunctionFunctionsGetPostParams struct {
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// ListFunctionsFunctionsListPostJSONBody defines parameters for ListFunctionsFunctionsListPost.
+type ListFunctionsFunctionsListPostJSONBody = FunctionListRequest
+
+// ListFunctionsFunctionsListPostParams defines parameters for ListFunctionsFunctionsListPost.
+type ListFunctionsFunctionsListPostParams struct {
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// ListTemplatesFunctionsTemplatesListPostJSONBody defines parameters for ListTemplatesFunctionsTemplatesListPost.
+type ListTemplatesFunctionsTemplatesListPostJSONBody = TemplateListRequest
+
+// ListTemplatesFunctionsTemplatesListPostParams defines parameters for ListTemplatesFunctionsTemplatesListPost.
+type ListTemplatesFunctionsTemplatesListPostParams struct {
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// ListTemplatesFunctionsTemplatesListPostJSONBodyLanguage defines parameters for ListTemplatesFunctionsTemplatesListPost.
+type ListTemplatesFunctionsTemplatesListPostJSONBodyLanguage string
+
+// TestFunctionFunctionsTestPostParams defines parameters for TestFunctionFunctionsTestPost.
+type TestFunctionFunctionsTestPostParams struct {
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// UpdateFunctionFunctionsUpdatePostParams defines parameters for UpdateFunctionFunctionsUpdatePost.
+type UpdateFunctionFunctionsUpdatePostParams struct {
+	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+}
+
+// GetAvailableVoicesTtsGetAvailableVoicesGetParams defines parameters for GetAvailableVoicesTtsGetAvailableVoicesGet.
+type GetAvailableVoicesTtsGetAvailableVoicesGetParams struct {
+	LangCode *string `form:"lang_code,omitempty" json:"lang_code,omitempty"`
+	Gender   *string `form:"gender,omitempty" json:"gender,omitempty"`
+	Provider *string `form:"provider,omitempty" json:"provider,omitempty"`
+}
+
+// CharacterCloneJSONRequestBody defines body for CharacterClone for application/json ContentType.
+type CharacterCloneJSONRequestBody = CharacterCloneRequest
 
 // CharacterCreateJSONRequestBody defines body for CharacterCreate for application/json ContentType.
 type CharacterCreateJSONRequestBody = CharacterCreate
+
+// AddDecisionCharacterNarrativeAddDecisionPostJSONRequestBody defines body for AddDecisionCharacterNarrativeAddDecisionPost for application/json ContentType.
+type AddDecisionCharacterNarrativeAddDecisionPostJSONRequestBody = DecisionCreate
+
+// DeleteDecisionCharacterNarrativeDeleteDecisionPostJSONRequestBody defines body for DeleteDecisionCharacterNarrativeDeleteDecisionPost for application/json ContentType.
+type DeleteDecisionCharacterNarrativeDeleteDecisionPostJSONRequestBody = DecisionDelete
+
+// EditDecisionCharacterNarrativeEditDecisionPostJSONRequestBody defines body for EditDecisionCharacterNarrativeEditDecisionPost for application/json ContentType.
+type EditDecisionCharacterNarrativeEditDecisionPostJSONRequestBody = DecisionUpdate
+
+// CreateSectionCharacterNarrativeSectionsCreatePostJSONRequestBody defines body for CreateSectionCharacterNarrativeSectionsCreatePost for application/json ContentType.
+type CreateSectionCharacterNarrativeSectionsCreatePostJSONRequestBody = SectionCreate
+
+// UpdateSectionCharacterNarrativeSectionsUpdatePostJSONRequestBody defines body for UpdateSectionCharacterNarrativeSectionsUpdatePost for application/json ContentType.
+type UpdateSectionCharacterNarrativeSectionsUpdatePostJSONRequestBody = SectionUpdate
+
+// CreateTriggerCharacterNarrativeTriggersCreatePostJSONRequestBody defines body for CreateTriggerCharacterNarrativeTriggersCreatePost for application/json ContentType.
+type CreateTriggerCharacterNarrativeTriggersCreatePostJSONRequestBody = TriggerCreate
+
+// UpdateTriggerCharacterNarrativeTriggersUpdatePostJSONRequestBody defines body for UpdateTriggerCharacterNarrativeTriggersUpdatePost for application/json ContentType.
+type UpdateTriggerCharacterNarrativeTriggersUpdatePostJSONRequestBody = TriggerUpdate
+
+// UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostJSONRequestBody defines body for UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost for application/json ContentType.
+type UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostJSONRequestBody = UpdateStartSectionRequest
+
+// CharacterUpdateJSONRequestBody defines body for CharacterUpdate for application/json ContentType.
+type CharacterUpdateJSONRequestBody = CharacterUpdate
+
+// CharacterVersionCreateJSONRequestBody defines body for CharacterVersionCreate for application/json ContentType.
+type CharacterVersionCreateJSONRequestBody = CharacterVersionCreate
+
+// CharacterVersionDeprecateJSONRequestBody defines body for CharacterVersionDeprecate for application/json ContentType.
+type CharacterVersionDeprecateJSONRequestBody = CharacterVersionDeprecate
+
+// CharacterVersionDiscardDraftJSONRequestBody defines body for CharacterVersionDiscardDraft for application/json ContentType.
+type CharacterVersionDiscardDraftJSONRequestBody = CharacterDraftDiscard
+
+// CharacterVersionForkJSONRequestBody defines body for CharacterVersionFork for application/json ContentType.
+type CharacterVersionForkJSONRequestBody = CharacterVersionFork
+
+// CharacterVersionPromoteJSONRequestBody defines body for CharacterVersionPromote for application/json ContentType.
+type CharacterVersionPromoteJSONRequestBody = CharacterVersionPromote
+
+// CharacterVersionRevertDraftChangeJSONRequestBody defines body for CharacterVersionRevertDraftChange for application/json ContentType.
+type CharacterVersionRevertDraftChangeJSONRequestBody = CharacterVersionRevertChange
+
+// CreateFunctionFunctionsCreatePostJSONRequestBody defines body for CreateFunctionFunctionsCreatePost for application/json ContentType.
+type CreateFunctionFunctionsCreatePostJSONRequestBody = FunctionCreate
+
+// DeleteFunctionFunctionsDeletePostJSONRequestBody defines body for DeleteFunctionFunctionsDeletePost for application/json ContentType.
+type DeleteFunctionFunctionsDeletePostJSONRequestBody = FunctionIdRequest
+
+// GetFunctionFunctionsGetPostJSONRequestBody defines body for GetFunctionFunctionsGetPost for application/json ContentType.
+type GetFunctionFunctionsGetPostJSONRequestBody = FunctionIdRequest
+
+// ListFunctionsFunctionsListPostJSONRequestBody defines body for ListFunctionsFunctionsListPost for application/json ContentType.
+type ListFunctionsFunctionsListPostJSONRequestBody = ListFunctionsFunctionsListPostJSONBody
+
+// ListTemplatesFunctionsTemplatesListPostJSONRequestBody defines body for ListTemplatesFunctionsTemplatesListPost for application/json ContentType.
+type ListTemplatesFunctionsTemplatesListPostJSONRequestBody = ListTemplatesFunctionsTemplatesListPostJSONBody
+
+// TestFunctionFunctionsTestPostJSONRequestBody defines body for TestFunctionFunctionsTestPost for application/json ContentType.
+type TestFunctionFunctionsTestPostJSONRequestBody = FunctionTestRequest
+
+// UpdateFunctionFunctionsUpdatePostJSONRequestBody defines body for UpdateFunctionFunctionsUpdatePost for application/json ContentType.
+type UpdateFunctionFunctionsUpdatePostJSONRequestBody = FunctionUpdate
+
+// AsCharacterCreateMetadataFilter0 returns the union data inside the CharacterCreate_MetadataFilter_AdditionalProperties as a CharacterCreateMetadataFilter0
+func (t CharacterCreate_MetadataFilter_AdditionalProperties) AsCharacterCreateMetadataFilter0() (CharacterCreateMetadataFilter0, error) {
+	var body CharacterCreateMetadataFilter0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCharacterCreateMetadataFilter0 overwrites any union data inside the CharacterCreate_MetadataFilter_AdditionalProperties as the provided CharacterCreateMetadataFilter0
+func (t *CharacterCreate_MetadataFilter_AdditionalProperties) FromCharacterCreateMetadataFilter0(v CharacterCreateMetadataFilter0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCharacterCreateMetadataFilter0 performs a merge with any union data inside the CharacterCreate_MetadataFilter_AdditionalProperties, using the provided CharacterCreateMetadataFilter0
+func (t *CharacterCreate_MetadataFilter_AdditionalProperties) MergeCharacterCreateMetadataFilter0(v CharacterCreateMetadataFilter0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsCharacterCreateMetadataFilter1 returns the union data inside the CharacterCreate_MetadataFilter_AdditionalProperties as a CharacterCreateMetadataFilter1
+func (t CharacterCreate_MetadataFilter_AdditionalProperties) AsCharacterCreateMetadataFilter1() (CharacterCreateMetadataFilter1, error) {
+	var body CharacterCreateMetadataFilter1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCharacterCreateMetadataFilter1 overwrites any union data inside the CharacterCreate_MetadataFilter_AdditionalProperties as the provided CharacterCreateMetadataFilter1
+func (t *CharacterCreate_MetadataFilter_AdditionalProperties) FromCharacterCreateMetadataFilter1(v CharacterCreateMetadataFilter1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCharacterCreateMetadataFilter1 performs a merge with any union data inside the CharacterCreate_MetadataFilter_AdditionalProperties, using the provided CharacterCreateMetadataFilter1
+func (t *CharacterCreate_MetadataFilter_AdditionalProperties) MergeCharacterCreateMetadataFilter1(v CharacterCreateMetadataFilter1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t CharacterCreate_MetadataFilter_AdditionalProperties) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *CharacterCreate_MetadataFilter_AdditionalProperties) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsCharacterUpdateMetadataFilter0 returns the union data inside the CharacterUpdate_MetadataFilter_AdditionalProperties as a CharacterUpdateMetadataFilter0
+func (t CharacterUpdate_MetadataFilter_AdditionalProperties) AsCharacterUpdateMetadataFilter0() (CharacterUpdateMetadataFilter0, error) {
+	var body CharacterUpdateMetadataFilter0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCharacterUpdateMetadataFilter0 overwrites any union data inside the CharacterUpdate_MetadataFilter_AdditionalProperties as the provided CharacterUpdateMetadataFilter0
+func (t *CharacterUpdate_MetadataFilter_AdditionalProperties) FromCharacterUpdateMetadataFilter0(v CharacterUpdateMetadataFilter0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCharacterUpdateMetadataFilter0 performs a merge with any union data inside the CharacterUpdate_MetadataFilter_AdditionalProperties, using the provided CharacterUpdateMetadataFilter0
+func (t *CharacterUpdate_MetadataFilter_AdditionalProperties) MergeCharacterUpdateMetadataFilter0(v CharacterUpdateMetadataFilter0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsCharacterUpdateMetadataFilter1 returns the union data inside the CharacterUpdate_MetadataFilter_AdditionalProperties as a CharacterUpdateMetadataFilter1
+func (t CharacterUpdate_MetadataFilter_AdditionalProperties) AsCharacterUpdateMetadataFilter1() (CharacterUpdateMetadataFilter1, error) {
+	var body CharacterUpdateMetadataFilter1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCharacterUpdateMetadataFilter1 overwrites any union data inside the CharacterUpdate_MetadataFilter_AdditionalProperties as the provided CharacterUpdateMetadataFilter1
+func (t *CharacterUpdate_MetadataFilter_AdditionalProperties) FromCharacterUpdateMetadataFilter1(v CharacterUpdateMetadataFilter1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCharacterUpdateMetadataFilter1 performs a merge with any union data inside the CharacterUpdate_MetadataFilter_AdditionalProperties, using the provided CharacterUpdateMetadataFilter1
+func (t *CharacterUpdate_MetadataFilter_AdditionalProperties) MergeCharacterUpdateMetadataFilter1(v CharacterUpdateMetadataFilter1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t CharacterUpdate_MetadataFilter_AdditionalProperties) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *CharacterUpdate_MetadataFilter_AdditionalProperties) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsSectionCreateParents0 returns the union data inside the SectionCreate_Parents_Item as a SectionCreateParents0
+func (t SectionCreate_Parents_Item) AsSectionCreateParents0() (SectionCreateParents0, error) {
+	var body SectionCreateParents0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSectionCreateParents0 overwrites any union data inside the SectionCreate_Parents_Item as the provided SectionCreateParents0
+func (t *SectionCreate_Parents_Item) FromSectionCreateParents0(v SectionCreateParents0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSectionCreateParents0 performs a merge with any union data inside the SectionCreate_Parents_Item, using the provided SectionCreateParents0
+func (t *SectionCreate_Parents_Item) MergeSectionCreateParents0(v SectionCreateParents0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSectionCreateParents1 returns the union data inside the SectionCreate_Parents_Item as a SectionCreateParents1
+func (t SectionCreate_Parents_Item) AsSectionCreateParents1() (SectionCreateParents1, error) {
+	var body SectionCreateParents1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSectionCreateParents1 overwrites any union data inside the SectionCreate_Parents_Item as the provided SectionCreateParents1
+func (t *SectionCreate_Parents_Item) FromSectionCreateParents1(v SectionCreateParents1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSectionCreateParents1 performs a merge with any union data inside the SectionCreate_Parents_Item, using the provided SectionCreateParents1
+func (t *SectionCreate_Parents_Item) MergeSectionCreateParents1(v SectionCreateParents1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SectionCreate_Parents_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SectionCreate_Parents_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsSectionUpdateParents0 returns the union data inside the SectionUpdate_Parents_Item as a SectionUpdateParents0
+func (t SectionUpdate_Parents_Item) AsSectionUpdateParents0() (SectionUpdateParents0, error) {
+	var body SectionUpdateParents0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSectionUpdateParents0 overwrites any union data inside the SectionUpdate_Parents_Item as the provided SectionUpdateParents0
+func (t *SectionUpdate_Parents_Item) FromSectionUpdateParents0(v SectionUpdateParents0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSectionUpdateParents0 performs a merge with any union data inside the SectionUpdate_Parents_Item, using the provided SectionUpdateParents0
+func (t *SectionUpdate_Parents_Item) MergeSectionUpdateParents0(v SectionUpdateParents0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSectionUpdateParents1 returns the union data inside the SectionUpdate_Parents_Item as a SectionUpdateParents1
+func (t SectionUpdate_Parents_Item) AsSectionUpdateParents1() (SectionUpdateParents1, error) {
+	var body SectionUpdateParents1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSectionUpdateParents1 overwrites any union data inside the SectionUpdate_Parents_Item as the provided SectionUpdateParents1
+func (t *SectionUpdate_Parents_Item) FromSectionUpdateParents1(v SectionUpdateParents1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSectionUpdateParents1 performs a merge with any union data inside the SectionUpdate_Parents_Item, using the provided SectionUpdateParents1
+func (t *SectionUpdate_Parents_Item) MergeSectionUpdateParents1(v SectionUpdateParents1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SectionUpdate_Parents_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SectionUpdate_Parents_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
 
 // AsValidationErrorLoc0 returns the union data inside the ValidationError_Loc_Item as a ValidationErrorLoc0
 func (t ValidationError_Loc_Item) AsValidationErrorLoc0() (ValidationErrorLoc0, error) {
@@ -217,6 +1767,68 @@ func (t ValidationError_Loc_Item) MarshalJSON() ([]byte, error) {
 }
 
 func (t *ValidationError_Loc_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsCharacterVersionDiffResponse returns the union data inside the CharacterVersionDiff200JSONResponseBody as a CharacterVersionDiffResponse
+func (t CharacterVersionDiff200JSONResponseBody) AsCharacterVersionDiffResponse() (CharacterVersionDiffResponse, error) {
+	var body CharacterVersionDiffResponse
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCharacterVersionDiffResponse overwrites any union data inside the CharacterVersionDiff200JSONResponseBody as the provided CharacterVersionDiffResponse
+func (t *CharacterVersionDiff200JSONResponseBody) FromCharacterVersionDiffResponse(v CharacterVersionDiffResponse) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCharacterVersionDiffResponse performs a merge with any union data inside the CharacterVersionDiff200JSONResponseBody, using the provided CharacterVersionDiffResponse
+func (t *CharacterVersionDiff200JSONResponseBody) MergeCharacterVersionDiffResponse(v CharacterVersionDiffResponse) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsCharacterVersionSemanticDiffResponse returns the union data inside the CharacterVersionDiff200JSONResponseBody as a CharacterVersionSemanticDiffResponse
+func (t CharacterVersionDiff200JSONResponseBody) AsCharacterVersionSemanticDiffResponse() (CharacterVersionSemanticDiffResponse, error) {
+	var body CharacterVersionSemanticDiffResponse
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCharacterVersionSemanticDiffResponse overwrites any union data inside the CharacterVersionDiff200JSONResponseBody as the provided CharacterVersionSemanticDiffResponse
+func (t *CharacterVersionDiff200JSONResponseBody) FromCharacterVersionSemanticDiffResponse(v CharacterVersionSemanticDiffResponse) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCharacterVersionSemanticDiffResponse performs a merge with any union data inside the CharacterVersionDiff200JSONResponseBody, using the provided CharacterVersionSemanticDiffResponse
+func (t *CharacterVersionDiff200JSONResponseBody) MergeCharacterVersionSemanticDiffResponse(v CharacterVersionSemanticDiffResponse) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t CharacterVersionDiff200JSONResponseBody) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *CharacterVersionDiff200JSONResponseBody) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -295,21 +1907,40 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 // The interface specification for the client above.
 type ClientInterface interface {
 
-	// CharacterCreateWithBody Create a character and active metadata row
+	// CharacterCloneWithBody Clone a character
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/clone (the `CharacterClone` operationId).
+	CharacterCloneWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterClone Clone a character
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/clone (the `CharacterClone` operationId).
+	CharacterClone(ctx context.Context, body CharacterCloneJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterCreateWithBody Create a character with explicit or automatically selected voice
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /character/create (the `CharacterCreate` operationId).
 	CharacterCreateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// CharacterCreate Create a character and active metadata row
+	// CharacterCreate Create a character with explicit or automatically selected voice
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /character/create (the `CharacterCreate` operationId).
 	CharacterCreate(ctx context.Context, body CharacterCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// CharacterGet Get one owned character with active metadata
+	// CharacterDelete Delete an owned character and its metadata
+	//
+	// Corresponds with POST /character/delete (the `CharacterDelete` operationId).
+	CharacterDelete(ctx context.Context, params *CharacterDeleteParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterGet Get one visible character with active metadata
 	//
 	// Corresponds with GET /character/get (the `CharacterGet` operationId).
 	CharacterGet(ctx context.Context, params *CharacterGetParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -318,9 +1949,408 @@ type ClientInterface interface {
 	//
 	// Corresponds with GET /character/list (the `CharacterList` operationId).
 	CharacterList(ctx context.Context, params *CharacterListParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// AddDecisionCharacterNarrativeAddDecisionPostWithBody Add Decision
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/narrative/add-decision (the `AddDecisionCharacterNarrativeAddDecisionPost` operationId).
+	AddDecisionCharacterNarrativeAddDecisionPostWithBody(ctx context.Context, params *AddDecisionCharacterNarrativeAddDecisionPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// AddDecisionCharacterNarrativeAddDecisionPost Add Decision
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/narrative/add-decision (the `AddDecisionCharacterNarrativeAddDecisionPost` operationId).
+	AddDecisionCharacterNarrativeAddDecisionPost(ctx context.Context, params *AddDecisionCharacterNarrativeAddDecisionPostParams, body AddDecisionCharacterNarrativeAddDecisionPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteDecisionCharacterNarrativeDeleteDecisionPostWithBody Delete Decision
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/narrative/delete-decision (the `DeleteDecisionCharacterNarrativeDeleteDecisionPost` operationId).
+	DeleteDecisionCharacterNarrativeDeleteDecisionPostWithBody(ctx context.Context, params *DeleteDecisionCharacterNarrativeDeleteDecisionPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteDecisionCharacterNarrativeDeleteDecisionPost Delete Decision
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/narrative/delete-decision (the `DeleteDecisionCharacterNarrativeDeleteDecisionPost` operationId).
+	DeleteDecisionCharacterNarrativeDeleteDecisionPost(ctx context.Context, params *DeleteDecisionCharacterNarrativeDeleteDecisionPostParams, body DeleteDecisionCharacterNarrativeDeleteDecisionPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EditDecisionCharacterNarrativeEditDecisionPostWithBody Edit Decision
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/narrative/edit-decision (the `EditDecisionCharacterNarrativeEditDecisionPost` operationId).
+	EditDecisionCharacterNarrativeEditDecisionPostWithBody(ctx context.Context, params *EditDecisionCharacterNarrativeEditDecisionPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EditDecisionCharacterNarrativeEditDecisionPost Edit Decision
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/narrative/edit-decision (the `EditDecisionCharacterNarrativeEditDecisionPost` operationId).
+	EditDecisionCharacterNarrativeEditDecisionPost(ctx context.Context, params *EditDecisionCharacterNarrativeEditDecisionPostParams, body EditDecisionCharacterNarrativeEditDecisionPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateSectionCharacterNarrativeSectionsCreatePostWithBody Create Section
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/narrative/sections/create (the `CreateSectionCharacterNarrativeSectionsCreatePost` operationId).
+	CreateSectionCharacterNarrativeSectionsCreatePostWithBody(ctx context.Context, params *CreateSectionCharacterNarrativeSectionsCreatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateSectionCharacterNarrativeSectionsCreatePost Create Section
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/narrative/sections/create (the `CreateSectionCharacterNarrativeSectionsCreatePost` operationId).
+	CreateSectionCharacterNarrativeSectionsCreatePost(ctx context.Context, params *CreateSectionCharacterNarrativeSectionsCreatePostParams, body CreateSectionCharacterNarrativeSectionsCreatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteSectionCharacterNarrativeSectionsDeletePost Delete Section
+	//
+	// Corresponds with POST /character/narrative/sections/delete (the `DeleteSectionCharacterNarrativeSectionsDeletePost` operationId).
+	DeleteSectionCharacterNarrativeSectionsDeletePost(ctx context.Context, params *DeleteSectionCharacterNarrativeSectionsDeletePostParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetSectionCharacterNarrativeSectionsGetGet Get Section
+	//
+	// Corresponds with GET /character/narrative/sections/get (the `GetSectionCharacterNarrativeSectionsGetGet` operationId).
+	GetSectionCharacterNarrativeSectionsGetGet(ctx context.Context, params *GetSectionCharacterNarrativeSectionsGetGetParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ListSectionsCharacterNarrativeSectionsListGet List Sections
+	//
+	// Corresponds with GET /character/narrative/sections/list (the `ListSectionsCharacterNarrativeSectionsListGet` operationId).
+	ListSectionsCharacterNarrativeSectionsListGet(ctx context.Context, params *ListSectionsCharacterNarrativeSectionsListGetParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateSectionCharacterNarrativeSectionsUpdatePostWithBody Update Section
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/narrative/sections/update (the `UpdateSectionCharacterNarrativeSectionsUpdatePost` operationId).
+	UpdateSectionCharacterNarrativeSectionsUpdatePostWithBody(ctx context.Context, params *UpdateSectionCharacterNarrativeSectionsUpdatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateSectionCharacterNarrativeSectionsUpdatePost Update Section
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/narrative/sections/update (the `UpdateSectionCharacterNarrativeSectionsUpdatePost` operationId).
+	UpdateSectionCharacterNarrativeSectionsUpdatePost(ctx context.Context, params *UpdateSectionCharacterNarrativeSectionsUpdatePostParams, body UpdateSectionCharacterNarrativeSectionsUpdatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateTriggerCharacterNarrativeTriggersCreatePostWithBody Create Trigger
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/narrative/triggers/create (the `CreateTriggerCharacterNarrativeTriggersCreatePost` operationId).
+	CreateTriggerCharacterNarrativeTriggersCreatePostWithBody(ctx context.Context, params *CreateTriggerCharacterNarrativeTriggersCreatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateTriggerCharacterNarrativeTriggersCreatePost Create Trigger
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/narrative/triggers/create (the `CreateTriggerCharacterNarrativeTriggersCreatePost` operationId).
+	CreateTriggerCharacterNarrativeTriggersCreatePost(ctx context.Context, params *CreateTriggerCharacterNarrativeTriggersCreatePostParams, body CreateTriggerCharacterNarrativeTriggersCreatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteTriggerCharacterNarrativeTriggersDeletePost Delete Trigger
+	//
+	// Corresponds with POST /character/narrative/triggers/delete (the `DeleteTriggerCharacterNarrativeTriggersDeletePost` operationId).
+	DeleteTriggerCharacterNarrativeTriggersDeletePost(ctx context.Context, params *DeleteTriggerCharacterNarrativeTriggersDeletePostParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetTriggerCharacterNarrativeTriggersGetGet Get Trigger
+	//
+	// Corresponds with GET /character/narrative/triggers/get (the `GetTriggerCharacterNarrativeTriggersGetGet` operationId).
+	GetTriggerCharacterNarrativeTriggersGetGet(ctx context.Context, params *GetTriggerCharacterNarrativeTriggersGetGetParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ListTriggersCharacterNarrativeTriggersListGet List Triggers
+	//
+	// Corresponds with GET /character/narrative/triggers/list (the `ListTriggersCharacterNarrativeTriggersListGet` operationId).
+	ListTriggersCharacterNarrativeTriggersListGet(ctx context.Context, params *ListTriggersCharacterNarrativeTriggersListGetParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateTriggerCharacterNarrativeTriggersUpdatePostWithBody Update Trigger
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/narrative/triggers/update (the `UpdateTriggerCharacterNarrativeTriggersUpdatePost` operationId).
+	UpdateTriggerCharacterNarrativeTriggersUpdatePostWithBody(ctx context.Context, params *UpdateTriggerCharacterNarrativeTriggersUpdatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateTriggerCharacterNarrativeTriggersUpdatePost Update Trigger
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/narrative/triggers/update (the `UpdateTriggerCharacterNarrativeTriggersUpdatePost` operationId).
+	UpdateTriggerCharacterNarrativeTriggersUpdatePost(ctx context.Context, params *UpdateTriggerCharacterNarrativeTriggersUpdatePostParams, body UpdateTriggerCharacterNarrativeTriggersUpdatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithBody Update Start Section Id
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/narrative/update-start-section-id (the `UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost` operationId).
+	UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithBody(ctx context.Context, params *UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost Update Start Section Id
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/narrative/update-start-section-id (the `UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost` operationId).
+	UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost(ctx context.Context, params *UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams, body UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterListSupportedModels List supported character LLM models
+	//
+	// Canonical read-only API for discovering the caller's supported character LLM models. When `character_id` is supplied, the response also identifies that character's active model, including a grandfathered internal model that remains assigned to it. Internal models are otherwise omitted from selection.
+	//
+	// Corresponds with GET /character/supported-models (the `CharacterListSupportedModels` operationId).
+	CharacterListSupportedModels(ctx context.Context, params *CharacterListSupportedModelsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterUpdateWithBody Update an owned character and version active metadata when backstory changes
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/update (the `CharacterUpdate` operationId).
+	CharacterUpdateWithBody(ctx context.Context, params *CharacterUpdateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterUpdate Update an owned character and version active metadata when backstory changes
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/update (the `CharacterUpdate` operationId).
+	CharacterUpdate(ctx context.Context, params *CharacterUpdateParams, body CharacterUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionCreateWithBody Release the current draft as an immutable character version
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/versions/create (the `CharacterVersionCreate` operationId).
+	CharacterVersionCreateWithBody(ctx context.Context, params *CharacterVersionCreateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionCreate Release the current draft as an immutable character version
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/versions/create (the `CharacterVersionCreate` operationId).
+	CharacterVersionCreate(ctx context.Context, params *CharacterVersionCreateParams, body CharacterVersionCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionDeprecateWithBody Deprecate or restore an immutable character version
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/versions/deprecate (the `CharacterVersionDeprecate` operationId).
+	CharacterVersionDeprecateWithBody(ctx context.Context, params *CharacterVersionDeprecateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionDeprecate Deprecate or restore an immutable character version
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/versions/deprecate (the `CharacterVersionDeprecate` operationId).
+	CharacterVersionDeprecate(ctx context.Context, params *CharacterVersionDeprecateParams, body CharacterVersionDeprecateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionDiff Compare two immutable character versions, latest, or draft
+	//
+	// Corresponds with GET /character/versions/diff (the `CharacterVersionDiff` operationId).
+	CharacterVersionDiff(ctx context.Context, params *CharacterVersionDiffParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionDiscardDraftWithBody Discard all saved draft changes and restore its released parent
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/versions/discard-draft (the `CharacterVersionDiscardDraft` operationId).
+	CharacterVersionDiscardDraftWithBody(ctx context.Context, params *CharacterVersionDiscardDraftParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionDiscardDraft Discard all saved draft changes and restore its released parent
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/versions/discard-draft (the `CharacterVersionDiscardDraft` operationId).
+	CharacterVersionDiscardDraft(ctx context.Context, params *CharacterVersionDiscardDraftParams, body CharacterVersionDiscardDraftJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionForkWithBody Replace the editable draft with an immutable tagged version
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/versions/fork (the `CharacterVersionFork` operationId).
+	CharacterVersionForkWithBody(ctx context.Context, params *CharacterVersionForkParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionFork Replace the editable draft with an immutable tagged version
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/versions/fork (the `CharacterVersionFork` operationId).
+	CharacterVersionFork(ctx context.Context, params *CharacterVersionForkParams, body CharacterVersionForkJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionList List immutable version tags and the latest and draft revisions
+	//
+	// Corresponds with GET /character/versions/list (the `CharacterVersionList` operationId).
+	CharacterVersionList(ctx context.Context, params *CharacterVersionListParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionPromoteWithBody Move latest to an immutable tagged revision
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/versions/promote (the `CharacterVersionPromote` operationId).
+	CharacterVersionPromoteWithBody(ctx context.Context, params *CharacterVersionPromoteParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionPromote Move latest to an immutable tagged revision
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/versions/promote (the `CharacterVersionPromote` operationId).
+	CharacterVersionPromote(ctx context.Context, params *CharacterVersionPromoteParams, body CharacterVersionPromoteJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionRevertDraftChangeWithBody Revert one semantic draft change to an immutable version
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /character/versions/revert (the `CharacterVersionRevertDraftChange` operationId).
+	CharacterVersionRevertDraftChangeWithBody(ctx context.Context, params *CharacterVersionRevertDraftChangeParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CharacterVersionRevertDraftChange Revert one semantic draft change to an immutable version
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /character/versions/revert (the `CharacterVersionRevertDraftChange` operationId).
+	CharacterVersionRevertDraftChange(ctx context.Context, params *CharacterVersionRevertDraftChangeParams, body CharacterVersionRevertDraftChangeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateFunctionFunctionsCreatePostWithBody Create Function
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /functions/create (the `CreateFunctionFunctionsCreatePost` operationId).
+	CreateFunctionFunctionsCreatePostWithBody(ctx context.Context, params *CreateFunctionFunctionsCreatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateFunctionFunctionsCreatePost Create Function
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /functions/create (the `CreateFunctionFunctionsCreatePost` operationId).
+	CreateFunctionFunctionsCreatePost(ctx context.Context, params *CreateFunctionFunctionsCreatePostParams, body CreateFunctionFunctionsCreatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteFunctionFunctionsDeletePostWithBody Delete Function
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /functions/delete (the `DeleteFunctionFunctionsDeletePost` operationId).
+	DeleteFunctionFunctionsDeletePostWithBody(ctx context.Context, params *DeleteFunctionFunctionsDeletePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteFunctionFunctionsDeletePost Delete Function
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /functions/delete (the `DeleteFunctionFunctionsDeletePost` operationId).
+	DeleteFunctionFunctionsDeletePost(ctx context.Context, params *DeleteFunctionFunctionsDeletePostParams, body DeleteFunctionFunctionsDeletePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetFunctionFunctionsGetPostWithBody Get Function
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /functions/get (the `GetFunctionFunctionsGetPost` operationId).
+	GetFunctionFunctionsGetPostWithBody(ctx context.Context, params *GetFunctionFunctionsGetPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetFunctionFunctionsGetPost Get Function
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /functions/get (the `GetFunctionFunctionsGetPost` operationId).
+	GetFunctionFunctionsGetPost(ctx context.Context, params *GetFunctionFunctionsGetPostParams, body GetFunctionFunctionsGetPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ListFunctionsFunctionsListPostWithBody List Functions
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /functions/list (the `ListFunctionsFunctionsListPost` operationId).
+	ListFunctionsFunctionsListPostWithBody(ctx context.Context, params *ListFunctionsFunctionsListPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ListFunctionsFunctionsListPost List Functions
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /functions/list (the `ListFunctionsFunctionsListPost` operationId).
+	ListFunctionsFunctionsListPost(ctx context.Context, params *ListFunctionsFunctionsListPostParams, body ListFunctionsFunctionsListPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ListTemplatesFunctionsTemplatesListPostWithBody List Templates
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /functions/templates/list (the `ListTemplatesFunctionsTemplatesListPost` operationId).
+	ListTemplatesFunctionsTemplatesListPostWithBody(ctx context.Context, params *ListTemplatesFunctionsTemplatesListPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ListTemplatesFunctionsTemplatesListPost List Templates
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /functions/templates/list (the `ListTemplatesFunctionsTemplatesListPost` operationId).
+	ListTemplatesFunctionsTemplatesListPost(ctx context.Context, params *ListTemplatesFunctionsTemplatesListPostParams, body ListTemplatesFunctionsTemplatesListPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// TestFunctionFunctionsTestPostWithBody Test Function
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /functions/test (the `TestFunctionFunctionsTestPost` operationId).
+	TestFunctionFunctionsTestPostWithBody(ctx context.Context, params *TestFunctionFunctionsTestPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// TestFunctionFunctionsTestPost Test Function
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /functions/test (the `TestFunctionFunctionsTestPost` operationId).
+	TestFunctionFunctionsTestPost(ctx context.Context, params *TestFunctionFunctionsTestPostParams, body TestFunctionFunctionsTestPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateFunctionFunctionsUpdatePostWithBody Update Function
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /functions/update (the `UpdateFunctionFunctionsUpdatePost` operationId).
+	UpdateFunctionFunctionsUpdatePostWithBody(ctx context.Context, params *UpdateFunctionFunctionsUpdatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateFunctionFunctionsUpdatePost Update Function
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /functions/update (the `UpdateFunctionFunctionsUpdatePost` operationId).
+	UpdateFunctionFunctionsUpdatePost(ctx context.Context, params *UpdateFunctionFunctionsUpdatePostParams, body UpdateFunctionFunctionsUpdatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetAvailableLanguagesTtsGetAvailableLanguagesGet Get Available Languages
+	//
+	// Corresponds with GET /tts/get_available_languages (the `GetAvailableLanguagesTtsGetAvailableLanguagesGet` operationId).
+	GetAvailableLanguagesTtsGetAvailableLanguagesGet(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetAvailableVoicesTtsGetAvailableVoicesGet Get Available Voices
+	//
+	// Corresponds with GET /tts/get_available_voices (the `GetAvailableVoicesTtsGetAvailableVoicesGet` operationId).
+	GetAvailableVoicesTtsGetAvailableVoicesGet(ctx context.Context, params *GetAvailableVoicesTtsGetAvailableVoicesGetParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
-// CharacterCreateWithBody Create a character and active metadata row
+// CharacterCloneWithBody Clone a character
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/clone (the `CharacterClone` operationId).
+func (c *Client) CharacterCloneWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterCloneRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterClone Clone a character
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/clone (the `CharacterClone` operationId).
+func (c *Client) CharacterClone(ctx context.Context, body CharacterCloneJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterCloneRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterCreateWithBody Create a character with explicit or automatically selected voice
 //
 // Takes any type of body and a specified content type.
 //
@@ -337,7 +2367,7 @@ func (c *Client) CharacterCreateWithBody(ctx context.Context, contentType string
 	return c.Client.Do(req)
 }
 
-// CharacterCreate Create a character and active metadata row
+// CharacterCreate Create a character with explicit or automatically selected voice
 //
 // Takes a body of the `application/json` content type.
 //
@@ -354,7 +2384,22 @@ func (c *Client) CharacterCreate(ctx context.Context, body CharacterCreateJSONRe
 	return c.Client.Do(req)
 }
 
-// CharacterGet Get one owned character with active metadata
+// CharacterDelete Delete an owned character and its metadata
+//
+// Corresponds with POST /character/delete (the `CharacterDelete` operationId).
+func (c *Client) CharacterDelete(ctx context.Context, params *CharacterDeleteParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterDeleteRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterGet Get one visible character with active metadata
 //
 // Corresponds with GET /character/get (the `CharacterGet` operationId).
 func (c *Client) CharacterGet(ctx context.Context, params *CharacterGetParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -382,6 +2427,961 @@ func (c *Client) CharacterList(ctx context.Context, params *CharacterListParams,
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// AddDecisionCharacterNarrativeAddDecisionPostWithBody Add Decision
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/narrative/add-decision (the `AddDecisionCharacterNarrativeAddDecisionPost` operationId).
+func (c *Client) AddDecisionCharacterNarrativeAddDecisionPostWithBody(ctx context.Context, params *AddDecisionCharacterNarrativeAddDecisionPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAddDecisionCharacterNarrativeAddDecisionPostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// AddDecisionCharacterNarrativeAddDecisionPost Add Decision
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/narrative/add-decision (the `AddDecisionCharacterNarrativeAddDecisionPost` operationId).
+func (c *Client) AddDecisionCharacterNarrativeAddDecisionPost(ctx context.Context, params *AddDecisionCharacterNarrativeAddDecisionPostParams, body AddDecisionCharacterNarrativeAddDecisionPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAddDecisionCharacterNarrativeAddDecisionPostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeleteDecisionCharacterNarrativeDeleteDecisionPostWithBody Delete Decision
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/narrative/delete-decision (the `DeleteDecisionCharacterNarrativeDeleteDecisionPost` operationId).
+func (c *Client) DeleteDecisionCharacterNarrativeDeleteDecisionPostWithBody(ctx context.Context, params *DeleteDecisionCharacterNarrativeDeleteDecisionPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteDecisionCharacterNarrativeDeleteDecisionPostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeleteDecisionCharacterNarrativeDeleteDecisionPost Delete Decision
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/narrative/delete-decision (the `DeleteDecisionCharacterNarrativeDeleteDecisionPost` operationId).
+func (c *Client) DeleteDecisionCharacterNarrativeDeleteDecisionPost(ctx context.Context, params *DeleteDecisionCharacterNarrativeDeleteDecisionPostParams, body DeleteDecisionCharacterNarrativeDeleteDecisionPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteDecisionCharacterNarrativeDeleteDecisionPostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// EditDecisionCharacterNarrativeEditDecisionPostWithBody Edit Decision
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/narrative/edit-decision (the `EditDecisionCharacterNarrativeEditDecisionPost` operationId).
+func (c *Client) EditDecisionCharacterNarrativeEditDecisionPostWithBody(ctx context.Context, params *EditDecisionCharacterNarrativeEditDecisionPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEditDecisionCharacterNarrativeEditDecisionPostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// EditDecisionCharacterNarrativeEditDecisionPost Edit Decision
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/narrative/edit-decision (the `EditDecisionCharacterNarrativeEditDecisionPost` operationId).
+func (c *Client) EditDecisionCharacterNarrativeEditDecisionPost(ctx context.Context, params *EditDecisionCharacterNarrativeEditDecisionPostParams, body EditDecisionCharacterNarrativeEditDecisionPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEditDecisionCharacterNarrativeEditDecisionPostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CreateSectionCharacterNarrativeSectionsCreatePostWithBody Create Section
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/narrative/sections/create (the `CreateSectionCharacterNarrativeSectionsCreatePost` operationId).
+func (c *Client) CreateSectionCharacterNarrativeSectionsCreatePostWithBody(ctx context.Context, params *CreateSectionCharacterNarrativeSectionsCreatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateSectionCharacterNarrativeSectionsCreatePostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CreateSectionCharacterNarrativeSectionsCreatePost Create Section
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/narrative/sections/create (the `CreateSectionCharacterNarrativeSectionsCreatePost` operationId).
+func (c *Client) CreateSectionCharacterNarrativeSectionsCreatePost(ctx context.Context, params *CreateSectionCharacterNarrativeSectionsCreatePostParams, body CreateSectionCharacterNarrativeSectionsCreatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateSectionCharacterNarrativeSectionsCreatePostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeleteSectionCharacterNarrativeSectionsDeletePost Delete Section
+//
+// Corresponds with POST /character/narrative/sections/delete (the `DeleteSectionCharacterNarrativeSectionsDeletePost` operationId).
+func (c *Client) DeleteSectionCharacterNarrativeSectionsDeletePost(ctx context.Context, params *DeleteSectionCharacterNarrativeSectionsDeletePostParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteSectionCharacterNarrativeSectionsDeletePostRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// GetSectionCharacterNarrativeSectionsGetGet Get Section
+//
+// Corresponds with GET /character/narrative/sections/get (the `GetSectionCharacterNarrativeSectionsGetGet` operationId).
+func (c *Client) GetSectionCharacterNarrativeSectionsGetGet(ctx context.Context, params *GetSectionCharacterNarrativeSectionsGetGetParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSectionCharacterNarrativeSectionsGetGetRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ListSectionsCharacterNarrativeSectionsListGet List Sections
+//
+// Corresponds with GET /character/narrative/sections/list (the `ListSectionsCharacterNarrativeSectionsListGet` operationId).
+func (c *Client) ListSectionsCharacterNarrativeSectionsListGet(ctx context.Context, params *ListSectionsCharacterNarrativeSectionsListGetParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListSectionsCharacterNarrativeSectionsListGetRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpdateSectionCharacterNarrativeSectionsUpdatePostWithBody Update Section
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/narrative/sections/update (the `UpdateSectionCharacterNarrativeSectionsUpdatePost` operationId).
+func (c *Client) UpdateSectionCharacterNarrativeSectionsUpdatePostWithBody(ctx context.Context, params *UpdateSectionCharacterNarrativeSectionsUpdatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateSectionCharacterNarrativeSectionsUpdatePostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpdateSectionCharacterNarrativeSectionsUpdatePost Update Section
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/narrative/sections/update (the `UpdateSectionCharacterNarrativeSectionsUpdatePost` operationId).
+func (c *Client) UpdateSectionCharacterNarrativeSectionsUpdatePost(ctx context.Context, params *UpdateSectionCharacterNarrativeSectionsUpdatePostParams, body UpdateSectionCharacterNarrativeSectionsUpdatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateSectionCharacterNarrativeSectionsUpdatePostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CreateTriggerCharacterNarrativeTriggersCreatePostWithBody Create Trigger
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/narrative/triggers/create (the `CreateTriggerCharacterNarrativeTriggersCreatePost` operationId).
+func (c *Client) CreateTriggerCharacterNarrativeTriggersCreatePostWithBody(ctx context.Context, params *CreateTriggerCharacterNarrativeTriggersCreatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateTriggerCharacterNarrativeTriggersCreatePostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CreateTriggerCharacterNarrativeTriggersCreatePost Create Trigger
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/narrative/triggers/create (the `CreateTriggerCharacterNarrativeTriggersCreatePost` operationId).
+func (c *Client) CreateTriggerCharacterNarrativeTriggersCreatePost(ctx context.Context, params *CreateTriggerCharacterNarrativeTriggersCreatePostParams, body CreateTriggerCharacterNarrativeTriggersCreatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateTriggerCharacterNarrativeTriggersCreatePostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeleteTriggerCharacterNarrativeTriggersDeletePost Delete Trigger
+//
+// Corresponds with POST /character/narrative/triggers/delete (the `DeleteTriggerCharacterNarrativeTriggersDeletePost` operationId).
+func (c *Client) DeleteTriggerCharacterNarrativeTriggersDeletePost(ctx context.Context, params *DeleteTriggerCharacterNarrativeTriggersDeletePostParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteTriggerCharacterNarrativeTriggersDeletePostRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// GetTriggerCharacterNarrativeTriggersGetGet Get Trigger
+//
+// Corresponds with GET /character/narrative/triggers/get (the `GetTriggerCharacterNarrativeTriggersGetGet` operationId).
+func (c *Client) GetTriggerCharacterNarrativeTriggersGetGet(ctx context.Context, params *GetTriggerCharacterNarrativeTriggersGetGetParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetTriggerCharacterNarrativeTriggersGetGetRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ListTriggersCharacterNarrativeTriggersListGet List Triggers
+//
+// Corresponds with GET /character/narrative/triggers/list (the `ListTriggersCharacterNarrativeTriggersListGet` operationId).
+func (c *Client) ListTriggersCharacterNarrativeTriggersListGet(ctx context.Context, params *ListTriggersCharacterNarrativeTriggersListGetParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListTriggersCharacterNarrativeTriggersListGetRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpdateTriggerCharacterNarrativeTriggersUpdatePostWithBody Update Trigger
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/narrative/triggers/update (the `UpdateTriggerCharacterNarrativeTriggersUpdatePost` operationId).
+func (c *Client) UpdateTriggerCharacterNarrativeTriggersUpdatePostWithBody(ctx context.Context, params *UpdateTriggerCharacterNarrativeTriggersUpdatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateTriggerCharacterNarrativeTriggersUpdatePostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpdateTriggerCharacterNarrativeTriggersUpdatePost Update Trigger
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/narrative/triggers/update (the `UpdateTriggerCharacterNarrativeTriggersUpdatePost` operationId).
+func (c *Client) UpdateTriggerCharacterNarrativeTriggersUpdatePost(ctx context.Context, params *UpdateTriggerCharacterNarrativeTriggersUpdatePostParams, body UpdateTriggerCharacterNarrativeTriggersUpdatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateTriggerCharacterNarrativeTriggersUpdatePostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithBody Update Start Section Id
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/narrative/update-start-section-id (the `UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost` operationId).
+func (c *Client) UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithBody(ctx context.Context, params *UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost Update Start Section Id
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/narrative/update-start-section-id (the `UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost` operationId).
+func (c *Client) UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost(ctx context.Context, params *UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams, body UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterListSupportedModels List supported character LLM models
+//
+// Canonical read-only API for discovering the caller's supported character LLM models. When `character_id` is supplied, the response also identifies that character's active model, including a grandfathered internal model that remains assigned to it. Internal models are otherwise omitted from selection.
+//
+// Corresponds with GET /character/supported-models (the `CharacterListSupportedModels` operationId).
+func (c *Client) CharacterListSupportedModels(ctx context.Context, params *CharacterListSupportedModelsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterListSupportedModelsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterUpdateWithBody Update an owned character and version active metadata when backstory changes
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/update (the `CharacterUpdate` operationId).
+func (c *Client) CharacterUpdateWithBody(ctx context.Context, params *CharacterUpdateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterUpdateRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterUpdate Update an owned character and version active metadata when backstory changes
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/update (the `CharacterUpdate` operationId).
+func (c *Client) CharacterUpdate(ctx context.Context, params *CharacterUpdateParams, body CharacterUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterUpdateRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionCreateWithBody Release the current draft as an immutable character version
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/versions/create (the `CharacterVersionCreate` operationId).
+func (c *Client) CharacterVersionCreateWithBody(ctx context.Context, params *CharacterVersionCreateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionCreateRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionCreate Release the current draft as an immutable character version
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/versions/create (the `CharacterVersionCreate` operationId).
+func (c *Client) CharacterVersionCreate(ctx context.Context, params *CharacterVersionCreateParams, body CharacterVersionCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionCreateRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionDeprecateWithBody Deprecate or restore an immutable character version
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/versions/deprecate (the `CharacterVersionDeprecate` operationId).
+func (c *Client) CharacterVersionDeprecateWithBody(ctx context.Context, params *CharacterVersionDeprecateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionDeprecateRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionDeprecate Deprecate or restore an immutable character version
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/versions/deprecate (the `CharacterVersionDeprecate` operationId).
+func (c *Client) CharacterVersionDeprecate(ctx context.Context, params *CharacterVersionDeprecateParams, body CharacterVersionDeprecateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionDeprecateRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionDiff Compare two immutable character versions, latest, or draft
+//
+// Corresponds with GET /character/versions/diff (the `CharacterVersionDiff` operationId).
+func (c *Client) CharacterVersionDiff(ctx context.Context, params *CharacterVersionDiffParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionDiffRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionDiscardDraftWithBody Discard all saved draft changes and restore its released parent
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/versions/discard-draft (the `CharacterVersionDiscardDraft` operationId).
+func (c *Client) CharacterVersionDiscardDraftWithBody(ctx context.Context, params *CharacterVersionDiscardDraftParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionDiscardDraftRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionDiscardDraft Discard all saved draft changes and restore its released parent
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/versions/discard-draft (the `CharacterVersionDiscardDraft` operationId).
+func (c *Client) CharacterVersionDiscardDraft(ctx context.Context, params *CharacterVersionDiscardDraftParams, body CharacterVersionDiscardDraftJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionDiscardDraftRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionForkWithBody Replace the editable draft with an immutable tagged version
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/versions/fork (the `CharacterVersionFork` operationId).
+func (c *Client) CharacterVersionForkWithBody(ctx context.Context, params *CharacterVersionForkParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionForkRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionFork Replace the editable draft with an immutable tagged version
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/versions/fork (the `CharacterVersionFork` operationId).
+func (c *Client) CharacterVersionFork(ctx context.Context, params *CharacterVersionForkParams, body CharacterVersionForkJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionForkRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionList List immutable version tags and the latest and draft revisions
+//
+// Corresponds with GET /character/versions/list (the `CharacterVersionList` operationId).
+func (c *Client) CharacterVersionList(ctx context.Context, params *CharacterVersionListParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionListRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionPromoteWithBody Move latest to an immutable tagged revision
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/versions/promote (the `CharacterVersionPromote` operationId).
+func (c *Client) CharacterVersionPromoteWithBody(ctx context.Context, params *CharacterVersionPromoteParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionPromoteRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionPromote Move latest to an immutable tagged revision
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/versions/promote (the `CharacterVersionPromote` operationId).
+func (c *Client) CharacterVersionPromote(ctx context.Context, params *CharacterVersionPromoteParams, body CharacterVersionPromoteJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionPromoteRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionRevertDraftChangeWithBody Revert one semantic draft change to an immutable version
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /character/versions/revert (the `CharacterVersionRevertDraftChange` operationId).
+func (c *Client) CharacterVersionRevertDraftChangeWithBody(ctx context.Context, params *CharacterVersionRevertDraftChangeParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionRevertDraftChangeRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CharacterVersionRevertDraftChange Revert one semantic draft change to an immutable version
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /character/versions/revert (the `CharacterVersionRevertDraftChange` operationId).
+func (c *Client) CharacterVersionRevertDraftChange(ctx context.Context, params *CharacterVersionRevertDraftChangeParams, body CharacterVersionRevertDraftChangeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterVersionRevertDraftChangeRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CreateFunctionFunctionsCreatePostWithBody Create Function
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /functions/create (the `CreateFunctionFunctionsCreatePost` operationId).
+func (c *Client) CreateFunctionFunctionsCreatePostWithBody(ctx context.Context, params *CreateFunctionFunctionsCreatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateFunctionFunctionsCreatePostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// CreateFunctionFunctionsCreatePost Create Function
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /functions/create (the `CreateFunctionFunctionsCreatePost` operationId).
+func (c *Client) CreateFunctionFunctionsCreatePost(ctx context.Context, params *CreateFunctionFunctionsCreatePostParams, body CreateFunctionFunctionsCreatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateFunctionFunctionsCreatePostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeleteFunctionFunctionsDeletePostWithBody Delete Function
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /functions/delete (the `DeleteFunctionFunctionsDeletePost` operationId).
+func (c *Client) DeleteFunctionFunctionsDeletePostWithBody(ctx context.Context, params *DeleteFunctionFunctionsDeletePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteFunctionFunctionsDeletePostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeleteFunctionFunctionsDeletePost Delete Function
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /functions/delete (the `DeleteFunctionFunctionsDeletePost` operationId).
+func (c *Client) DeleteFunctionFunctionsDeletePost(ctx context.Context, params *DeleteFunctionFunctionsDeletePostParams, body DeleteFunctionFunctionsDeletePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteFunctionFunctionsDeletePostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// GetFunctionFunctionsGetPostWithBody Get Function
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /functions/get (the `GetFunctionFunctionsGetPost` operationId).
+func (c *Client) GetFunctionFunctionsGetPostWithBody(ctx context.Context, params *GetFunctionFunctionsGetPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetFunctionFunctionsGetPostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// GetFunctionFunctionsGetPost Get Function
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /functions/get (the `GetFunctionFunctionsGetPost` operationId).
+func (c *Client) GetFunctionFunctionsGetPost(ctx context.Context, params *GetFunctionFunctionsGetPostParams, body GetFunctionFunctionsGetPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetFunctionFunctionsGetPostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ListFunctionsFunctionsListPostWithBody List Functions
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /functions/list (the `ListFunctionsFunctionsListPost` operationId).
+func (c *Client) ListFunctionsFunctionsListPostWithBody(ctx context.Context, params *ListFunctionsFunctionsListPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListFunctionsFunctionsListPostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ListFunctionsFunctionsListPost List Functions
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /functions/list (the `ListFunctionsFunctionsListPost` operationId).
+func (c *Client) ListFunctionsFunctionsListPost(ctx context.Context, params *ListFunctionsFunctionsListPostParams, body ListFunctionsFunctionsListPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListFunctionsFunctionsListPostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ListTemplatesFunctionsTemplatesListPostWithBody List Templates
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /functions/templates/list (the `ListTemplatesFunctionsTemplatesListPost` operationId).
+func (c *Client) ListTemplatesFunctionsTemplatesListPostWithBody(ctx context.Context, params *ListTemplatesFunctionsTemplatesListPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListTemplatesFunctionsTemplatesListPostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ListTemplatesFunctionsTemplatesListPost List Templates
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /functions/templates/list (the `ListTemplatesFunctionsTemplatesListPost` operationId).
+func (c *Client) ListTemplatesFunctionsTemplatesListPost(ctx context.Context, params *ListTemplatesFunctionsTemplatesListPostParams, body ListTemplatesFunctionsTemplatesListPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListTemplatesFunctionsTemplatesListPostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// TestFunctionFunctionsTestPostWithBody Test Function
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /functions/test (the `TestFunctionFunctionsTestPost` operationId).
+func (c *Client) TestFunctionFunctionsTestPostWithBody(ctx context.Context, params *TestFunctionFunctionsTestPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTestFunctionFunctionsTestPostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// TestFunctionFunctionsTestPost Test Function
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /functions/test (the `TestFunctionFunctionsTestPost` operationId).
+func (c *Client) TestFunctionFunctionsTestPost(ctx context.Context, params *TestFunctionFunctionsTestPostParams, body TestFunctionFunctionsTestPostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewTestFunctionFunctionsTestPostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpdateFunctionFunctionsUpdatePostWithBody Update Function
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /functions/update (the `UpdateFunctionFunctionsUpdatePost` operationId).
+func (c *Client) UpdateFunctionFunctionsUpdatePostWithBody(ctx context.Context, params *UpdateFunctionFunctionsUpdatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateFunctionFunctionsUpdatePostRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// UpdateFunctionFunctionsUpdatePost Update Function
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /functions/update (the `UpdateFunctionFunctionsUpdatePost` operationId).
+func (c *Client) UpdateFunctionFunctionsUpdatePost(ctx context.Context, params *UpdateFunctionFunctionsUpdatePostParams, body UpdateFunctionFunctionsUpdatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateFunctionFunctionsUpdatePostRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// GetAvailableLanguagesTtsGetAvailableLanguagesGet Get Available Languages
+//
+// Corresponds with GET /tts/get_available_languages (the `GetAvailableLanguagesTtsGetAvailableLanguagesGet` operationId).
+func (c *Client) GetAvailableLanguagesTtsGetAvailableLanguagesGet(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAvailableLanguagesTtsGetAvailableLanguagesGetRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// GetAvailableVoicesTtsGetAvailableVoicesGet Get Available Voices
+//
+// Corresponds with GET /tts/get_available_voices (the `GetAvailableVoicesTtsGetAvailableVoicesGet` operationId).
+func (c *Client) GetAvailableVoicesTtsGetAvailableVoicesGet(ctx context.Context, params *GetAvailableVoicesTtsGetAvailableVoicesGetParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAvailableVoicesTtsGetAvailableVoicesGetRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// NewCharacterCloneRequest calls the generic CharacterClone builder with application/json body
+func NewCharacterCloneRequest(server string, body CharacterCloneJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCharacterCloneRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewCharacterCloneRequestWithBody constructs an http.Request for the CharacterClone method, with any body, and a specified content type
+func NewCharacterCloneRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/clone")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
 }
 
 // NewCharacterCreateRequest calls the generic CharacterCreate builder with application/json body
@@ -424,6 +3424,68 @@ func NewCharacterCreateRequestWithBody(server string, contentType string, body i
 	return req, nil
 }
 
+// NewCharacterDeleteRequest constructs an http.Request for the CharacterDelete method
+func NewCharacterDeleteRequest(server string, params *CharacterDeleteParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/delete")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewCharacterGetRequest constructs an http.Request for the CharacterGet method
 func NewCharacterGetRequest(server string, params *CharacterGetParams) (*http.Request, error) {
 	var err error
@@ -458,6 +3520,18 @@ func NewCharacterGetRequest(server string, params *CharacterGetParams) (*http.Re
 			for _, qp := range strings.Split(queryFrag, "&") {
 				rawQueryFragments = append(rawQueryFragments, qp)
 			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
 		}
 
 		if encoded := queryValues.Encode(); encoded != "" {
@@ -502,6 +3576,18 @@ func NewCharacterListRequest(server string, params *CharacterListParams) (*http.
 		// per the OpenAPI spec (e.g. "color=blue,black,brown").
 		var rawQueryFragments []string
 
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
 		if params.Limit != nil {
 
 			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "limit", *params.Limit, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "integer", Format: ""}); err != nil {
@@ -517,6 +3603,2327 @@ func NewCharacterListRequest(server string, params *CharacterListParams) (*http.
 		if params.Offset != nil {
 
 			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "offset", *params.Offset, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "integer", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.Sort != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "sort", *params.Sort, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewAddDecisionCharacterNarrativeAddDecisionPostRequest calls the generic AddDecisionCharacterNarrativeAddDecisionPost builder with application/json body
+func NewAddDecisionCharacterNarrativeAddDecisionPostRequest(server string, params *AddDecisionCharacterNarrativeAddDecisionPostParams, body AddDecisionCharacterNarrativeAddDecisionPostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewAddDecisionCharacterNarrativeAddDecisionPostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewAddDecisionCharacterNarrativeAddDecisionPostRequestWithBody constructs an http.Request for the AddDecisionCharacterNarrativeAddDecisionPost method, with any body, and a specified content type
+func NewAddDecisionCharacterNarrativeAddDecisionPostRequestWithBody(server string, params *AddDecisionCharacterNarrativeAddDecisionPostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/add-decision")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteDecisionCharacterNarrativeDeleteDecisionPostRequest calls the generic DeleteDecisionCharacterNarrativeDeleteDecisionPost builder with application/json body
+func NewDeleteDecisionCharacterNarrativeDeleteDecisionPostRequest(server string, params *DeleteDecisionCharacterNarrativeDeleteDecisionPostParams, body DeleteDecisionCharacterNarrativeDeleteDecisionPostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDeleteDecisionCharacterNarrativeDeleteDecisionPostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewDeleteDecisionCharacterNarrativeDeleteDecisionPostRequestWithBody constructs an http.Request for the DeleteDecisionCharacterNarrativeDeleteDecisionPost method, with any body, and a specified content type
+func NewDeleteDecisionCharacterNarrativeDeleteDecisionPostRequestWithBody(server string, params *DeleteDecisionCharacterNarrativeDeleteDecisionPostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/delete-decision")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewEditDecisionCharacterNarrativeEditDecisionPostRequest calls the generic EditDecisionCharacterNarrativeEditDecisionPost builder with application/json body
+func NewEditDecisionCharacterNarrativeEditDecisionPostRequest(server string, params *EditDecisionCharacterNarrativeEditDecisionPostParams, body EditDecisionCharacterNarrativeEditDecisionPostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEditDecisionCharacterNarrativeEditDecisionPostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewEditDecisionCharacterNarrativeEditDecisionPostRequestWithBody constructs an http.Request for the EditDecisionCharacterNarrativeEditDecisionPost method, with any body, and a specified content type
+func NewEditDecisionCharacterNarrativeEditDecisionPostRequestWithBody(server string, params *EditDecisionCharacterNarrativeEditDecisionPostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/edit-decision")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCreateSectionCharacterNarrativeSectionsCreatePostRequest calls the generic CreateSectionCharacterNarrativeSectionsCreatePost builder with application/json body
+func NewCreateSectionCharacterNarrativeSectionsCreatePostRequest(server string, params *CreateSectionCharacterNarrativeSectionsCreatePostParams, body CreateSectionCharacterNarrativeSectionsCreatePostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateSectionCharacterNarrativeSectionsCreatePostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewCreateSectionCharacterNarrativeSectionsCreatePostRequestWithBody constructs an http.Request for the CreateSectionCharacterNarrativeSectionsCreatePost method, with any body, and a specified content type
+func NewCreateSectionCharacterNarrativeSectionsCreatePostRequestWithBody(server string, params *CreateSectionCharacterNarrativeSectionsCreatePostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/sections/create")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteSectionCharacterNarrativeSectionsDeletePostRequest constructs an http.Request for the DeleteSectionCharacterNarrativeSectionsDeletePost method
+func NewDeleteSectionCharacterNarrativeSectionsDeletePostRequest(server string, params *DeleteSectionCharacterNarrativeSectionsDeletePostParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/sections/delete")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "section_id", params.SectionId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetSectionCharacterNarrativeSectionsGetGetRequest constructs an http.Request for the GetSectionCharacterNarrativeSectionsGetGet method
+func NewGetSectionCharacterNarrativeSectionsGetGetRequest(server string, params *GetSectionCharacterNarrativeSectionsGetGetParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/sections/get")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "section_id", params.SectionId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewListSectionsCharacterNarrativeSectionsListGetRequest constructs an http.Request for the ListSectionsCharacterNarrativeSectionsListGet method
+func NewListSectionsCharacterNarrativeSectionsListGetRequest(server string, params *ListSectionsCharacterNarrativeSectionsListGetParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/sections/list")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateSectionCharacterNarrativeSectionsUpdatePostRequest calls the generic UpdateSectionCharacterNarrativeSectionsUpdatePost builder with application/json body
+func NewUpdateSectionCharacterNarrativeSectionsUpdatePostRequest(server string, params *UpdateSectionCharacterNarrativeSectionsUpdatePostParams, body UpdateSectionCharacterNarrativeSectionsUpdatePostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateSectionCharacterNarrativeSectionsUpdatePostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewUpdateSectionCharacterNarrativeSectionsUpdatePostRequestWithBody constructs an http.Request for the UpdateSectionCharacterNarrativeSectionsUpdatePost method, with any body, and a specified content type
+func NewUpdateSectionCharacterNarrativeSectionsUpdatePostRequestWithBody(server string, params *UpdateSectionCharacterNarrativeSectionsUpdatePostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/sections/update")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "section_id", params.SectionId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCreateTriggerCharacterNarrativeTriggersCreatePostRequest calls the generic CreateTriggerCharacterNarrativeTriggersCreatePost builder with application/json body
+func NewCreateTriggerCharacterNarrativeTriggersCreatePostRequest(server string, params *CreateTriggerCharacterNarrativeTriggersCreatePostParams, body CreateTriggerCharacterNarrativeTriggersCreatePostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateTriggerCharacterNarrativeTriggersCreatePostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewCreateTriggerCharacterNarrativeTriggersCreatePostRequestWithBody constructs an http.Request for the CreateTriggerCharacterNarrativeTriggersCreatePost method, with any body, and a specified content type
+func NewCreateTriggerCharacterNarrativeTriggersCreatePostRequestWithBody(server string, params *CreateTriggerCharacterNarrativeTriggersCreatePostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/triggers/create")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteTriggerCharacterNarrativeTriggersDeletePostRequest constructs an http.Request for the DeleteTriggerCharacterNarrativeTriggersDeletePost method
+func NewDeleteTriggerCharacterNarrativeTriggersDeletePostRequest(server string, params *DeleteTriggerCharacterNarrativeTriggersDeletePostParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/triggers/delete")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "trigger_id", params.TriggerId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetTriggerCharacterNarrativeTriggersGetGetRequest constructs an http.Request for the GetTriggerCharacterNarrativeTriggersGetGet method
+func NewGetTriggerCharacterNarrativeTriggersGetGetRequest(server string, params *GetTriggerCharacterNarrativeTriggersGetGetParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/triggers/get")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "trigger_id", params.TriggerId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewListTriggersCharacterNarrativeTriggersListGetRequest constructs an http.Request for the ListTriggersCharacterNarrativeTriggersListGet method
+func NewListTriggersCharacterNarrativeTriggersListGetRequest(server string, params *ListTriggersCharacterNarrativeTriggersListGetParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/triggers/list")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateTriggerCharacterNarrativeTriggersUpdatePostRequest calls the generic UpdateTriggerCharacterNarrativeTriggersUpdatePost builder with application/json body
+func NewUpdateTriggerCharacterNarrativeTriggersUpdatePostRequest(server string, params *UpdateTriggerCharacterNarrativeTriggersUpdatePostParams, body UpdateTriggerCharacterNarrativeTriggersUpdatePostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateTriggerCharacterNarrativeTriggersUpdatePostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewUpdateTriggerCharacterNarrativeTriggersUpdatePostRequestWithBody constructs an http.Request for the UpdateTriggerCharacterNarrativeTriggersUpdatePost method, with any body, and a specified content type
+func NewUpdateTriggerCharacterNarrativeTriggersUpdatePostRequestWithBody(server string, params *UpdateTriggerCharacterNarrativeTriggersUpdatePostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/triggers/update")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "trigger_id", params.TriggerId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewUpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostRequest calls the generic UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost builder with application/json body
+func NewUpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostRequest(server string, params *UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams, body UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewUpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostRequestWithBody constructs an http.Request for the UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost method, with any body, and a specified content type
+func NewUpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostRequestWithBody(server string, params *UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/narrative/update-start-section-id")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCharacterListSupportedModelsRequest constructs an http.Request for the CharacterListSupportedModels method
+func NewCharacterListSupportedModelsRequest(server string, params *CharacterListSupportedModelsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/supported-models")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.CharacterId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", *params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCharacterUpdateRequest calls the generic CharacterUpdate builder with application/json body
+func NewCharacterUpdateRequest(server string, params *CharacterUpdateParams, body CharacterUpdateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCharacterUpdateRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewCharacterUpdateRequestWithBody constructs an http.Request for the CharacterUpdate method, with any body, and a specified content type
+func NewCharacterUpdateRequestWithBody(server string, params *CharacterUpdateParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/update")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.CharacterId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", *params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCharacterVersionCreateRequest calls the generic CharacterVersionCreate builder with application/json body
+func NewCharacterVersionCreateRequest(server string, params *CharacterVersionCreateParams, body CharacterVersionCreateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCharacterVersionCreateRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewCharacterVersionCreateRequestWithBody constructs an http.Request for the CharacterVersionCreate method, with any body, and a specified content type
+func NewCharacterVersionCreateRequestWithBody(server string, params *CharacterVersionCreateParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/versions/create")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCharacterVersionDeprecateRequest calls the generic CharacterVersionDeprecate builder with application/json body
+func NewCharacterVersionDeprecateRequest(server string, params *CharacterVersionDeprecateParams, body CharacterVersionDeprecateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCharacterVersionDeprecateRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewCharacterVersionDeprecateRequestWithBody constructs an http.Request for the CharacterVersionDeprecate method, with any body, and a specified content type
+func NewCharacterVersionDeprecateRequestWithBody(server string, params *CharacterVersionDeprecateParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/versions/deprecate")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCharacterVersionDiffRequest constructs an http.Request for the CharacterVersionDiff method
+func NewCharacterVersionDiffRequest(server string, params *CharacterVersionDiffParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/versions/diff")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "from", params.From, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "to", params.To, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.View != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "view", *params.View, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCharacterVersionDiscardDraftRequest calls the generic CharacterVersionDiscardDraft builder with application/json body
+func NewCharacterVersionDiscardDraftRequest(server string, params *CharacterVersionDiscardDraftParams, body CharacterVersionDiscardDraftJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCharacterVersionDiscardDraftRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewCharacterVersionDiscardDraftRequestWithBody constructs an http.Request for the CharacterVersionDiscardDraft method, with any body, and a specified content type
+func NewCharacterVersionDiscardDraftRequestWithBody(server string, params *CharacterVersionDiscardDraftParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/versions/discard-draft")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCharacterVersionForkRequest calls the generic CharacterVersionFork builder with application/json body
+func NewCharacterVersionForkRequest(server string, params *CharacterVersionForkParams, body CharacterVersionForkJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCharacterVersionForkRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewCharacterVersionForkRequestWithBody constructs an http.Request for the CharacterVersionFork method, with any body, and a specified content type
+func NewCharacterVersionForkRequestWithBody(server string, params *CharacterVersionForkParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/versions/fork")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCharacterVersionListRequest constructs an http.Request for the CharacterVersionList method
+func NewCharacterVersionListRequest(server string, params *CharacterVersionListParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/versions/list")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCharacterVersionPromoteRequest calls the generic CharacterVersionPromote builder with application/json body
+func NewCharacterVersionPromoteRequest(server string, params *CharacterVersionPromoteParams, body CharacterVersionPromoteJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCharacterVersionPromoteRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewCharacterVersionPromoteRequestWithBody constructs an http.Request for the CharacterVersionPromote method, with any body, and a specified content type
+func NewCharacterVersionPromoteRequestWithBody(server string, params *CharacterVersionPromoteParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/versions/promote")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCharacterVersionRevertDraftChangeRequest calls the generic CharacterVersionRevertDraftChange builder with application/json body
+func NewCharacterVersionRevertDraftChangeRequest(server string, params *CharacterVersionRevertDraftChangeParams, body CharacterVersionRevertDraftChangeJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCharacterVersionRevertDraftChangeRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewCharacterVersionRevertDraftChangeRequestWithBody constructs an http.Request for the CharacterVersionRevertDraftChange method, with any body, and a specified content type
+func NewCharacterVersionRevertDraftChangeRequestWithBody(server string, params *CharacterVersionRevertDraftChangeParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/character/versions/revert")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "character_id", params.CharacterId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCreateFunctionFunctionsCreatePostRequest calls the generic CreateFunctionFunctionsCreatePost builder with application/json body
+func NewCreateFunctionFunctionsCreatePostRequest(server string, params *CreateFunctionFunctionsCreatePostParams, body CreateFunctionFunctionsCreatePostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateFunctionFunctionsCreatePostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewCreateFunctionFunctionsCreatePostRequestWithBody constructs an http.Request for the CreateFunctionFunctionsCreatePost method, with any body, and a specified content type
+func NewCreateFunctionFunctionsCreatePostRequestWithBody(server string, params *CreateFunctionFunctionsCreatePostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/functions/create")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteFunctionFunctionsDeletePostRequest calls the generic DeleteFunctionFunctionsDeletePost builder with application/json body
+func NewDeleteFunctionFunctionsDeletePostRequest(server string, params *DeleteFunctionFunctionsDeletePostParams, body DeleteFunctionFunctionsDeletePostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDeleteFunctionFunctionsDeletePostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewDeleteFunctionFunctionsDeletePostRequestWithBody constructs an http.Request for the DeleteFunctionFunctionsDeletePost method, with any body, and a specified content type
+func NewDeleteFunctionFunctionsDeletePostRequestWithBody(server string, params *DeleteFunctionFunctionsDeletePostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/functions/delete")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetFunctionFunctionsGetPostRequest calls the generic GetFunctionFunctionsGetPost builder with application/json body
+func NewGetFunctionFunctionsGetPostRequest(server string, params *GetFunctionFunctionsGetPostParams, body GetFunctionFunctionsGetPostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewGetFunctionFunctionsGetPostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewGetFunctionFunctionsGetPostRequestWithBody constructs an http.Request for the GetFunctionFunctionsGetPost method, with any body, and a specified content type
+func NewGetFunctionFunctionsGetPostRequestWithBody(server string, params *GetFunctionFunctionsGetPostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/functions/get")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewListFunctionsFunctionsListPostRequest calls the generic ListFunctionsFunctionsListPost builder with application/json body
+func NewListFunctionsFunctionsListPostRequest(server string, params *ListFunctionsFunctionsListPostParams, body ListFunctionsFunctionsListPostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewListFunctionsFunctionsListPostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewListFunctionsFunctionsListPostRequestWithBody constructs an http.Request for the ListFunctionsFunctionsListPost method, with any body, and a specified content type
+func NewListFunctionsFunctionsListPostRequestWithBody(server string, params *ListFunctionsFunctionsListPostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/functions/list")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewListTemplatesFunctionsTemplatesListPostRequest calls the generic ListTemplatesFunctionsTemplatesListPost builder with application/json body
+func NewListTemplatesFunctionsTemplatesListPostRequest(server string, params *ListTemplatesFunctionsTemplatesListPostParams, body ListTemplatesFunctionsTemplatesListPostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewListTemplatesFunctionsTemplatesListPostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewListTemplatesFunctionsTemplatesListPostRequestWithBody constructs an http.Request for the ListTemplatesFunctionsTemplatesListPost method, with any body, and a specified content type
+func NewListTemplatesFunctionsTemplatesListPostRequestWithBody(server string, params *ListTemplatesFunctionsTemplatesListPostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/functions/templates/list")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewTestFunctionFunctionsTestPostRequest calls the generic TestFunctionFunctionsTestPost builder with application/json body
+func NewTestFunctionFunctionsTestPostRequest(server string, params *TestFunctionFunctionsTestPostParams, body TestFunctionFunctionsTestPostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewTestFunctionFunctionsTestPostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewTestFunctionFunctionsTestPostRequestWithBody constructs an http.Request for the TestFunctionFunctionsTestPost method, with any body, and a specified content type
+func NewTestFunctionFunctionsTestPostRequestWithBody(server string, params *TestFunctionFunctionsTestPostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/functions/test")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewUpdateFunctionFunctionsUpdatePostRequest calls the generic UpdateFunctionFunctionsUpdatePost builder with application/json body
+func NewUpdateFunctionFunctionsUpdatePostRequest(server string, params *UpdateFunctionFunctionsUpdatePostParams, body UpdateFunctionFunctionsUpdatePostJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateFunctionFunctionsUpdatePostRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewUpdateFunctionFunctionsUpdatePostRequestWithBody constructs an http.Request for the UpdateFunctionFunctionsUpdatePost method, with any body, and a specified content type
+func NewUpdateFunctionFunctionsUpdatePostRequestWithBody(server string, params *UpdateFunctionFunctionsUpdatePostParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/functions/update")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.WorkspaceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "workspace_id", *params.WorkspaceId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: "uuid"}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetAvailableLanguagesTtsGetAvailableLanguagesGetRequest constructs an http.Request for the GetAvailableLanguagesTtsGetAvailableLanguagesGet method
+func NewGetAvailableLanguagesTtsGetAvailableLanguagesGetRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/tts/get_available_languages")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetAvailableVoicesTtsGetAvailableVoicesGetRequest constructs an http.Request for the GetAvailableVoicesTtsGetAvailableVoicesGet method
+func NewGetAvailableVoicesTtsGetAvailableVoicesGetRequest(server string, params *GetAvailableVoicesTtsGetAvailableVoicesGetParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/tts/get_available_voices")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.LangCode != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "lang_code", *params.LangCode, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.Gender != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "gender", *params.Gender, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if params.Provider != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "provider", *params.Provider, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "", Format: ""}); err != nil {
 				return nil, err
 			} else {
 				for _, qp := range strings.Split(queryFrag, "&") {
@@ -584,21 +5991,42 @@ func WithBaseURL(baseURL string) ClientOption {
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
 
-	// CharacterCreateWithBodyWithResponse Create a character and active metadata row
+	// CharacterCloneWithBodyWithResponse Clone a character
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/clone (the `CharacterClone` operationId).
+	CharacterCloneWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterCloneResp, error)
+
+	// CharacterCloneWithResponse Clone a character
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/clone (the `CharacterClone` operationId).
+	CharacterCloneWithResponse(ctx context.Context, body CharacterCloneJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterCloneResp, error)
+
+	// CharacterCreateWithBodyWithResponse Create a character with explicit or automatically selected voice
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /character/create (the `CharacterCreate` operationId).
 	CharacterCreateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterCreateResp, error)
 
-	// CharacterCreateWithResponse Create a character and active metadata row
+	// CharacterCreateWithResponse Create a character with explicit or automatically selected voice
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /character/create (the `CharacterCreate` operationId).
 	CharacterCreateWithResponse(ctx context.Context, body CharacterCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterCreateResp, error)
 
-	// CharacterGetWithResponse Get one owned character with active metadata
+	// CharacterDeleteWithResponse Delete an owned character and its metadata
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/delete (the `CharacterDelete` operationId).
+	CharacterDeleteWithResponse(ctx context.Context, params *CharacterDeleteParams, reqEditors ...RequestEditorFn) (*CharacterDeleteResp, error)
+
+	// CharacterGetWithResponse Get one visible character with active metadata
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
@@ -611,6 +6039,441 @@ type ClientWithResponsesInterface interface {
 	//
 	// Corresponds with GET /character/list (the `CharacterList` operationId).
 	CharacterListWithResponse(ctx context.Context, params *CharacterListParams, reqEditors ...RequestEditorFn) (*CharacterListResp, error)
+
+	// AddDecisionCharacterNarrativeAddDecisionPostWithBodyWithResponse Add Decision
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/add-decision (the `AddDecisionCharacterNarrativeAddDecisionPost` operationId).
+	AddDecisionCharacterNarrativeAddDecisionPostWithBodyWithResponse(ctx context.Context, params *AddDecisionCharacterNarrativeAddDecisionPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AddDecisionCharacterNarrativeAddDecisionPostResp, error)
+
+	// AddDecisionCharacterNarrativeAddDecisionPostWithResponse Add Decision
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/add-decision (the `AddDecisionCharacterNarrativeAddDecisionPost` operationId).
+	AddDecisionCharacterNarrativeAddDecisionPostWithResponse(ctx context.Context, params *AddDecisionCharacterNarrativeAddDecisionPostParams, body AddDecisionCharacterNarrativeAddDecisionPostJSONRequestBody, reqEditors ...RequestEditorFn) (*AddDecisionCharacterNarrativeAddDecisionPostResp, error)
+
+	// DeleteDecisionCharacterNarrativeDeleteDecisionPostWithBodyWithResponse Delete Decision
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/delete-decision (the `DeleteDecisionCharacterNarrativeDeleteDecisionPost` operationId).
+	DeleteDecisionCharacterNarrativeDeleteDecisionPostWithBodyWithResponse(ctx context.Context, params *DeleteDecisionCharacterNarrativeDeleteDecisionPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteDecisionCharacterNarrativeDeleteDecisionPostResp, error)
+
+	// DeleteDecisionCharacterNarrativeDeleteDecisionPostWithResponse Delete Decision
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/delete-decision (the `DeleteDecisionCharacterNarrativeDeleteDecisionPost` operationId).
+	DeleteDecisionCharacterNarrativeDeleteDecisionPostWithResponse(ctx context.Context, params *DeleteDecisionCharacterNarrativeDeleteDecisionPostParams, body DeleteDecisionCharacterNarrativeDeleteDecisionPostJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteDecisionCharacterNarrativeDeleteDecisionPostResp, error)
+
+	// EditDecisionCharacterNarrativeEditDecisionPostWithBodyWithResponse Edit Decision
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/edit-decision (the `EditDecisionCharacterNarrativeEditDecisionPost` operationId).
+	EditDecisionCharacterNarrativeEditDecisionPostWithBodyWithResponse(ctx context.Context, params *EditDecisionCharacterNarrativeEditDecisionPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*EditDecisionCharacterNarrativeEditDecisionPostResp, error)
+
+	// EditDecisionCharacterNarrativeEditDecisionPostWithResponse Edit Decision
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/edit-decision (the `EditDecisionCharacterNarrativeEditDecisionPost` operationId).
+	EditDecisionCharacterNarrativeEditDecisionPostWithResponse(ctx context.Context, params *EditDecisionCharacterNarrativeEditDecisionPostParams, body EditDecisionCharacterNarrativeEditDecisionPostJSONRequestBody, reqEditors ...RequestEditorFn) (*EditDecisionCharacterNarrativeEditDecisionPostResp, error)
+
+	// CreateSectionCharacterNarrativeSectionsCreatePostWithBodyWithResponse Create Section
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/sections/create (the `CreateSectionCharacterNarrativeSectionsCreatePost` operationId).
+	CreateSectionCharacterNarrativeSectionsCreatePostWithBodyWithResponse(ctx context.Context, params *CreateSectionCharacterNarrativeSectionsCreatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateSectionCharacterNarrativeSectionsCreatePostResp, error)
+
+	// CreateSectionCharacterNarrativeSectionsCreatePostWithResponse Create Section
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/sections/create (the `CreateSectionCharacterNarrativeSectionsCreatePost` operationId).
+	CreateSectionCharacterNarrativeSectionsCreatePostWithResponse(ctx context.Context, params *CreateSectionCharacterNarrativeSectionsCreatePostParams, body CreateSectionCharacterNarrativeSectionsCreatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateSectionCharacterNarrativeSectionsCreatePostResp, error)
+
+	// DeleteSectionCharacterNarrativeSectionsDeletePostWithResponse Delete Section
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/sections/delete (the `DeleteSectionCharacterNarrativeSectionsDeletePost` operationId).
+	DeleteSectionCharacterNarrativeSectionsDeletePostWithResponse(ctx context.Context, params *DeleteSectionCharacterNarrativeSectionsDeletePostParams, reqEditors ...RequestEditorFn) (*DeleteSectionCharacterNarrativeSectionsDeletePostResp, error)
+
+	// GetSectionCharacterNarrativeSectionsGetGetWithResponse Get Section
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /character/narrative/sections/get (the `GetSectionCharacterNarrativeSectionsGetGet` operationId).
+	GetSectionCharacterNarrativeSectionsGetGetWithResponse(ctx context.Context, params *GetSectionCharacterNarrativeSectionsGetGetParams, reqEditors ...RequestEditorFn) (*GetSectionCharacterNarrativeSectionsGetGetResp, error)
+
+	// ListSectionsCharacterNarrativeSectionsListGetWithResponse List Sections
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /character/narrative/sections/list (the `ListSectionsCharacterNarrativeSectionsListGet` operationId).
+	ListSectionsCharacterNarrativeSectionsListGetWithResponse(ctx context.Context, params *ListSectionsCharacterNarrativeSectionsListGetParams, reqEditors ...RequestEditorFn) (*ListSectionsCharacterNarrativeSectionsListGetResp, error)
+
+	// UpdateSectionCharacterNarrativeSectionsUpdatePostWithBodyWithResponse Update Section
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/sections/update (the `UpdateSectionCharacterNarrativeSectionsUpdatePost` operationId).
+	UpdateSectionCharacterNarrativeSectionsUpdatePostWithBodyWithResponse(ctx context.Context, params *UpdateSectionCharacterNarrativeSectionsUpdatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateSectionCharacterNarrativeSectionsUpdatePostResp, error)
+
+	// UpdateSectionCharacterNarrativeSectionsUpdatePostWithResponse Update Section
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/sections/update (the `UpdateSectionCharacterNarrativeSectionsUpdatePost` operationId).
+	UpdateSectionCharacterNarrativeSectionsUpdatePostWithResponse(ctx context.Context, params *UpdateSectionCharacterNarrativeSectionsUpdatePostParams, body UpdateSectionCharacterNarrativeSectionsUpdatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateSectionCharacterNarrativeSectionsUpdatePostResp, error)
+
+	// CreateTriggerCharacterNarrativeTriggersCreatePostWithBodyWithResponse Create Trigger
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/triggers/create (the `CreateTriggerCharacterNarrativeTriggersCreatePost` operationId).
+	CreateTriggerCharacterNarrativeTriggersCreatePostWithBodyWithResponse(ctx context.Context, params *CreateTriggerCharacterNarrativeTriggersCreatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTriggerCharacterNarrativeTriggersCreatePostResp, error)
+
+	// CreateTriggerCharacterNarrativeTriggersCreatePostWithResponse Create Trigger
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/triggers/create (the `CreateTriggerCharacterNarrativeTriggersCreatePost` operationId).
+	CreateTriggerCharacterNarrativeTriggersCreatePostWithResponse(ctx context.Context, params *CreateTriggerCharacterNarrativeTriggersCreatePostParams, body CreateTriggerCharacterNarrativeTriggersCreatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateTriggerCharacterNarrativeTriggersCreatePostResp, error)
+
+	// DeleteTriggerCharacterNarrativeTriggersDeletePostWithResponse Delete Trigger
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/triggers/delete (the `DeleteTriggerCharacterNarrativeTriggersDeletePost` operationId).
+	DeleteTriggerCharacterNarrativeTriggersDeletePostWithResponse(ctx context.Context, params *DeleteTriggerCharacterNarrativeTriggersDeletePostParams, reqEditors ...RequestEditorFn) (*DeleteTriggerCharacterNarrativeTriggersDeletePostResp, error)
+
+	// GetTriggerCharacterNarrativeTriggersGetGetWithResponse Get Trigger
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /character/narrative/triggers/get (the `GetTriggerCharacterNarrativeTriggersGetGet` operationId).
+	GetTriggerCharacterNarrativeTriggersGetGetWithResponse(ctx context.Context, params *GetTriggerCharacterNarrativeTriggersGetGetParams, reqEditors ...RequestEditorFn) (*GetTriggerCharacterNarrativeTriggersGetGetResp, error)
+
+	// ListTriggersCharacterNarrativeTriggersListGetWithResponse List Triggers
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /character/narrative/triggers/list (the `ListTriggersCharacterNarrativeTriggersListGet` operationId).
+	ListTriggersCharacterNarrativeTriggersListGetWithResponse(ctx context.Context, params *ListTriggersCharacterNarrativeTriggersListGetParams, reqEditors ...RequestEditorFn) (*ListTriggersCharacterNarrativeTriggersListGetResp, error)
+
+	// UpdateTriggerCharacterNarrativeTriggersUpdatePostWithBodyWithResponse Update Trigger
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/triggers/update (the `UpdateTriggerCharacterNarrativeTriggersUpdatePost` operationId).
+	UpdateTriggerCharacterNarrativeTriggersUpdatePostWithBodyWithResponse(ctx context.Context, params *UpdateTriggerCharacterNarrativeTriggersUpdatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateTriggerCharacterNarrativeTriggersUpdatePostResp, error)
+
+	// UpdateTriggerCharacterNarrativeTriggersUpdatePostWithResponse Update Trigger
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/triggers/update (the `UpdateTriggerCharacterNarrativeTriggersUpdatePost` operationId).
+	UpdateTriggerCharacterNarrativeTriggersUpdatePostWithResponse(ctx context.Context, params *UpdateTriggerCharacterNarrativeTriggersUpdatePostParams, body UpdateTriggerCharacterNarrativeTriggersUpdatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateTriggerCharacterNarrativeTriggersUpdatePostResp, error)
+
+	// UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithBodyWithResponse Update Start Section Id
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/update-start-section-id (the `UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost` operationId).
+	UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithBodyWithResponse(ctx context.Context, params *UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp, error)
+
+	// UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithResponse Update Start Section Id
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/narrative/update-start-section-id (the `UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost` operationId).
+	UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithResponse(ctx context.Context, params *UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams, body UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp, error)
+
+	// CharacterListSupportedModelsWithResponse List supported character LLM models
+	//
+	// Canonical read-only API for discovering the caller's supported character LLM models. When `character_id` is supplied, the response also identifies that character's active model, including a grandfathered internal model that remains assigned to it. Internal models are otherwise omitted from selection.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /character/supported-models (the `CharacterListSupportedModels` operationId).
+	CharacterListSupportedModelsWithResponse(ctx context.Context, params *CharacterListSupportedModelsParams, reqEditors ...RequestEditorFn) (*CharacterListSupportedModelsResp, error)
+
+	// CharacterUpdateWithBodyWithResponse Update an owned character and version active metadata when backstory changes
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/update (the `CharacterUpdate` operationId).
+	CharacterUpdateWithBodyWithResponse(ctx context.Context, params *CharacterUpdateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterUpdateResp, error)
+
+	// CharacterUpdateWithResponse Update an owned character and version active metadata when backstory changes
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/update (the `CharacterUpdate` operationId).
+	CharacterUpdateWithResponse(ctx context.Context, params *CharacterUpdateParams, body CharacterUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterUpdateResp, error)
+
+	// CharacterVersionCreateWithBodyWithResponse Release the current draft as an immutable character version
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/versions/create (the `CharacterVersionCreate` operationId).
+	CharacterVersionCreateWithBodyWithResponse(ctx context.Context, params *CharacterVersionCreateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterVersionCreateResp, error)
+
+	// CharacterVersionCreateWithResponse Release the current draft as an immutable character version
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/versions/create (the `CharacterVersionCreate` operationId).
+	CharacterVersionCreateWithResponse(ctx context.Context, params *CharacterVersionCreateParams, body CharacterVersionCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterVersionCreateResp, error)
+
+	// CharacterVersionDeprecateWithBodyWithResponse Deprecate or restore an immutable character version
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/versions/deprecate (the `CharacterVersionDeprecate` operationId).
+	CharacterVersionDeprecateWithBodyWithResponse(ctx context.Context, params *CharacterVersionDeprecateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterVersionDeprecateResp, error)
+
+	// CharacterVersionDeprecateWithResponse Deprecate or restore an immutable character version
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/versions/deprecate (the `CharacterVersionDeprecate` operationId).
+	CharacterVersionDeprecateWithResponse(ctx context.Context, params *CharacterVersionDeprecateParams, body CharacterVersionDeprecateJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterVersionDeprecateResp, error)
+
+	// CharacterVersionDiffWithResponse Compare two immutable character versions, latest, or draft
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /character/versions/diff (the `CharacterVersionDiff` operationId).
+	CharacterVersionDiffWithResponse(ctx context.Context, params *CharacterVersionDiffParams, reqEditors ...RequestEditorFn) (*CharacterVersionDiffResp, error)
+
+	// CharacterVersionDiscardDraftWithBodyWithResponse Discard all saved draft changes and restore its released parent
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/versions/discard-draft (the `CharacterVersionDiscardDraft` operationId).
+	CharacterVersionDiscardDraftWithBodyWithResponse(ctx context.Context, params *CharacterVersionDiscardDraftParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterVersionDiscardDraftResp, error)
+
+	// CharacterVersionDiscardDraftWithResponse Discard all saved draft changes and restore its released parent
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/versions/discard-draft (the `CharacterVersionDiscardDraft` operationId).
+	CharacterVersionDiscardDraftWithResponse(ctx context.Context, params *CharacterVersionDiscardDraftParams, body CharacterVersionDiscardDraftJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterVersionDiscardDraftResp, error)
+
+	// CharacterVersionForkWithBodyWithResponse Replace the editable draft with an immutable tagged version
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/versions/fork (the `CharacterVersionFork` operationId).
+	CharacterVersionForkWithBodyWithResponse(ctx context.Context, params *CharacterVersionForkParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterVersionForkResp, error)
+
+	// CharacterVersionForkWithResponse Replace the editable draft with an immutable tagged version
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/versions/fork (the `CharacterVersionFork` operationId).
+	CharacterVersionForkWithResponse(ctx context.Context, params *CharacterVersionForkParams, body CharacterVersionForkJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterVersionForkResp, error)
+
+	// CharacterVersionListWithResponse List immutable version tags and the latest and draft revisions
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /character/versions/list (the `CharacterVersionList` operationId).
+	CharacterVersionListWithResponse(ctx context.Context, params *CharacterVersionListParams, reqEditors ...RequestEditorFn) (*CharacterVersionListResp, error)
+
+	// CharacterVersionPromoteWithBodyWithResponse Move latest to an immutable tagged revision
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/versions/promote (the `CharacterVersionPromote` operationId).
+	CharacterVersionPromoteWithBodyWithResponse(ctx context.Context, params *CharacterVersionPromoteParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterVersionPromoteResp, error)
+
+	// CharacterVersionPromoteWithResponse Move latest to an immutable tagged revision
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/versions/promote (the `CharacterVersionPromote` operationId).
+	CharacterVersionPromoteWithResponse(ctx context.Context, params *CharacterVersionPromoteParams, body CharacterVersionPromoteJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterVersionPromoteResp, error)
+
+	// CharacterVersionRevertDraftChangeWithBodyWithResponse Revert one semantic draft change to an immutable version
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/versions/revert (the `CharacterVersionRevertDraftChange` operationId).
+	CharacterVersionRevertDraftChangeWithBodyWithResponse(ctx context.Context, params *CharacterVersionRevertDraftChangeParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterVersionRevertDraftChangeResp, error)
+
+	// CharacterVersionRevertDraftChangeWithResponse Revert one semantic draft change to an immutable version
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /character/versions/revert (the `CharacterVersionRevertDraftChange` operationId).
+	CharacterVersionRevertDraftChangeWithResponse(ctx context.Context, params *CharacterVersionRevertDraftChangeParams, body CharacterVersionRevertDraftChangeJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterVersionRevertDraftChangeResp, error)
+
+	// CreateFunctionFunctionsCreatePostWithBodyWithResponse Create Function
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/create (the `CreateFunctionFunctionsCreatePost` operationId).
+	CreateFunctionFunctionsCreatePostWithBodyWithResponse(ctx context.Context, params *CreateFunctionFunctionsCreatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateFunctionFunctionsCreatePostResp, error)
+
+	// CreateFunctionFunctionsCreatePostWithResponse Create Function
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/create (the `CreateFunctionFunctionsCreatePost` operationId).
+	CreateFunctionFunctionsCreatePostWithResponse(ctx context.Context, params *CreateFunctionFunctionsCreatePostParams, body CreateFunctionFunctionsCreatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateFunctionFunctionsCreatePostResp, error)
+
+	// DeleteFunctionFunctionsDeletePostWithBodyWithResponse Delete Function
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/delete (the `DeleteFunctionFunctionsDeletePost` operationId).
+	DeleteFunctionFunctionsDeletePostWithBodyWithResponse(ctx context.Context, params *DeleteFunctionFunctionsDeletePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteFunctionFunctionsDeletePostResp, error)
+
+	// DeleteFunctionFunctionsDeletePostWithResponse Delete Function
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/delete (the `DeleteFunctionFunctionsDeletePost` operationId).
+	DeleteFunctionFunctionsDeletePostWithResponse(ctx context.Context, params *DeleteFunctionFunctionsDeletePostParams, body DeleteFunctionFunctionsDeletePostJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteFunctionFunctionsDeletePostResp, error)
+
+	// GetFunctionFunctionsGetPostWithBodyWithResponse Get Function
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/get (the `GetFunctionFunctionsGetPost` operationId).
+	GetFunctionFunctionsGetPostWithBodyWithResponse(ctx context.Context, params *GetFunctionFunctionsGetPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*GetFunctionFunctionsGetPostResp, error)
+
+	// GetFunctionFunctionsGetPostWithResponse Get Function
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/get (the `GetFunctionFunctionsGetPost` operationId).
+	GetFunctionFunctionsGetPostWithResponse(ctx context.Context, params *GetFunctionFunctionsGetPostParams, body GetFunctionFunctionsGetPostJSONRequestBody, reqEditors ...RequestEditorFn) (*GetFunctionFunctionsGetPostResp, error)
+
+	// ListFunctionsFunctionsListPostWithBodyWithResponse List Functions
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/list (the `ListFunctionsFunctionsListPost` operationId).
+	ListFunctionsFunctionsListPostWithBodyWithResponse(ctx context.Context, params *ListFunctionsFunctionsListPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ListFunctionsFunctionsListPostResp, error)
+
+	// ListFunctionsFunctionsListPostWithResponse List Functions
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/list (the `ListFunctionsFunctionsListPost` operationId).
+	ListFunctionsFunctionsListPostWithResponse(ctx context.Context, params *ListFunctionsFunctionsListPostParams, body ListFunctionsFunctionsListPostJSONRequestBody, reqEditors ...RequestEditorFn) (*ListFunctionsFunctionsListPostResp, error)
+
+	// ListTemplatesFunctionsTemplatesListPostWithBodyWithResponse List Templates
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/templates/list (the `ListTemplatesFunctionsTemplatesListPost` operationId).
+	ListTemplatesFunctionsTemplatesListPostWithBodyWithResponse(ctx context.Context, params *ListTemplatesFunctionsTemplatesListPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ListTemplatesFunctionsTemplatesListPostResp, error)
+
+	// ListTemplatesFunctionsTemplatesListPostWithResponse List Templates
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/templates/list (the `ListTemplatesFunctionsTemplatesListPost` operationId).
+	ListTemplatesFunctionsTemplatesListPostWithResponse(ctx context.Context, params *ListTemplatesFunctionsTemplatesListPostParams, body ListTemplatesFunctionsTemplatesListPostJSONRequestBody, reqEditors ...RequestEditorFn) (*ListTemplatesFunctionsTemplatesListPostResp, error)
+
+	// TestFunctionFunctionsTestPostWithBodyWithResponse Test Function
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/test (the `TestFunctionFunctionsTestPost` operationId).
+	TestFunctionFunctionsTestPostWithBodyWithResponse(ctx context.Context, params *TestFunctionFunctionsTestPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TestFunctionFunctionsTestPostResp, error)
+
+	// TestFunctionFunctionsTestPostWithResponse Test Function
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/test (the `TestFunctionFunctionsTestPost` operationId).
+	TestFunctionFunctionsTestPostWithResponse(ctx context.Context, params *TestFunctionFunctionsTestPostParams, body TestFunctionFunctionsTestPostJSONRequestBody, reqEditors ...RequestEditorFn) (*TestFunctionFunctionsTestPostResp, error)
+
+	// UpdateFunctionFunctionsUpdatePostWithBodyWithResponse Update Function
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/update (the `UpdateFunctionFunctionsUpdatePost` operationId).
+	UpdateFunctionFunctionsUpdatePostWithBodyWithResponse(ctx context.Context, params *UpdateFunctionFunctionsUpdatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateFunctionFunctionsUpdatePostResp, error)
+
+	// UpdateFunctionFunctionsUpdatePostWithResponse Update Function
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /functions/update (the `UpdateFunctionFunctionsUpdatePost` operationId).
+	UpdateFunctionFunctionsUpdatePostWithResponse(ctx context.Context, params *UpdateFunctionFunctionsUpdatePostParams, body UpdateFunctionFunctionsUpdatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateFunctionFunctionsUpdatePostResp, error)
+
+	// GetAvailableLanguagesTtsGetAvailableLanguagesGetWithResponse Get Available Languages
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /tts/get_available_languages (the `GetAvailableLanguagesTtsGetAvailableLanguagesGet` operationId).
+	GetAvailableLanguagesTtsGetAvailableLanguagesGetWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetAvailableLanguagesTtsGetAvailableLanguagesGetResp, error)
+
+	// GetAvailableVoicesTtsGetAvailableVoicesGetWithResponse Get Available Voices
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /tts/get_available_voices (the `GetAvailableVoicesTtsGetAvailableVoicesGet` operationId).
+	GetAvailableVoicesTtsGetAvailableVoicesGetWithResponse(ctx context.Context, params *GetAvailableVoicesTtsGetAvailableVoicesGetParams, reqEditors ...RequestEditorFn) (*GetAvailableVoicesTtsGetAvailableVoicesGetResp, error)
+}
+
+type CharacterCloneResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *CharacterCloneResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r CharacterCloneResp) GetJSON200() *CharacterCloneResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CharacterCloneResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CharacterCloneResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CharacterCloneResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CharacterCloneResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CharacterCloneResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
 }
 
 type CharacterCreateResp struct {
@@ -655,6 +6518,54 @@ func (r CharacterCreateResp) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r CharacterCreateResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CharacterDeleteResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *Message
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r CharacterDeleteResp) GetJSON200() *Message {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CharacterDeleteResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CharacterDeleteResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CharacterDeleteResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CharacterDeleteResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CharacterDeleteResp) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -757,7 +6668,1617 @@ func (r CharacterListResp) ContentType() string {
 	return ""
 }
 
-// CharacterCreateWithBodyWithResponse Create a character and active metadata row
+type AddDecisionCharacterNarrativeAddDecisionPostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *DecisionMutationResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r AddDecisionCharacterNarrativeAddDecisionPostResp) GetJSON200() *DecisionMutationResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r AddDecisionCharacterNarrativeAddDecisionPostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r AddDecisionCharacterNarrativeAddDecisionPostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r AddDecisionCharacterNarrativeAddDecisionPostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r AddDecisionCharacterNarrativeAddDecisionPostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r AddDecisionCharacterNarrativeAddDecisionPostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeleteDecisionCharacterNarrativeDeleteDecisionPostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *DecisionMutationResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeleteDecisionCharacterNarrativeDeleteDecisionPostResp) GetJSON200() *DecisionMutationResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r DeleteDecisionCharacterNarrativeDeleteDecisionPostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r DeleteDecisionCharacterNarrativeDeleteDecisionPostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteDecisionCharacterNarrativeDeleteDecisionPostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteDecisionCharacterNarrativeDeleteDecisionPostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeleteDecisionCharacterNarrativeDeleteDecisionPostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type EditDecisionCharacterNarrativeEditDecisionPostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *DecisionMutationResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r EditDecisionCharacterNarrativeEditDecisionPostResp) GetJSON200() *DecisionMutationResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r EditDecisionCharacterNarrativeEditDecisionPostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r EditDecisionCharacterNarrativeEditDecisionPostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r EditDecisionCharacterNarrativeEditDecisionPostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EditDecisionCharacterNarrativeEditDecisionPostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r EditDecisionCharacterNarrativeEditDecisionPostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CreateSectionCharacterNarrativeSectionsCreatePostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON201 the response for an HTTP 201 `application/json` response
+	JSON201 *SectionResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON201 returns the response for an HTTP 201 `application/json` response
+func (r CreateSectionCharacterNarrativeSectionsCreatePostResp) GetJSON201() *SectionResponse {
+	return r.JSON201
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CreateSectionCharacterNarrativeSectionsCreatePostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CreateSectionCharacterNarrativeSectionsCreatePostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateSectionCharacterNarrativeSectionsCreatePostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateSectionCharacterNarrativeSectionsCreatePostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CreateSectionCharacterNarrativeSectionsCreatePostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeleteSectionCharacterNarrativeSectionsDeletePostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *Message
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeleteSectionCharacterNarrativeSectionsDeletePostResp) GetJSON200() *Message {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r DeleteSectionCharacterNarrativeSectionsDeletePostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r DeleteSectionCharacterNarrativeSectionsDeletePostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteSectionCharacterNarrativeSectionsDeletePostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteSectionCharacterNarrativeSectionsDeletePostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeleteSectionCharacterNarrativeSectionsDeletePostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetSectionCharacterNarrativeSectionsGetGetResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *SectionResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r GetSectionCharacterNarrativeSectionsGetGetResp) GetJSON200() *SectionResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r GetSectionCharacterNarrativeSectionsGetGetResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r GetSectionCharacterNarrativeSectionsGetGetResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r GetSectionCharacterNarrativeSectionsGetGetResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetSectionCharacterNarrativeSectionsGetGetResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetSectionCharacterNarrativeSectionsGetGetResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type ListSectionsCharacterNarrativeSectionsListGetResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *[]SectionResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r ListSectionsCharacterNarrativeSectionsListGetResp) GetJSON200() *[]SectionResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r ListSectionsCharacterNarrativeSectionsListGetResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r ListSectionsCharacterNarrativeSectionsListGetResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ListSectionsCharacterNarrativeSectionsListGetResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListSectionsCharacterNarrativeSectionsListGetResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ListSectionsCharacterNarrativeSectionsListGetResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type UpdateSectionCharacterNarrativeSectionsUpdatePostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *SectionResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r UpdateSectionCharacterNarrativeSectionsUpdatePostResp) GetJSON200() *SectionResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r UpdateSectionCharacterNarrativeSectionsUpdatePostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r UpdateSectionCharacterNarrativeSectionsUpdatePostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateSectionCharacterNarrativeSectionsUpdatePostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateSectionCharacterNarrativeSectionsUpdatePostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r UpdateSectionCharacterNarrativeSectionsUpdatePostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CreateTriggerCharacterNarrativeTriggersCreatePostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON201 the response for an HTTP 201 `application/json` response
+	JSON201 *TriggerResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON201 returns the response for an HTTP 201 `application/json` response
+func (r CreateTriggerCharacterNarrativeTriggersCreatePostResp) GetJSON201() *TriggerResponse {
+	return r.JSON201
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CreateTriggerCharacterNarrativeTriggersCreatePostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CreateTriggerCharacterNarrativeTriggersCreatePostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateTriggerCharacterNarrativeTriggersCreatePostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateTriggerCharacterNarrativeTriggersCreatePostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CreateTriggerCharacterNarrativeTriggersCreatePostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeleteTriggerCharacterNarrativeTriggersDeletePostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *Message
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeleteTriggerCharacterNarrativeTriggersDeletePostResp) GetJSON200() *Message {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r DeleteTriggerCharacterNarrativeTriggersDeletePostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r DeleteTriggerCharacterNarrativeTriggersDeletePostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteTriggerCharacterNarrativeTriggersDeletePostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteTriggerCharacterNarrativeTriggersDeletePostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeleteTriggerCharacterNarrativeTriggersDeletePostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetTriggerCharacterNarrativeTriggersGetGetResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *TriggerResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r GetTriggerCharacterNarrativeTriggersGetGetResp) GetJSON200() *TriggerResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r GetTriggerCharacterNarrativeTriggersGetGetResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r GetTriggerCharacterNarrativeTriggersGetGetResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r GetTriggerCharacterNarrativeTriggersGetGetResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetTriggerCharacterNarrativeTriggersGetGetResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetTriggerCharacterNarrativeTriggersGetGetResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type ListTriggersCharacterNarrativeTriggersListGetResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *[]TriggerResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r ListTriggersCharacterNarrativeTriggersListGetResp) GetJSON200() *[]TriggerResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r ListTriggersCharacterNarrativeTriggersListGetResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r ListTriggersCharacterNarrativeTriggersListGetResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ListTriggersCharacterNarrativeTriggersListGetResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListTriggersCharacterNarrativeTriggersListGetResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ListTriggersCharacterNarrativeTriggersListGetResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type UpdateTriggerCharacterNarrativeTriggersUpdatePostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *TriggerResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r UpdateTriggerCharacterNarrativeTriggersUpdatePostResp) GetJSON200() *TriggerResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r UpdateTriggerCharacterNarrativeTriggersUpdatePostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r UpdateTriggerCharacterNarrativeTriggersUpdatePostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateTriggerCharacterNarrativeTriggersUpdatePostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateTriggerCharacterNarrativeTriggersUpdatePostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r UpdateTriggerCharacterNarrativeTriggersUpdatePostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *Message
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp) GetJSON200() *Message {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CharacterListSupportedModelsResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *SupportedModelsResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r CharacterListSupportedModelsResp) GetJSON200() *SupportedModelsResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CharacterListSupportedModelsResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CharacterListSupportedModelsResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CharacterListSupportedModelsResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CharacterListSupportedModelsResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CharacterListSupportedModelsResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CharacterUpdateResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *CharacterResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r CharacterUpdateResp) GetJSON200() *CharacterResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CharacterUpdateResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CharacterUpdateResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CharacterUpdateResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CharacterUpdateResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CharacterUpdateResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CharacterVersionCreateResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON201 the response for an HTTP 201 `application/json` response
+	JSON201 *CharacterVersionItem
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON201 returns the response for an HTTP 201 `application/json` response
+func (r CharacterVersionCreateResp) GetJSON201() *CharacterVersionItem {
+	return r.JSON201
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CharacterVersionCreateResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CharacterVersionCreateResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CharacterVersionCreateResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CharacterVersionCreateResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CharacterVersionCreateResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CharacterVersionDeprecateResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *CharacterVersionItem
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r CharacterVersionDeprecateResp) GetJSON200() *CharacterVersionItem {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CharacterVersionDeprecateResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CharacterVersionDeprecateResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CharacterVersionDeprecateResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CharacterVersionDeprecateResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CharacterVersionDeprecateResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CharacterVersionDiffResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *CharacterVersionDiff200JSONResponseBody
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r CharacterVersionDiffResp) GetJSON200() *CharacterVersionDiff200JSONResponseBody {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CharacterVersionDiffResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CharacterVersionDiffResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CharacterVersionDiffResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CharacterVersionDiffResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CharacterVersionDiffResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CharacterVersionDiscardDraftResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *CharacterDraftDiscardResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r CharacterVersionDiscardDraftResp) GetJSON200() *CharacterDraftDiscardResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CharacterVersionDiscardDraftResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CharacterVersionDiscardDraftResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CharacterVersionDiscardDraftResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CharacterVersionDiscardDraftResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CharacterVersionDiscardDraftResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CharacterVersionForkResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *CharacterVersionForkResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r CharacterVersionForkResp) GetJSON200() *CharacterVersionForkResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CharacterVersionForkResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CharacterVersionForkResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CharacterVersionForkResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CharacterVersionForkResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CharacterVersionForkResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CharacterVersionListResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *CharacterVersionListResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r CharacterVersionListResp) GetJSON200() *CharacterVersionListResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CharacterVersionListResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CharacterVersionListResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CharacterVersionListResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CharacterVersionListResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CharacterVersionListResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CharacterVersionPromoteResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *CharacterVersionItem
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r CharacterVersionPromoteResp) GetJSON200() *CharacterVersionItem {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CharacterVersionPromoteResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CharacterVersionPromoteResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CharacterVersionPromoteResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CharacterVersionPromoteResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CharacterVersionPromoteResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CharacterVersionRevertDraftChangeResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *CharacterVersionRevertChangeResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r CharacterVersionRevertDraftChangeResp) GetJSON200() *CharacterVersionRevertChangeResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CharacterVersionRevertDraftChangeResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CharacterVersionRevertDraftChangeResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CharacterVersionRevertDraftChangeResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CharacterVersionRevertDraftChangeResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CharacterVersionRevertDraftChangeResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type CreateFunctionFunctionsCreatePostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON201 the response for an HTTP 201 `application/json` response
+	JSON201 *FunctionCreateResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON201 returns the response for an HTTP 201 `application/json` response
+func (r CreateFunctionFunctionsCreatePostResp) GetJSON201() *FunctionCreateResponse {
+	return r.JSON201
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r CreateFunctionFunctionsCreatePostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r CreateFunctionFunctionsCreatePostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateFunctionFunctionsCreatePostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateFunctionFunctionsCreatePostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r CreateFunctionFunctionsCreatePostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeleteFunctionFunctionsDeletePostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *FunctionStatusResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeleteFunctionFunctionsDeletePostResp) GetJSON200() *FunctionStatusResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r DeleteFunctionFunctionsDeletePostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r DeleteFunctionFunctionsDeletePostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteFunctionFunctionsDeletePostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteFunctionFunctionsDeletePostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeleteFunctionFunctionsDeletePostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetFunctionFunctionsGetPostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *FunctionDetailResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r GetFunctionFunctionsGetPostResp) GetJSON200() *FunctionDetailResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r GetFunctionFunctionsGetPostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r GetFunctionFunctionsGetPostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r GetFunctionFunctionsGetPostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetFunctionFunctionsGetPostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetFunctionFunctionsGetPostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type ListFunctionsFunctionsListPostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *FunctionListResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r ListFunctionsFunctionsListPostResp) GetJSON200() *FunctionListResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r ListFunctionsFunctionsListPostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r ListFunctionsFunctionsListPostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ListFunctionsFunctionsListPostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListFunctionsFunctionsListPostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ListFunctionsFunctionsListPostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type ListTemplatesFunctionsTemplatesListPostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *TemplateListResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r ListTemplatesFunctionsTemplatesListPostResp) GetJSON200() *TemplateListResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r ListTemplatesFunctionsTemplatesListPostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r ListTemplatesFunctionsTemplatesListPostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ListTemplatesFunctionsTemplatesListPostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListTemplatesFunctionsTemplatesListPostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ListTemplatesFunctionsTemplatesListPostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type TestFunctionFunctionsTestPostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *FunctionExecutionResult
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r TestFunctionFunctionsTestPostResp) GetJSON200() *FunctionExecutionResult {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r TestFunctionFunctionsTestPostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r TestFunctionFunctionsTestPostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r TestFunctionFunctionsTestPostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r TestFunctionFunctionsTestPostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r TestFunctionFunctionsTestPostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type UpdateFunctionFunctionsUpdatePostResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *FunctionStatusResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r UpdateFunctionFunctionsUpdatePostResp) GetJSON200() *FunctionStatusResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r UpdateFunctionFunctionsUpdatePostResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r UpdateFunctionFunctionsUpdatePostResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateFunctionFunctionsUpdatePostResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateFunctionFunctionsUpdatePostResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r UpdateFunctionFunctionsUpdatePostResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetAvailableLanguagesTtsGetAvailableLanguagesGetResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AvailableLanguagesResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r GetAvailableLanguagesTtsGetAvailableLanguagesGetResp) GetJSON200() *AvailableLanguagesResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r GetAvailableLanguagesTtsGetAvailableLanguagesGetResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r GetAvailableLanguagesTtsGetAvailableLanguagesGetResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r GetAvailableLanguagesTtsGetAvailableLanguagesGetResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetAvailableLanguagesTtsGetAvailableLanguagesGetResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetAvailableLanguagesTtsGetAvailableLanguagesGetResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type GetAvailableVoicesTtsGetAvailableVoicesGetResp struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AvailableVoicesResponse
+	// JSON422 the response for an HTTP 422 `application/json` response
+	JSON422 *HTTPValidationError
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r GetAvailableVoicesTtsGetAvailableVoicesGetResp) GetJSON200() *AvailableVoicesResponse {
+	return r.JSON200
+}
+
+// GetJSON422 returns the response for an HTTP 422 `application/json` response
+func (r GetAvailableVoicesTtsGetAvailableVoicesGetResp) GetJSON422() *HTTPValidationError {
+	return r.JSON422
+}
+
+// GetBody returns the raw response body bytes
+func (r GetAvailableVoicesTtsGetAvailableVoicesGetResp) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r GetAvailableVoicesTtsGetAvailableVoicesGetResp) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetAvailableVoicesTtsGetAvailableVoicesGetResp) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r GetAvailableVoicesTtsGetAvailableVoicesGetResp) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+// CharacterCloneWithBodyWithResponse Clone a character
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/clone (the `CharacterClone` operationId).
+func (c *ClientWithResponses) CharacterCloneWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterCloneResp, error) {
+	rsp, err := c.CharacterCloneWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterCloneResp(rsp)
+}
+
+// CharacterCloneWithResponse Clone a character
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/clone (the `CharacterClone` operationId).
+func (c *ClientWithResponses) CharacterCloneWithResponse(ctx context.Context, body CharacterCloneJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterCloneResp, error) {
+	rsp, err := c.CharacterClone(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterCloneResp(rsp)
+}
+
+// CharacterCreateWithBodyWithResponse Create a character with explicit or automatically selected voice
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -770,7 +8291,7 @@ func (c *ClientWithResponses) CharacterCreateWithBodyWithResponse(ctx context.Co
 	return ParseCharacterCreateResp(rsp)
 }
 
-// CharacterCreateWithResponse Create a character and active metadata row
+// CharacterCreateWithResponse Create a character with explicit or automatically selected voice
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -783,7 +8304,20 @@ func (c *ClientWithResponses) CharacterCreateWithResponse(ctx context.Context, b
 	return ParseCharacterCreateResp(rsp)
 }
 
-// CharacterGetWithResponse Get one owned character with active metadata
+// CharacterDeleteWithResponse Delete an owned character and its metadata
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/delete (the `CharacterDelete` operationId).
+func (c *ClientWithResponses) CharacterDeleteWithResponse(ctx context.Context, params *CharacterDeleteParams, reqEditors ...RequestEditorFn) (*CharacterDeleteResp, error) {
+	rsp, err := c.CharacterDelete(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterDeleteResp(rsp)
+}
+
+// CharacterGetWithResponse Get one visible character with active metadata
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -809,6 +8343,756 @@ func (c *ClientWithResponses) CharacterListWithResponse(ctx context.Context, par
 	return ParseCharacterListResp(rsp)
 }
 
+// AddDecisionCharacterNarrativeAddDecisionPostWithBodyWithResponse Add Decision
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/add-decision (the `AddDecisionCharacterNarrativeAddDecisionPost` operationId).
+func (c *ClientWithResponses) AddDecisionCharacterNarrativeAddDecisionPostWithBodyWithResponse(ctx context.Context, params *AddDecisionCharacterNarrativeAddDecisionPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AddDecisionCharacterNarrativeAddDecisionPostResp, error) {
+	rsp, err := c.AddDecisionCharacterNarrativeAddDecisionPostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAddDecisionCharacterNarrativeAddDecisionPostResp(rsp)
+}
+
+// AddDecisionCharacterNarrativeAddDecisionPostWithResponse Add Decision
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/add-decision (the `AddDecisionCharacterNarrativeAddDecisionPost` operationId).
+func (c *ClientWithResponses) AddDecisionCharacterNarrativeAddDecisionPostWithResponse(ctx context.Context, params *AddDecisionCharacterNarrativeAddDecisionPostParams, body AddDecisionCharacterNarrativeAddDecisionPostJSONRequestBody, reqEditors ...RequestEditorFn) (*AddDecisionCharacterNarrativeAddDecisionPostResp, error) {
+	rsp, err := c.AddDecisionCharacterNarrativeAddDecisionPost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAddDecisionCharacterNarrativeAddDecisionPostResp(rsp)
+}
+
+// DeleteDecisionCharacterNarrativeDeleteDecisionPostWithBodyWithResponse Delete Decision
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/delete-decision (the `DeleteDecisionCharacterNarrativeDeleteDecisionPost` operationId).
+func (c *ClientWithResponses) DeleteDecisionCharacterNarrativeDeleteDecisionPostWithBodyWithResponse(ctx context.Context, params *DeleteDecisionCharacterNarrativeDeleteDecisionPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteDecisionCharacterNarrativeDeleteDecisionPostResp, error) {
+	rsp, err := c.DeleteDecisionCharacterNarrativeDeleteDecisionPostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteDecisionCharacterNarrativeDeleteDecisionPostResp(rsp)
+}
+
+// DeleteDecisionCharacterNarrativeDeleteDecisionPostWithResponse Delete Decision
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/delete-decision (the `DeleteDecisionCharacterNarrativeDeleteDecisionPost` operationId).
+func (c *ClientWithResponses) DeleteDecisionCharacterNarrativeDeleteDecisionPostWithResponse(ctx context.Context, params *DeleteDecisionCharacterNarrativeDeleteDecisionPostParams, body DeleteDecisionCharacterNarrativeDeleteDecisionPostJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteDecisionCharacterNarrativeDeleteDecisionPostResp, error) {
+	rsp, err := c.DeleteDecisionCharacterNarrativeDeleteDecisionPost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteDecisionCharacterNarrativeDeleteDecisionPostResp(rsp)
+}
+
+// EditDecisionCharacterNarrativeEditDecisionPostWithBodyWithResponse Edit Decision
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/edit-decision (the `EditDecisionCharacterNarrativeEditDecisionPost` operationId).
+func (c *ClientWithResponses) EditDecisionCharacterNarrativeEditDecisionPostWithBodyWithResponse(ctx context.Context, params *EditDecisionCharacterNarrativeEditDecisionPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*EditDecisionCharacterNarrativeEditDecisionPostResp, error) {
+	rsp, err := c.EditDecisionCharacterNarrativeEditDecisionPostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEditDecisionCharacterNarrativeEditDecisionPostResp(rsp)
+}
+
+// EditDecisionCharacterNarrativeEditDecisionPostWithResponse Edit Decision
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/edit-decision (the `EditDecisionCharacterNarrativeEditDecisionPost` operationId).
+func (c *ClientWithResponses) EditDecisionCharacterNarrativeEditDecisionPostWithResponse(ctx context.Context, params *EditDecisionCharacterNarrativeEditDecisionPostParams, body EditDecisionCharacterNarrativeEditDecisionPostJSONRequestBody, reqEditors ...RequestEditorFn) (*EditDecisionCharacterNarrativeEditDecisionPostResp, error) {
+	rsp, err := c.EditDecisionCharacterNarrativeEditDecisionPost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEditDecisionCharacterNarrativeEditDecisionPostResp(rsp)
+}
+
+// CreateSectionCharacterNarrativeSectionsCreatePostWithBodyWithResponse Create Section
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/sections/create (the `CreateSectionCharacterNarrativeSectionsCreatePost` operationId).
+func (c *ClientWithResponses) CreateSectionCharacterNarrativeSectionsCreatePostWithBodyWithResponse(ctx context.Context, params *CreateSectionCharacterNarrativeSectionsCreatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateSectionCharacterNarrativeSectionsCreatePostResp, error) {
+	rsp, err := c.CreateSectionCharacterNarrativeSectionsCreatePostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateSectionCharacterNarrativeSectionsCreatePostResp(rsp)
+}
+
+// CreateSectionCharacterNarrativeSectionsCreatePostWithResponse Create Section
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/sections/create (the `CreateSectionCharacterNarrativeSectionsCreatePost` operationId).
+func (c *ClientWithResponses) CreateSectionCharacterNarrativeSectionsCreatePostWithResponse(ctx context.Context, params *CreateSectionCharacterNarrativeSectionsCreatePostParams, body CreateSectionCharacterNarrativeSectionsCreatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateSectionCharacterNarrativeSectionsCreatePostResp, error) {
+	rsp, err := c.CreateSectionCharacterNarrativeSectionsCreatePost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateSectionCharacterNarrativeSectionsCreatePostResp(rsp)
+}
+
+// DeleteSectionCharacterNarrativeSectionsDeletePostWithResponse Delete Section
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/sections/delete (the `DeleteSectionCharacterNarrativeSectionsDeletePost` operationId).
+func (c *ClientWithResponses) DeleteSectionCharacterNarrativeSectionsDeletePostWithResponse(ctx context.Context, params *DeleteSectionCharacterNarrativeSectionsDeletePostParams, reqEditors ...RequestEditorFn) (*DeleteSectionCharacterNarrativeSectionsDeletePostResp, error) {
+	rsp, err := c.DeleteSectionCharacterNarrativeSectionsDeletePost(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteSectionCharacterNarrativeSectionsDeletePostResp(rsp)
+}
+
+// GetSectionCharacterNarrativeSectionsGetGetWithResponse Get Section
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /character/narrative/sections/get (the `GetSectionCharacterNarrativeSectionsGetGet` operationId).
+func (c *ClientWithResponses) GetSectionCharacterNarrativeSectionsGetGetWithResponse(ctx context.Context, params *GetSectionCharacterNarrativeSectionsGetGetParams, reqEditors ...RequestEditorFn) (*GetSectionCharacterNarrativeSectionsGetGetResp, error) {
+	rsp, err := c.GetSectionCharacterNarrativeSectionsGetGet(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetSectionCharacterNarrativeSectionsGetGetResp(rsp)
+}
+
+// ListSectionsCharacterNarrativeSectionsListGetWithResponse List Sections
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /character/narrative/sections/list (the `ListSectionsCharacterNarrativeSectionsListGet` operationId).
+func (c *ClientWithResponses) ListSectionsCharacterNarrativeSectionsListGetWithResponse(ctx context.Context, params *ListSectionsCharacterNarrativeSectionsListGetParams, reqEditors ...RequestEditorFn) (*ListSectionsCharacterNarrativeSectionsListGetResp, error) {
+	rsp, err := c.ListSectionsCharacterNarrativeSectionsListGet(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListSectionsCharacterNarrativeSectionsListGetResp(rsp)
+}
+
+// UpdateSectionCharacterNarrativeSectionsUpdatePostWithBodyWithResponse Update Section
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/sections/update (the `UpdateSectionCharacterNarrativeSectionsUpdatePost` operationId).
+func (c *ClientWithResponses) UpdateSectionCharacterNarrativeSectionsUpdatePostWithBodyWithResponse(ctx context.Context, params *UpdateSectionCharacterNarrativeSectionsUpdatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateSectionCharacterNarrativeSectionsUpdatePostResp, error) {
+	rsp, err := c.UpdateSectionCharacterNarrativeSectionsUpdatePostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateSectionCharacterNarrativeSectionsUpdatePostResp(rsp)
+}
+
+// UpdateSectionCharacterNarrativeSectionsUpdatePostWithResponse Update Section
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/sections/update (the `UpdateSectionCharacterNarrativeSectionsUpdatePost` operationId).
+func (c *ClientWithResponses) UpdateSectionCharacterNarrativeSectionsUpdatePostWithResponse(ctx context.Context, params *UpdateSectionCharacterNarrativeSectionsUpdatePostParams, body UpdateSectionCharacterNarrativeSectionsUpdatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateSectionCharacterNarrativeSectionsUpdatePostResp, error) {
+	rsp, err := c.UpdateSectionCharacterNarrativeSectionsUpdatePost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateSectionCharacterNarrativeSectionsUpdatePostResp(rsp)
+}
+
+// CreateTriggerCharacterNarrativeTriggersCreatePostWithBodyWithResponse Create Trigger
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/triggers/create (the `CreateTriggerCharacterNarrativeTriggersCreatePost` operationId).
+func (c *ClientWithResponses) CreateTriggerCharacterNarrativeTriggersCreatePostWithBodyWithResponse(ctx context.Context, params *CreateTriggerCharacterNarrativeTriggersCreatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateTriggerCharacterNarrativeTriggersCreatePostResp, error) {
+	rsp, err := c.CreateTriggerCharacterNarrativeTriggersCreatePostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateTriggerCharacterNarrativeTriggersCreatePostResp(rsp)
+}
+
+// CreateTriggerCharacterNarrativeTriggersCreatePostWithResponse Create Trigger
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/triggers/create (the `CreateTriggerCharacterNarrativeTriggersCreatePost` operationId).
+func (c *ClientWithResponses) CreateTriggerCharacterNarrativeTriggersCreatePostWithResponse(ctx context.Context, params *CreateTriggerCharacterNarrativeTriggersCreatePostParams, body CreateTriggerCharacterNarrativeTriggersCreatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateTriggerCharacterNarrativeTriggersCreatePostResp, error) {
+	rsp, err := c.CreateTriggerCharacterNarrativeTriggersCreatePost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateTriggerCharacterNarrativeTriggersCreatePostResp(rsp)
+}
+
+// DeleteTriggerCharacterNarrativeTriggersDeletePostWithResponse Delete Trigger
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/triggers/delete (the `DeleteTriggerCharacterNarrativeTriggersDeletePost` operationId).
+func (c *ClientWithResponses) DeleteTriggerCharacterNarrativeTriggersDeletePostWithResponse(ctx context.Context, params *DeleteTriggerCharacterNarrativeTriggersDeletePostParams, reqEditors ...RequestEditorFn) (*DeleteTriggerCharacterNarrativeTriggersDeletePostResp, error) {
+	rsp, err := c.DeleteTriggerCharacterNarrativeTriggersDeletePost(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteTriggerCharacterNarrativeTriggersDeletePostResp(rsp)
+}
+
+// GetTriggerCharacterNarrativeTriggersGetGetWithResponse Get Trigger
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /character/narrative/triggers/get (the `GetTriggerCharacterNarrativeTriggersGetGet` operationId).
+func (c *ClientWithResponses) GetTriggerCharacterNarrativeTriggersGetGetWithResponse(ctx context.Context, params *GetTriggerCharacterNarrativeTriggersGetGetParams, reqEditors ...RequestEditorFn) (*GetTriggerCharacterNarrativeTriggersGetGetResp, error) {
+	rsp, err := c.GetTriggerCharacterNarrativeTriggersGetGet(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetTriggerCharacterNarrativeTriggersGetGetResp(rsp)
+}
+
+// ListTriggersCharacterNarrativeTriggersListGetWithResponse List Triggers
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /character/narrative/triggers/list (the `ListTriggersCharacterNarrativeTriggersListGet` operationId).
+func (c *ClientWithResponses) ListTriggersCharacterNarrativeTriggersListGetWithResponse(ctx context.Context, params *ListTriggersCharacterNarrativeTriggersListGetParams, reqEditors ...RequestEditorFn) (*ListTriggersCharacterNarrativeTriggersListGetResp, error) {
+	rsp, err := c.ListTriggersCharacterNarrativeTriggersListGet(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListTriggersCharacterNarrativeTriggersListGetResp(rsp)
+}
+
+// UpdateTriggerCharacterNarrativeTriggersUpdatePostWithBodyWithResponse Update Trigger
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/triggers/update (the `UpdateTriggerCharacterNarrativeTriggersUpdatePost` operationId).
+func (c *ClientWithResponses) UpdateTriggerCharacterNarrativeTriggersUpdatePostWithBodyWithResponse(ctx context.Context, params *UpdateTriggerCharacterNarrativeTriggersUpdatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateTriggerCharacterNarrativeTriggersUpdatePostResp, error) {
+	rsp, err := c.UpdateTriggerCharacterNarrativeTriggersUpdatePostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateTriggerCharacterNarrativeTriggersUpdatePostResp(rsp)
+}
+
+// UpdateTriggerCharacterNarrativeTriggersUpdatePostWithResponse Update Trigger
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/triggers/update (the `UpdateTriggerCharacterNarrativeTriggersUpdatePost` operationId).
+func (c *ClientWithResponses) UpdateTriggerCharacterNarrativeTriggersUpdatePostWithResponse(ctx context.Context, params *UpdateTriggerCharacterNarrativeTriggersUpdatePostParams, body UpdateTriggerCharacterNarrativeTriggersUpdatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateTriggerCharacterNarrativeTriggersUpdatePostResp, error) {
+	rsp, err := c.UpdateTriggerCharacterNarrativeTriggersUpdatePost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateTriggerCharacterNarrativeTriggersUpdatePostResp(rsp)
+}
+
+// UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithBodyWithResponse Update Start Section Id
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/update-start-section-id (the `UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost` operationId).
+func (c *ClientWithResponses) UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithBodyWithResponse(ctx context.Context, params *UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp, error) {
+	rsp, err := c.UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp(rsp)
+}
+
+// UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithResponse Update Start Section Id
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/narrative/update-start-section-id (the `UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost` operationId).
+func (c *ClientWithResponses) UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithResponse(ctx context.Context, params *UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams, body UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp, error) {
+	rsp, err := c.UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp(rsp)
+}
+
+// CharacterListSupportedModelsWithResponse List supported character LLM models
+//
+// Canonical read-only API for discovering the caller's supported character LLM models. When `character_id` is supplied, the response also identifies that character's active model, including a grandfathered internal model that remains assigned to it. Internal models are otherwise omitted from selection.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /character/supported-models (the `CharacterListSupportedModels` operationId).
+func (c *ClientWithResponses) CharacterListSupportedModelsWithResponse(ctx context.Context, params *CharacterListSupportedModelsParams, reqEditors ...RequestEditorFn) (*CharacterListSupportedModelsResp, error) {
+	rsp, err := c.CharacterListSupportedModels(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterListSupportedModelsResp(rsp)
+}
+
+// CharacterUpdateWithBodyWithResponse Update an owned character and version active metadata when backstory changes
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/update (the `CharacterUpdate` operationId).
+func (c *ClientWithResponses) CharacterUpdateWithBodyWithResponse(ctx context.Context, params *CharacterUpdateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterUpdateResp, error) {
+	rsp, err := c.CharacterUpdateWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterUpdateResp(rsp)
+}
+
+// CharacterUpdateWithResponse Update an owned character and version active metadata when backstory changes
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/update (the `CharacterUpdate` operationId).
+func (c *ClientWithResponses) CharacterUpdateWithResponse(ctx context.Context, params *CharacterUpdateParams, body CharacterUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterUpdateResp, error) {
+	rsp, err := c.CharacterUpdate(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterUpdateResp(rsp)
+}
+
+// CharacterVersionCreateWithBodyWithResponse Release the current draft as an immutable character version
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/versions/create (the `CharacterVersionCreate` operationId).
+func (c *ClientWithResponses) CharacterVersionCreateWithBodyWithResponse(ctx context.Context, params *CharacterVersionCreateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterVersionCreateResp, error) {
+	rsp, err := c.CharacterVersionCreateWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionCreateResp(rsp)
+}
+
+// CharacterVersionCreateWithResponse Release the current draft as an immutable character version
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/versions/create (the `CharacterVersionCreate` operationId).
+func (c *ClientWithResponses) CharacterVersionCreateWithResponse(ctx context.Context, params *CharacterVersionCreateParams, body CharacterVersionCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterVersionCreateResp, error) {
+	rsp, err := c.CharacterVersionCreate(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionCreateResp(rsp)
+}
+
+// CharacterVersionDeprecateWithBodyWithResponse Deprecate or restore an immutable character version
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/versions/deprecate (the `CharacterVersionDeprecate` operationId).
+func (c *ClientWithResponses) CharacterVersionDeprecateWithBodyWithResponse(ctx context.Context, params *CharacterVersionDeprecateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterVersionDeprecateResp, error) {
+	rsp, err := c.CharacterVersionDeprecateWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionDeprecateResp(rsp)
+}
+
+// CharacterVersionDeprecateWithResponse Deprecate or restore an immutable character version
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/versions/deprecate (the `CharacterVersionDeprecate` operationId).
+func (c *ClientWithResponses) CharacterVersionDeprecateWithResponse(ctx context.Context, params *CharacterVersionDeprecateParams, body CharacterVersionDeprecateJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterVersionDeprecateResp, error) {
+	rsp, err := c.CharacterVersionDeprecate(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionDeprecateResp(rsp)
+}
+
+// CharacterVersionDiffWithResponse Compare two immutable character versions, latest, or draft
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /character/versions/diff (the `CharacterVersionDiff` operationId).
+func (c *ClientWithResponses) CharacterVersionDiffWithResponse(ctx context.Context, params *CharacterVersionDiffParams, reqEditors ...RequestEditorFn) (*CharacterVersionDiffResp, error) {
+	rsp, err := c.CharacterVersionDiff(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionDiffResp(rsp)
+}
+
+// CharacterVersionDiscardDraftWithBodyWithResponse Discard all saved draft changes and restore its released parent
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/versions/discard-draft (the `CharacterVersionDiscardDraft` operationId).
+func (c *ClientWithResponses) CharacterVersionDiscardDraftWithBodyWithResponse(ctx context.Context, params *CharacterVersionDiscardDraftParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterVersionDiscardDraftResp, error) {
+	rsp, err := c.CharacterVersionDiscardDraftWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionDiscardDraftResp(rsp)
+}
+
+// CharacterVersionDiscardDraftWithResponse Discard all saved draft changes and restore its released parent
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/versions/discard-draft (the `CharacterVersionDiscardDraft` operationId).
+func (c *ClientWithResponses) CharacterVersionDiscardDraftWithResponse(ctx context.Context, params *CharacterVersionDiscardDraftParams, body CharacterVersionDiscardDraftJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterVersionDiscardDraftResp, error) {
+	rsp, err := c.CharacterVersionDiscardDraft(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionDiscardDraftResp(rsp)
+}
+
+// CharacterVersionForkWithBodyWithResponse Replace the editable draft with an immutable tagged version
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/versions/fork (the `CharacterVersionFork` operationId).
+func (c *ClientWithResponses) CharacterVersionForkWithBodyWithResponse(ctx context.Context, params *CharacterVersionForkParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterVersionForkResp, error) {
+	rsp, err := c.CharacterVersionForkWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionForkResp(rsp)
+}
+
+// CharacterVersionForkWithResponse Replace the editable draft with an immutable tagged version
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/versions/fork (the `CharacterVersionFork` operationId).
+func (c *ClientWithResponses) CharacterVersionForkWithResponse(ctx context.Context, params *CharacterVersionForkParams, body CharacterVersionForkJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterVersionForkResp, error) {
+	rsp, err := c.CharacterVersionFork(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionForkResp(rsp)
+}
+
+// CharacterVersionListWithResponse List immutable version tags and the latest and draft revisions
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /character/versions/list (the `CharacterVersionList` operationId).
+func (c *ClientWithResponses) CharacterVersionListWithResponse(ctx context.Context, params *CharacterVersionListParams, reqEditors ...RequestEditorFn) (*CharacterVersionListResp, error) {
+	rsp, err := c.CharacterVersionList(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionListResp(rsp)
+}
+
+// CharacterVersionPromoteWithBodyWithResponse Move latest to an immutable tagged revision
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/versions/promote (the `CharacterVersionPromote` operationId).
+func (c *ClientWithResponses) CharacterVersionPromoteWithBodyWithResponse(ctx context.Context, params *CharacterVersionPromoteParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterVersionPromoteResp, error) {
+	rsp, err := c.CharacterVersionPromoteWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionPromoteResp(rsp)
+}
+
+// CharacterVersionPromoteWithResponse Move latest to an immutable tagged revision
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/versions/promote (the `CharacterVersionPromote` operationId).
+func (c *ClientWithResponses) CharacterVersionPromoteWithResponse(ctx context.Context, params *CharacterVersionPromoteParams, body CharacterVersionPromoteJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterVersionPromoteResp, error) {
+	rsp, err := c.CharacterVersionPromote(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionPromoteResp(rsp)
+}
+
+// CharacterVersionRevertDraftChangeWithBodyWithResponse Revert one semantic draft change to an immutable version
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/versions/revert (the `CharacterVersionRevertDraftChange` operationId).
+func (c *ClientWithResponses) CharacterVersionRevertDraftChangeWithBodyWithResponse(ctx context.Context, params *CharacterVersionRevertDraftChangeParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterVersionRevertDraftChangeResp, error) {
+	rsp, err := c.CharacterVersionRevertDraftChangeWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionRevertDraftChangeResp(rsp)
+}
+
+// CharacterVersionRevertDraftChangeWithResponse Revert one semantic draft change to an immutable version
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /character/versions/revert (the `CharacterVersionRevertDraftChange` operationId).
+func (c *ClientWithResponses) CharacterVersionRevertDraftChangeWithResponse(ctx context.Context, params *CharacterVersionRevertDraftChangeParams, body CharacterVersionRevertDraftChangeJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterVersionRevertDraftChangeResp, error) {
+	rsp, err := c.CharacterVersionRevertDraftChange(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCharacterVersionRevertDraftChangeResp(rsp)
+}
+
+// CreateFunctionFunctionsCreatePostWithBodyWithResponse Create Function
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/create (the `CreateFunctionFunctionsCreatePost` operationId).
+func (c *ClientWithResponses) CreateFunctionFunctionsCreatePostWithBodyWithResponse(ctx context.Context, params *CreateFunctionFunctionsCreatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateFunctionFunctionsCreatePostResp, error) {
+	rsp, err := c.CreateFunctionFunctionsCreatePostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateFunctionFunctionsCreatePostResp(rsp)
+}
+
+// CreateFunctionFunctionsCreatePostWithResponse Create Function
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/create (the `CreateFunctionFunctionsCreatePost` operationId).
+func (c *ClientWithResponses) CreateFunctionFunctionsCreatePostWithResponse(ctx context.Context, params *CreateFunctionFunctionsCreatePostParams, body CreateFunctionFunctionsCreatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateFunctionFunctionsCreatePostResp, error) {
+	rsp, err := c.CreateFunctionFunctionsCreatePost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateFunctionFunctionsCreatePostResp(rsp)
+}
+
+// DeleteFunctionFunctionsDeletePostWithBodyWithResponse Delete Function
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/delete (the `DeleteFunctionFunctionsDeletePost` operationId).
+func (c *ClientWithResponses) DeleteFunctionFunctionsDeletePostWithBodyWithResponse(ctx context.Context, params *DeleteFunctionFunctionsDeletePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteFunctionFunctionsDeletePostResp, error) {
+	rsp, err := c.DeleteFunctionFunctionsDeletePostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteFunctionFunctionsDeletePostResp(rsp)
+}
+
+// DeleteFunctionFunctionsDeletePostWithResponse Delete Function
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/delete (the `DeleteFunctionFunctionsDeletePost` operationId).
+func (c *ClientWithResponses) DeleteFunctionFunctionsDeletePostWithResponse(ctx context.Context, params *DeleteFunctionFunctionsDeletePostParams, body DeleteFunctionFunctionsDeletePostJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteFunctionFunctionsDeletePostResp, error) {
+	rsp, err := c.DeleteFunctionFunctionsDeletePost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteFunctionFunctionsDeletePostResp(rsp)
+}
+
+// GetFunctionFunctionsGetPostWithBodyWithResponse Get Function
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/get (the `GetFunctionFunctionsGetPost` operationId).
+func (c *ClientWithResponses) GetFunctionFunctionsGetPostWithBodyWithResponse(ctx context.Context, params *GetFunctionFunctionsGetPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*GetFunctionFunctionsGetPostResp, error) {
+	rsp, err := c.GetFunctionFunctionsGetPostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetFunctionFunctionsGetPostResp(rsp)
+}
+
+// GetFunctionFunctionsGetPostWithResponse Get Function
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/get (the `GetFunctionFunctionsGetPost` operationId).
+func (c *ClientWithResponses) GetFunctionFunctionsGetPostWithResponse(ctx context.Context, params *GetFunctionFunctionsGetPostParams, body GetFunctionFunctionsGetPostJSONRequestBody, reqEditors ...RequestEditorFn) (*GetFunctionFunctionsGetPostResp, error) {
+	rsp, err := c.GetFunctionFunctionsGetPost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetFunctionFunctionsGetPostResp(rsp)
+}
+
+// ListFunctionsFunctionsListPostWithBodyWithResponse List Functions
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/list (the `ListFunctionsFunctionsListPost` operationId).
+func (c *ClientWithResponses) ListFunctionsFunctionsListPostWithBodyWithResponse(ctx context.Context, params *ListFunctionsFunctionsListPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ListFunctionsFunctionsListPostResp, error) {
+	rsp, err := c.ListFunctionsFunctionsListPostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListFunctionsFunctionsListPostResp(rsp)
+}
+
+// ListFunctionsFunctionsListPostWithResponse List Functions
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/list (the `ListFunctionsFunctionsListPost` operationId).
+func (c *ClientWithResponses) ListFunctionsFunctionsListPostWithResponse(ctx context.Context, params *ListFunctionsFunctionsListPostParams, body ListFunctionsFunctionsListPostJSONRequestBody, reqEditors ...RequestEditorFn) (*ListFunctionsFunctionsListPostResp, error) {
+	rsp, err := c.ListFunctionsFunctionsListPost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListFunctionsFunctionsListPostResp(rsp)
+}
+
+// ListTemplatesFunctionsTemplatesListPostWithBodyWithResponse List Templates
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/templates/list (the `ListTemplatesFunctionsTemplatesListPost` operationId).
+func (c *ClientWithResponses) ListTemplatesFunctionsTemplatesListPostWithBodyWithResponse(ctx context.Context, params *ListTemplatesFunctionsTemplatesListPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ListTemplatesFunctionsTemplatesListPostResp, error) {
+	rsp, err := c.ListTemplatesFunctionsTemplatesListPostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListTemplatesFunctionsTemplatesListPostResp(rsp)
+}
+
+// ListTemplatesFunctionsTemplatesListPostWithResponse List Templates
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/templates/list (the `ListTemplatesFunctionsTemplatesListPost` operationId).
+func (c *ClientWithResponses) ListTemplatesFunctionsTemplatesListPostWithResponse(ctx context.Context, params *ListTemplatesFunctionsTemplatesListPostParams, body ListTemplatesFunctionsTemplatesListPostJSONRequestBody, reqEditors ...RequestEditorFn) (*ListTemplatesFunctionsTemplatesListPostResp, error) {
+	rsp, err := c.ListTemplatesFunctionsTemplatesListPost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListTemplatesFunctionsTemplatesListPostResp(rsp)
+}
+
+// TestFunctionFunctionsTestPostWithBodyWithResponse Test Function
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/test (the `TestFunctionFunctionsTestPost` operationId).
+func (c *ClientWithResponses) TestFunctionFunctionsTestPostWithBodyWithResponse(ctx context.Context, params *TestFunctionFunctionsTestPostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*TestFunctionFunctionsTestPostResp, error) {
+	rsp, err := c.TestFunctionFunctionsTestPostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTestFunctionFunctionsTestPostResp(rsp)
+}
+
+// TestFunctionFunctionsTestPostWithResponse Test Function
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/test (the `TestFunctionFunctionsTestPost` operationId).
+func (c *ClientWithResponses) TestFunctionFunctionsTestPostWithResponse(ctx context.Context, params *TestFunctionFunctionsTestPostParams, body TestFunctionFunctionsTestPostJSONRequestBody, reqEditors ...RequestEditorFn) (*TestFunctionFunctionsTestPostResp, error) {
+	rsp, err := c.TestFunctionFunctionsTestPost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseTestFunctionFunctionsTestPostResp(rsp)
+}
+
+// UpdateFunctionFunctionsUpdatePostWithBodyWithResponse Update Function
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/update (the `UpdateFunctionFunctionsUpdatePost` operationId).
+func (c *ClientWithResponses) UpdateFunctionFunctionsUpdatePostWithBodyWithResponse(ctx context.Context, params *UpdateFunctionFunctionsUpdatePostParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateFunctionFunctionsUpdatePostResp, error) {
+	rsp, err := c.UpdateFunctionFunctionsUpdatePostWithBody(ctx, params, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateFunctionFunctionsUpdatePostResp(rsp)
+}
+
+// UpdateFunctionFunctionsUpdatePostWithResponse Update Function
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /functions/update (the `UpdateFunctionFunctionsUpdatePost` operationId).
+func (c *ClientWithResponses) UpdateFunctionFunctionsUpdatePostWithResponse(ctx context.Context, params *UpdateFunctionFunctionsUpdatePostParams, body UpdateFunctionFunctionsUpdatePostJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateFunctionFunctionsUpdatePostResp, error) {
+	rsp, err := c.UpdateFunctionFunctionsUpdatePost(ctx, params, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateFunctionFunctionsUpdatePostResp(rsp)
+}
+
+// GetAvailableLanguagesTtsGetAvailableLanguagesGetWithResponse Get Available Languages
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /tts/get_available_languages (the `GetAvailableLanguagesTtsGetAvailableLanguagesGet` operationId).
+func (c *ClientWithResponses) GetAvailableLanguagesTtsGetAvailableLanguagesGetWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetAvailableLanguagesTtsGetAvailableLanguagesGetResp, error) {
+	rsp, err := c.GetAvailableLanguagesTtsGetAvailableLanguagesGet(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetAvailableLanguagesTtsGetAvailableLanguagesGetResp(rsp)
+}
+
+// GetAvailableVoicesTtsGetAvailableVoicesGetWithResponse Get Available Voices
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /tts/get_available_voices (the `GetAvailableVoicesTtsGetAvailableVoicesGet` operationId).
+func (c *ClientWithResponses) GetAvailableVoicesTtsGetAvailableVoicesGetWithResponse(ctx context.Context, params *GetAvailableVoicesTtsGetAvailableVoicesGetParams, reqEditors ...RequestEditorFn) (*GetAvailableVoicesTtsGetAvailableVoicesGetResp, error) {
+	rsp, err := c.GetAvailableVoicesTtsGetAvailableVoicesGet(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetAvailableVoicesTtsGetAvailableVoicesGetResp(rsp)
+}
+
+// ParseCharacterCloneResp parses an HTTP response from a CharacterCloneWithResponse call
+func ParseCharacterCloneResp(rsp *http.Response) (*CharacterCloneResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CharacterCloneResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CharacterCloneResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseCharacterCreateResp parses an HTTP response from a CharacterCreateWithResponse call
 func ParseCharacterCreateResp(rsp *http.Response) (*CharacterCreateResp, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -829,6 +9113,39 @@ func ParseCharacterCreateResp(rsp *http.Response) (*CharacterCreateResp, error) 
 			return nil, err
 		}
 		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCharacterDeleteResp parses an HTTP response from a CharacterDeleteWithResponse call
+func ParseCharacterDeleteResp(rsp *http.Response) (*CharacterDeleteResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CharacterDeleteResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
 		var dest HTTPValidationError
@@ -891,6 +9208,1095 @@ func ParseCharacterListResp(rsp *http.Response) (*CharacterListResp, error) {
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest PageCharacterListItem
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseAddDecisionCharacterNarrativeAddDecisionPostResp parses an HTTP response from a AddDecisionCharacterNarrativeAddDecisionPostWithResponse call
+func ParseAddDecisionCharacterNarrativeAddDecisionPostResp(rsp *http.Response) (*AddDecisionCharacterNarrativeAddDecisionPostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AddDecisionCharacterNarrativeAddDecisionPostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DecisionMutationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteDecisionCharacterNarrativeDeleteDecisionPostResp parses an HTTP response from a DeleteDecisionCharacterNarrativeDeleteDecisionPostWithResponse call
+func ParseDeleteDecisionCharacterNarrativeDeleteDecisionPostResp(rsp *http.Response) (*DeleteDecisionCharacterNarrativeDeleteDecisionPostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteDecisionCharacterNarrativeDeleteDecisionPostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DecisionMutationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEditDecisionCharacterNarrativeEditDecisionPostResp parses an HTTP response from a EditDecisionCharacterNarrativeEditDecisionPostWithResponse call
+func ParseEditDecisionCharacterNarrativeEditDecisionPostResp(rsp *http.Response) (*EditDecisionCharacterNarrativeEditDecisionPostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EditDecisionCharacterNarrativeEditDecisionPostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DecisionMutationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateSectionCharacterNarrativeSectionsCreatePostResp parses an HTTP response from a CreateSectionCharacterNarrativeSectionsCreatePostWithResponse call
+func ParseCreateSectionCharacterNarrativeSectionsCreatePostResp(rsp *http.Response) (*CreateSectionCharacterNarrativeSectionsCreatePostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateSectionCharacterNarrativeSectionsCreatePostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest SectionResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteSectionCharacterNarrativeSectionsDeletePostResp parses an HTTP response from a DeleteSectionCharacterNarrativeSectionsDeletePostWithResponse call
+func ParseDeleteSectionCharacterNarrativeSectionsDeletePostResp(rsp *http.Response) (*DeleteSectionCharacterNarrativeSectionsDeletePostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteSectionCharacterNarrativeSectionsDeletePostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetSectionCharacterNarrativeSectionsGetGetResp parses an HTTP response from a GetSectionCharacterNarrativeSectionsGetGetWithResponse call
+func ParseGetSectionCharacterNarrativeSectionsGetGetResp(rsp *http.Response) (*GetSectionCharacterNarrativeSectionsGetGetResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetSectionCharacterNarrativeSectionsGetGetResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest SectionResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseListSectionsCharacterNarrativeSectionsListGetResp parses an HTTP response from a ListSectionsCharacterNarrativeSectionsListGetWithResponse call
+func ParseListSectionsCharacterNarrativeSectionsListGetResp(rsp *http.Response) (*ListSectionsCharacterNarrativeSectionsListGetResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListSectionsCharacterNarrativeSectionsListGetResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []SectionResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateSectionCharacterNarrativeSectionsUpdatePostResp parses an HTTP response from a UpdateSectionCharacterNarrativeSectionsUpdatePostWithResponse call
+func ParseUpdateSectionCharacterNarrativeSectionsUpdatePostResp(rsp *http.Response) (*UpdateSectionCharacterNarrativeSectionsUpdatePostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateSectionCharacterNarrativeSectionsUpdatePostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest SectionResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateTriggerCharacterNarrativeTriggersCreatePostResp parses an HTTP response from a CreateTriggerCharacterNarrativeTriggersCreatePostWithResponse call
+func ParseCreateTriggerCharacterNarrativeTriggersCreatePostResp(rsp *http.Response) (*CreateTriggerCharacterNarrativeTriggersCreatePostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateTriggerCharacterNarrativeTriggersCreatePostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest TriggerResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteTriggerCharacterNarrativeTriggersDeletePostResp parses an HTTP response from a DeleteTriggerCharacterNarrativeTriggersDeletePostWithResponse call
+func ParseDeleteTriggerCharacterNarrativeTriggersDeletePostResp(rsp *http.Response) (*DeleteTriggerCharacterNarrativeTriggersDeletePostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteTriggerCharacterNarrativeTriggersDeletePostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetTriggerCharacterNarrativeTriggersGetGetResp parses an HTTP response from a GetTriggerCharacterNarrativeTriggersGetGetWithResponse call
+func ParseGetTriggerCharacterNarrativeTriggersGetGetResp(rsp *http.Response) (*GetTriggerCharacterNarrativeTriggersGetGetResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetTriggerCharacterNarrativeTriggersGetGetResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest TriggerResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseListTriggersCharacterNarrativeTriggersListGetResp parses an HTTP response from a ListTriggersCharacterNarrativeTriggersListGetWithResponse call
+func ParseListTriggersCharacterNarrativeTriggersListGetResp(rsp *http.Response) (*ListTriggersCharacterNarrativeTriggersListGetResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListTriggersCharacterNarrativeTriggersListGetResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []TriggerResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateTriggerCharacterNarrativeTriggersUpdatePostResp parses an HTTP response from a UpdateTriggerCharacterNarrativeTriggersUpdatePostWithResponse call
+func ParseUpdateTriggerCharacterNarrativeTriggersUpdatePostResp(rsp *http.Response) (*UpdateTriggerCharacterNarrativeTriggersUpdatePostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateTriggerCharacterNarrativeTriggersUpdatePostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest TriggerResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp parses an HTTP response from a UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostWithResponse call
+func ParseUpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp(rsp *http.Response) (*UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCharacterListSupportedModelsResp parses an HTTP response from a CharacterListSupportedModelsWithResponse call
+func ParseCharacterListSupportedModelsResp(rsp *http.Response) (*CharacterListSupportedModelsResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CharacterListSupportedModelsResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest SupportedModelsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCharacterUpdateResp parses an HTTP response from a CharacterUpdateWithResponse call
+func ParseCharacterUpdateResp(rsp *http.Response) (*CharacterUpdateResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CharacterUpdateResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CharacterResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCharacterVersionCreateResp parses an HTTP response from a CharacterVersionCreateWithResponse call
+func ParseCharacterVersionCreateResp(rsp *http.Response) (*CharacterVersionCreateResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CharacterVersionCreateResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest CharacterVersionItem
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCharacterVersionDeprecateResp parses an HTTP response from a CharacterVersionDeprecateWithResponse call
+func ParseCharacterVersionDeprecateResp(rsp *http.Response) (*CharacterVersionDeprecateResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CharacterVersionDeprecateResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CharacterVersionItem
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCharacterVersionDiffResp parses an HTTP response from a CharacterVersionDiffWithResponse call
+func ParseCharacterVersionDiffResp(rsp *http.Response) (*CharacterVersionDiffResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CharacterVersionDiffResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CharacterVersionDiff200JSONResponseBody
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCharacterVersionDiscardDraftResp parses an HTTP response from a CharacterVersionDiscardDraftWithResponse call
+func ParseCharacterVersionDiscardDraftResp(rsp *http.Response) (*CharacterVersionDiscardDraftResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CharacterVersionDiscardDraftResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CharacterDraftDiscardResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCharacterVersionForkResp parses an HTTP response from a CharacterVersionForkWithResponse call
+func ParseCharacterVersionForkResp(rsp *http.Response) (*CharacterVersionForkResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CharacterVersionForkResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CharacterVersionForkResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCharacterVersionListResp parses an HTTP response from a CharacterVersionListWithResponse call
+func ParseCharacterVersionListResp(rsp *http.Response) (*CharacterVersionListResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CharacterVersionListResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CharacterVersionListResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCharacterVersionPromoteResp parses an HTTP response from a CharacterVersionPromoteWithResponse call
+func ParseCharacterVersionPromoteResp(rsp *http.Response) (*CharacterVersionPromoteResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CharacterVersionPromoteResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CharacterVersionItem
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCharacterVersionRevertDraftChangeResp parses an HTTP response from a CharacterVersionRevertDraftChangeWithResponse call
+func ParseCharacterVersionRevertDraftChangeResp(rsp *http.Response) (*CharacterVersionRevertDraftChangeResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CharacterVersionRevertDraftChangeResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CharacterVersionRevertChangeResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateFunctionFunctionsCreatePostResp parses an HTTP response from a CreateFunctionFunctionsCreatePostWithResponse call
+func ParseCreateFunctionFunctionsCreatePostResp(rsp *http.Response) (*CreateFunctionFunctionsCreatePostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateFunctionFunctionsCreatePostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest FunctionCreateResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteFunctionFunctionsDeletePostResp parses an HTTP response from a DeleteFunctionFunctionsDeletePostWithResponse call
+func ParseDeleteFunctionFunctionsDeletePostResp(rsp *http.Response) (*DeleteFunctionFunctionsDeletePostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteFunctionFunctionsDeletePostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest FunctionStatusResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetFunctionFunctionsGetPostResp parses an HTTP response from a GetFunctionFunctionsGetPostWithResponse call
+func ParseGetFunctionFunctionsGetPostResp(rsp *http.Response) (*GetFunctionFunctionsGetPostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetFunctionFunctionsGetPostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest FunctionDetailResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseListFunctionsFunctionsListPostResp parses an HTTP response from a ListFunctionsFunctionsListPostWithResponse call
+func ParseListFunctionsFunctionsListPostResp(rsp *http.Response) (*ListFunctionsFunctionsListPostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListFunctionsFunctionsListPostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest FunctionListResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseListTemplatesFunctionsTemplatesListPostResp parses an HTTP response from a ListTemplatesFunctionsTemplatesListPostWithResponse call
+func ParseListTemplatesFunctionsTemplatesListPostResp(rsp *http.Response) (*ListTemplatesFunctionsTemplatesListPostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListTemplatesFunctionsTemplatesListPostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest TemplateListResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseTestFunctionFunctionsTestPostResp parses an HTTP response from a TestFunctionFunctionsTestPostWithResponse call
+func ParseTestFunctionFunctionsTestPostResp(rsp *http.Response) (*TestFunctionFunctionsTestPostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &TestFunctionFunctionsTestPostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest FunctionExecutionResult
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateFunctionFunctionsUpdatePostResp parses an HTTP response from a UpdateFunctionFunctionsUpdatePostWithResponse call
+func ParseUpdateFunctionFunctionsUpdatePostResp(rsp *http.Response) (*UpdateFunctionFunctionsUpdatePostResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateFunctionFunctionsUpdatePostResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest FunctionStatusResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetAvailableLanguagesTtsGetAvailableLanguagesGetResp parses an HTTP response from a GetAvailableLanguagesTtsGetAvailableLanguagesGetWithResponse call
+func ParseGetAvailableLanguagesTtsGetAvailableLanguagesGetResp(rsp *http.Response) (*GetAvailableLanguagesTtsGetAvailableLanguagesGetResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetAvailableLanguagesTtsGetAvailableLanguagesGetResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AvailableLanguagesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 422:
+		var dest HTTPValidationError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON422 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetAvailableVoicesTtsGetAvailableVoicesGetResp parses an HTTP response from a GetAvailableVoicesTtsGetAvailableVoicesGetWithResponse call
+func ParseGetAvailableVoicesTtsGetAvailableVoicesGetResp(rsp *http.Response) (*GetAvailableVoicesTtsGetAvailableVoicesGetResp, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetAvailableVoicesTtsGetAvailableVoicesGetResp{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AvailableVoicesResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

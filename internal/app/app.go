@@ -2,13 +2,16 @@ package app
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
+
+	contract "github.com/Conv-AI/convai-cli/api"
 
 	"github.com/Conv-AI/convai-cli/internal/api"
 	"github.com/Conv-AI/convai-cli/internal/characterapi"
@@ -42,6 +45,9 @@ type application struct {
 	profileFlag     string
 	apiURLFlag      string
 	outputFlag      string
+	workspaceFlag   string
+	spec            contract.Spec
+	commands        []contract.Command
 }
 
 func New(options Options) (*cobra.Command, error) {
@@ -67,6 +73,10 @@ func New(options Options) (*cobra.Command, error) {
 	if options.ReadSecret == nil {
 		options.ReadSecret = term.ReadPassword
 	}
+	spec, commands, err := contract.Load()
+	if err != nil {
+		return nil, err
+	}
 	a := &application{
 		version:         options.Version,
 		stdin:           options.Stdin,
@@ -76,6 +86,8 @@ func New(options Options) (*cobra.Command, error) {
 		credentialStore: options.CredentialStore,
 		httpClient:      options.HTTPClient,
 		readSecret:      options.ReadSecret,
+		spec:            spec,
+		commands:        commands,
 	}
 	return a.rootCommand(), nil
 }
@@ -93,6 +105,7 @@ func (a *application) rootCommand() *cobra.Command {
 	root.PersistentFlags().StringVar(&a.profileFlag, "profile", "", "configuration profile")
 	root.PersistentFlags().StringVar(&a.apiURLFlag, "api-url", "", "override the profile API URL")
 	root.PersistentFlags().StringVarP(&a.outputFlag, "output", "o", "table", "output: table, json, or yaml")
+	root.PersistentFlags().StringVar(&a.workspaceFlag, "workspace", "", "Workspace UUID, or personal to use the account default")
 
 	root.AddCommand(
 		a.authCommand(),
@@ -107,6 +120,7 @@ func (a *application) rootCommand() *cobra.Command {
 			},
 		},
 	)
+	a.addResourceCommands(root)
 	return root
 }
 
@@ -148,7 +162,7 @@ func (a *application) authLoginCommand() *cobra.Command {
 				if err != nil {
 					return err
 				}
-				if _, _, err := client.ListCharacters(cmd.Context(), 1, 0); err != nil {
+				if _, _, err := client.WithWorkspace(profile.WorkspaceID).ListCharacters(cmd.Context(), 1, 0); err != nil {
 					return fmt.Errorf("verify credential: %w", err)
 				}
 			}
@@ -198,13 +212,14 @@ func (a *application) authStatusCommand() *cobra.Command {
 				"api_url":         profile.APIURL,
 				"credential_type": resolved.Type,
 				"source":          source,
+				"workspace_id":    profile.WorkspaceID,
 			}
 			if check {
 				client, err := api.New(profile.APIURL, resolved, a.httpClient)
 				if err != nil {
 					return err
 				}
-				if _, _, err := client.ListCharacters(cmd.Context(), 1, 0); err != nil {
+				if _, _, err := client.WithWorkspace(profile.WorkspaceID).ListCharacters(cmd.Context(), 1, 0); err != nil {
 					return err
 				}
 				status["verified"] = true
@@ -271,6 +286,7 @@ func (a *application) configGetCommand() *cobra.Command {
 				"profile":         name,
 				"api_url":         profile.APIURL,
 				"credential_type": profile.CredentialType,
+				"workspace_id":    profile.WorkspaceID,
 			}
 			format, err := output.Parse(a.outputFlag)
 			if err != nil {
@@ -313,16 +329,12 @@ func (a *application) configUseCommand() *cobra.Command {
 
 func (a *application) configSetCommand() *cobra.Command {
 	return &cobra.Command{
-		Use:   "set api-url URL",
-		Short: "Create or update a profile API URL",
+		Use:   "set api-url|workspace-id VALUE",
+		Short: "Create or update profile metadata",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if args[0] != "api-url" {
-				return errors.New("only api-url can be set")
-			}
-			url, err := config.NormalizeAPIURL(args[1])
-			if err != nil {
-				return err
+			if args[0] != "api-url" && args[0] != "workspace-id" {
+				return errors.New("only api-url and workspace-id can be set")
 			}
 			cfg, err := a.configStore.Load()
 			if err != nil {
@@ -338,8 +350,21 @@ func (a *application) configSetCommand() *cobra.Command {
 			profile, ok := cfg.Profiles[name]
 			if !ok {
 				profile.CredentialType = config.CredentialPAT
+				profile.APIURL = config.DefaultAPIURL
 			}
-			profile.APIURL = url
+			value := args[1]
+			if args[0] == "api-url" {
+				profile.APIURL, err = config.NormalizeAPIURL(value)
+			} else {
+				if value == "personal" {
+					value = ""
+				}
+				err = config.ValidateWorkspaceID(value)
+				profile.WorkspaceID = value
+			}
+			if err != nil {
+				return err
+			}
 			cfg.Profiles[name] = profile
 			if cfg.CurrentProfile == "" {
 				cfg.CurrentProfile = name
@@ -347,7 +372,7 @@ func (a *application) configSetCommand() *cobra.Command {
 			if err := a.configStore.Save(cfg); err != nil {
 				return err
 			}
-			fmt.Fprintf(cmd.OutOrStdout(), "Set %s api-url to %s\n", name, url)
+			fmt.Fprintf(cmd.OutOrStdout(), "Set %s %s to %s\n", name, args[0], args[1])
 			return nil
 		},
 	}
@@ -362,11 +387,17 @@ func (a *application) characterCommand() *cobra.Command {
 func (a *application) characterListCommand() *cobra.Command {
 	var limit int
 	var offset int
+	var all bool
+	var sort string
 	command := &cobra.Command{
 		Use:   "list",
 		Short: "List characters owned by the authenticated account",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
+			format, err := output.Parse(a.outputFlag)
+			if err != nil {
+				return err
+			}
 			if limit < 1 || limit > 500 {
 				return errors.New("--limit must be between 1 and 500")
 			}
@@ -377,19 +408,39 @@ func (a *application) characterListCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			if sort != "created" && sort != "last_updated" && sort != "last_interacted" {
+				return errors.New("invalid --sort")
+			}
+			client = client.WithSort(sort)
 			items, total, err := client.ListCharacters(cmd.Context(), limit, offset)
 			if err != nil {
 				return err
 			}
-			format, err := output.Parse(a.outputFlag)
-			if err != nil {
-				return err
+			if all {
+				pages := 1
+				for offset+len(items) < total {
+					if pages >= 1000 {
+						return errors.New("pagination exceeded 1000 pages; use explicit page offsets")
+					}
+					page, updatedTotal, err := client.ListCharacters(cmd.Context(), limit, offset+len(items))
+					if err != nil {
+						return err
+					}
+					if len(page) == 0 {
+						return errors.New("pagination stopped before the reported total; retry with a stable dataset")
+					}
+					items = append(items, page...)
+					total = updatedTotal
+					pages++
+				}
 			}
 			return output.CharacterList(cmd.OutOrStdout(), format, items, total)
 		},
 	}
 	command.Flags().IntVar(&limit, "limit", 50, "maximum number of characters")
 	command.Flags().IntVar(&offset, "offset", 0, "number of characters to skip")
+	command.Flags().BoolVar(&all, "all", false, "fetch every remaining page")
+	command.Flags().StringVar(&sort, "sort", "created", "created, last_updated, or last_interacted")
 	return command
 }
 
@@ -434,6 +485,9 @@ func (a *application) characterCreateCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
+			if a.workspaceFlag == "personal" && request.WorkspaceId != nil && *request.WorkspaceId != "" {
+				return errors.New("input workspace conflicts with explicit personal selection")
+			}
 			client, err := a.apiClient()
 			if err != nil {
 				return err
@@ -471,7 +525,7 @@ func (a *application) doctorCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			_, _, err = client.ListCharacters(cmd.Context(), 1, 0)
+			_, _, err = client.WithWorkspace(profile.WorkspaceID).ListCharacters(cmd.Context(), 1, 0)
 			if err != nil {
 				return err
 			}
@@ -521,6 +575,15 @@ func (a *application) profile() (config.Config, string, config.Profile, error) {
 			return config.Config{}, "", config.Profile{}, err
 		}
 	}
+	if a.workspaceFlag != "" {
+		profile.WorkspaceID = a.workspaceFlag
+		if profile.WorkspaceID == "personal" {
+			profile.WorkspaceID = ""
+		}
+	}
+	if err := config.ValidateWorkspaceID(profile.WorkspaceID); err != nil {
+		return config.Config{}, "", config.Profile{}, err
+	}
 	return cfg, name, profile, nil
 }
 
@@ -533,7 +596,11 @@ func (a *application) apiClient() (*api.Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("resolve credential for profile %s: %w; run `convai auth login --profile %s` or set %s", name, err, name, credential.EnvironmentToken)
 	}
-	return api.New(profile.APIURL, resolved, a.httpClient)
+	client, err := api.New(profile.APIURL, resolved, a.httpClient)
+	if err != nil {
+		return nil, err
+	}
+	return client.WithWorkspace(profile.WorkspaceID), nil
 }
 
 func (a *application) readCredential(fromStdin bool) (string, error) {
@@ -565,35 +632,32 @@ func (a *application) createRequest(name, voice, backstory, inputFile string) (c
 		if name != "" || voice != "" || backstory != "" {
 			return characterapi.CharacterCreate{}, errors.New("--file cannot be combined with --name, --voice, or --backstory")
 		}
-		var reader io.Reader
-		format := "json"
-		if inputFile == "-" {
-			reader = a.stdin
-		} else {
-			file, err := os.Open(inputFile)
-			if err != nil {
-				return characterapi.CharacterCreate{}, fmt.Errorf("open character input: %w", err)
-			}
-			defer file.Close()
-			reader = file
-			extension := strings.TrimPrefix(strings.ToLower(filepath.Ext(inputFile)), ".")
-			if extension != "" {
-				format = extension
-			}
+		body, err := a.inputObject(inputFile)
+		if err != nil {
+			return characterapi.CharacterCreate{}, err
 		}
-		request, err := api.DecodeCreateRequest(reader, format)
+		data, err := json.Marshal(body)
+		if err != nil {
+			return characterapi.CharacterCreate{}, err
+		}
+		request, err := api.DecodeCreateRequest(bytes.NewReader(data), "json")
 		if err != nil {
 			return characterapi.CharacterCreate{}, err
 		}
 		if err := validateCreateRequest(request); err != nil {
 			return characterapi.CharacterCreate{}, err
 		}
+		if err := contract.ValidateInput("character_create", nil, data); err != nil {
+			return characterapi.CharacterCreate{}, err
+		}
 		return request, nil
 	}
 	request := characterapi.CharacterCreate{
 		CharName:  name,
-		VoiceType: voice,
 		Backstory: backstory,
+	}
+	if voice != "" {
+		request.VoiceType = &voice
 	}
 	if err := validateCreateRequest(request); err != nil {
 		return characterapi.CharacterCreate{}, err
@@ -608,18 +672,22 @@ func validateCreateRequest(request characterapi.CharacterCreate) error {
 	if len([]rune(request.CharName)) > 100 {
 		return errors.New("character name must contain at most 100 characters")
 	}
-	if strings.TrimSpace(request.VoiceType) == "" {
-		return errors.New("voice identifier is required")
+	if request.VoiceType != nil && strings.TrimSpace(*request.VoiceType) == "" {
+		return errors.New("voice identifier must not be blank when supplied")
 	}
 	if strings.TrimSpace(request.Backstory) == "" {
 		return errors.New("backstory is required")
 	}
-	return nil
+	data, err := json.Marshal(request)
+	if err != nil {
+		return err
+	}
+	return contract.ValidateInput("character_create", nil, data)
 }
 
 func RedactError(err error) string {
 	message := err.Error()
-	for _, prefix := range []string{"cvpat_", "ck_live_", "sk_"} {
+	for _, prefix := range []string{"cvpat_", "cvoat_", "cvort_", "cvoac_", "ck_live_", "sk_"} {
 		for {
 			index := strings.Index(message, prefix)
 			if index < 0 {

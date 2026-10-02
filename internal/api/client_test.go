@@ -112,7 +112,7 @@ func TestCreateCharacterUsesGeneratedContract(t *testing.T) {
 	})
 	created, err := client.CreateCharacter(context.Background(), characterapi.CharacterCreate{
 		CharName:  "Ari",
-		VoiceType: "voice-1",
+		VoiceType: new("voice-1"),
 		Backstory: "Backstory",
 	})
 	if err != nil {
@@ -159,7 +159,7 @@ func TestDecodeCreateRequestSupportsStrictYAMLAndBoundsInput(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DecodeCreateRequest: %v", err)
 	}
-	if request.CharName != "Ari" || request.VoiceType != "voice-1" {
+	if request.CharName != "Ari" || request.VoiceType == nil || *request.VoiceType != "voice-1" {
 		t.Fatalf("request = %#v", request)
 	}
 

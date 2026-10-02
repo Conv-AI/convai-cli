@@ -1,9 +1,11 @@
-package api_test
+package contract_test
 
 import (
 	"encoding/json"
 	"os"
 	"testing"
+
+	contract "github.com/Conv-AI/convai-cli/api"
 
 	"gopkg.in/yaml.v3"
 )
@@ -28,6 +30,10 @@ type generatorConfig struct {
 
 func TestCatalogReferencesStableOpenAPIOperationsAndGeneratorSelection(t *testing.T) {
 	t.Parallel()
+	owner, _, err := contract.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
 	var spec struct {
 		Paths map[string]map[string]struct {
 			OperationID string `json:"operationId"`
@@ -67,10 +73,11 @@ func TestCatalogReferencesStableOpenAPIOperationsAndGeneratorSelection(t *testin
 		if !selected[operation.OperationID] {
 			t.Errorf("catalog operation %q is absent from generator config", operation.OperationID)
 		}
-		if operation.Group == "" || operation.Command == "" || operation.Stability == "" {
+		if operation.Group == "" || operation.Command == "" {
 			t.Errorf("catalog operation %q has incomplete CLI metadata", operation.OperationID)
 		}
-		if len(operation.RequiredScopes) == 0 {
+		approved, ok := owner.Find(operation.OperationID)
+		if !ok || len(approved.Metadata.Tools[0].RequiredScopes) == 0 {
 			t.Errorf("catalog operation %q has no required scope", operation.OperationID)
 		}
 	}

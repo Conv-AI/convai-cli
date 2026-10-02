@@ -14,10 +14,14 @@ import (
 	"github.com/Conv-AI/convai-cli/internal/characterapi"
 	"github.com/Conv-AI/convai-cli/internal/config"
 	"github.com/Conv-AI/convai-cli/internal/credential"
+	"github.com/google/uuid"
 )
 
 type Client struct {
 	generated *characterapi.ClientWithResponses
+	secret    string
+	workspace string
+	sort      string
 }
 
 type Error struct {
@@ -34,12 +38,25 @@ func (e *Error) Error() string {
 }
 
 func New(baseURL string, auth credential.Credential, httpClient *http.Client) (*Client, error) {
+	if _, err := config.NormalizeAPIURL(baseURL); err != nil {
+		return nil, err
+	}
+	parsed, err := credential.Parse(auth.Value)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.Type != auth.Type {
+		return nil, errors.New("credential type does not match token")
+	}
 	if httpClient == nil {
 		httpClient = &http.Client{Timeout: 30 * time.Second}
 	}
+	copyClient := *httpClient
+	copyClient.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	httpClient = &copyClient
 	editor := func(_ context.Context, request *http.Request) error {
 		switch auth.Type {
-		case config.CredentialPAT:
+		case config.CredentialPAT, config.CredentialOAuth:
 			request.Header.Set("Authorization", "Bearer "+auth.Value)
 		case config.CredentialAPIKey:
 			request.Header.Set("CONVAI-API-KEY", auth.Value)
@@ -58,19 +75,51 @@ func New(baseURL string, auth credential.Credential, httpClient *http.Client) (*
 	if err != nil {
 		return nil, fmt.Errorf("create Character API client: %w", err)
 	}
-	return &Client{generated: generated}, nil
+	return &Client{generated: generated, secret: auth.Value}, nil
+}
+
+func (c *Client) WithWorkspace(value string) *Client {
+	copy := *c
+	copy.workspace = value
+	return &copy
+}
+
+func (c *Client) WithSort(value string) *Client { copy := *c; copy.sort = value; return &copy }
+
+func (c *Client) safeError(err error) error {
+	var apiErr *Error
+	if errors.As(err, &apiErr) {
+		copy := *apiErr
+		copy.Message = strings.ReplaceAll(copy.Message, c.secret, "[REDACTED]")
+		copy.RequestID = strings.ReplaceAll(copy.RequestID, c.secret, "[REDACTED]")
+		if len(copy.Message) > 500 {
+			copy.Message = copy.Message[:500]
+		}
+		return &copy
+	}
+	return errors.New(strings.ReplaceAll(err.Error(), c.secret, "[REDACTED]"))
 }
 
 func (c *Client) ListCharacters(ctx context.Context, limit, offset int) ([]characterapi.CharacterListItem, int, error) {
-	response, err := c.generated.CharacterListWithResponse(ctx, &characterapi.CharacterListParams{
-		Limit:  &limit,
-		Offset: &offset,
-	})
+	workspace, err := c.workspaceUUID()
 	if err != nil {
-		return nil, 0, transportError(err)
+		return nil, 0, err
+	}
+	params := &characterapi.CharacterListParams{
+		Limit:       &limit,
+		Offset:      &offset,
+		WorkspaceId: workspace,
+	}
+	if c.sort != "" {
+		sort := characterapi.CharacterListParamsSort(c.sort)
+		params.Sort = &sort
+	}
+	response, err := c.generated.CharacterListWithResponse(ctx, params)
+	if err != nil {
+		return nil, 0, c.safeError(transportError(err))
 	}
 	if response.JSON200 == nil {
-		return nil, 0, responseError(response.StatusCode(), response.Body, response.HTTPResponse)
+		return nil, 0, c.safeError(responseError(response.StatusCode(), response.Body, response.HTTPResponse))
 	}
 	items := []characterapi.CharacterListItem{}
 	if response.JSON200.Items != nil {
@@ -84,16 +133,21 @@ func (c *Client) ListCharacters(ctx context.Context, limit, offset int) ([]chara
 }
 
 func (c *Client) GetCharacter(ctx context.Context, characterID string) (characterapi.CharacterResponse, error) {
+	workspace, err := c.workspaceUUID()
+	if err != nil {
+		return characterapi.CharacterResponse{}, err
+	}
 	response, err := c.generated.CharacterGetWithResponse(ctx, &characterapi.CharacterGetParams{
 		CharacterId: characterID,
+		WorkspaceId: workspace,
 	})
 	if err != nil {
-		return characterapi.CharacterResponse{}, transportError(err)
+		return characterapi.CharacterResponse{}, c.safeError(transportError(err))
 	}
 	if response.JSON200 == nil {
-		return characterapi.CharacterResponse{}, responseError(
+		return characterapi.CharacterResponse{}, c.safeError(responseError(
 			response.StatusCode(), response.Body, response.HTTPResponse,
-		)
+		))
 	}
 	return *response.JSON200, nil
 }
@@ -102,16 +156,33 @@ func (c *Client) CreateCharacter(
 	ctx context.Context,
 	request characterapi.CharacterCreate,
 ) (characterapi.CharacterCreateResponse, error) {
+	if c.workspace != "" {
+		if request.WorkspaceId != nil && *request.WorkspaceId != c.workspace {
+			return characterapi.CharacterCreateResponse{}, errors.New("input workspace conflicts with selected workspace")
+		}
+		request.WorkspaceId = &c.workspace
+	}
 	response, err := c.generated.CharacterCreateWithResponse(ctx, request)
 	if err != nil {
-		return characterapi.CharacterCreateResponse{}, transportError(err)
+		return characterapi.CharacterCreateResponse{}, c.safeError(transportError(err))
 	}
 	if response.JSON201 == nil {
-		return characterapi.CharacterCreateResponse{}, responseError(
+		return characterapi.CharacterCreateResponse{}, c.safeError(responseError(
 			response.StatusCode(), response.Body, response.HTTPResponse,
-		)
+		))
 	}
 	return *response.JSON201, nil
+}
+
+func (c *Client) workspaceUUID() (*uuid.UUID, error) {
+	if c.workspace == "" {
+		return nil, nil
+	}
+	value, err := uuid.Parse(c.workspace)
+	if err != nil {
+		return nil, errors.New("workspace must be a UUID")
+	}
+	return &value, nil
 }
 
 func transportError(err error) error {
@@ -130,9 +201,6 @@ func responseError(statusCode int, body []byte, response *http.Response) error {
 		}
 	}
 	message = strings.TrimSpace(message)
-	if len(message) > 500 {
-		message = message[:500]
-	}
 	requestID := ""
 	if response != nil {
 		requestID = response.Header.Get("X-Request-ID")

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"text/tabwriter"
-	"time"
 
 	"github.com/Conv-AI/convai-cli/internal/characterapi"
 	"sigs.k8s.io/yaml"
@@ -28,6 +28,29 @@ func Parse(value string) (Format, error) {
 	default:
 		return "", errors.New("output must be table, json, or yaml")
 	}
+}
+
+func Resource(writer io.Writer, format Format, value any) error {
+	if format != Table {
+		return Structured(writer, format, value)
+	}
+	if object, ok := value.(map[string]any); ok {
+		keys := make([]string, 0, len(object))
+		for key := range object {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		table := tabwriter.NewWriter(writer, 0, 4, 2, ' ', 0)
+		for _, key := range keys {
+			data, err := json.Marshal(object[key])
+			if err != nil {
+				return err
+			}
+			fmt.Fprintf(table, "%s\t%s\n", key, data)
+		}
+		return table.Flush()
+	}
+	return Structured(writer, JSON, value)
 }
 
 func Structured(writer io.Writer, format Format, value any) error {
@@ -70,7 +93,7 @@ func CharacterList(writer io.Writer, format Format, items []characterapi.Charact
 			stringValue(item.CharacterName),
 			item.LanguageCode,
 			stringValue(item.VoiceType),
-			item.Timestamp.UTC().Format(time.RFC3339),
+			item.Timestamp,
 		)
 	}
 	if err := table.Flush(); err != nil {
