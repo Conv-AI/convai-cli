@@ -17,6 +17,45 @@ func TestUpstreamDriftGate(t *testing.T) {
 		mutate func(map[string]any)
 	}{
 		{"removed operation", func(root map[string]any) { delete(root["paths"].(map[string]any), "/character/delete") }},
+		{"removed API key alternative", func(root map[string]any) {
+			root["paths"].(map[string]any)["/character/list"].(map[string]any)["get"].(map[string]any)["security"] = []any{map[string]any{"PersonalAccessTokenAuth": []any{}}}
+		}},
+		{"explicit unauthenticated override", func(root map[string]any) {
+			root["paths"].(map[string]any)["/character/list"].(map[string]any)["get"].(map[string]any)["security"] = []any{}
+		}},
+		{"inherited authentication removed", func(root map[string]any) {
+			delete(root["paths"].(map[string]any)["/character/list"].(map[string]any)["get"].(map[string]any), "security")
+		}},
+		{"inherited authentication changed", func(root map[string]any) {
+			delete(root["paths"].(map[string]any)["/character/list"].(map[string]any)["get"].(map[string]any), "security")
+			root["security"] = []any{map[string]any{"PersonalAccessTokenAuth": []any{}}}
+		}},
+		{"API key header changed", func(root map[string]any) {
+			root["components"].(map[string]any)["securitySchemes"].(map[string]any)["ConvaiApiKeyAuth"].(map[string]any)["name"] = "X-API-Key"
+		}},
+		{"Bearer scheme changed", func(root map[string]any) {
+			root["components"].(map[string]any)["securitySchemes"].(map[string]any)["PersonalAccessTokenAuth"].(map[string]any)["scheme"] = "basic"
+		}},
+		{"authentication scheme removed", func(root map[string]any) {
+			delete(root["components"].(map[string]any)["securitySchemes"].(map[string]any), "ConvaiApiKeyAuth")
+		}},
+		{"referenced authentication scheme changed", func(root map[string]any) {
+			schemes := root["components"].(map[string]any)["securitySchemes"].(map[string]any)
+			schemes["APIKeyDefinition"] = schemes["ConvaiApiKeyAuth"]
+			schemes["APIKeyDefinition"].(map[string]any)["name"] = "X-API-Key"
+			schemes["ConvaiApiKeyAuth"] = map[string]any{"$ref": "#/components/securitySchemes/APIKeyDefinition"}
+		}},
+		{"cyclic authentication scheme", func(root map[string]any) {
+			root["components"].(map[string]any)["securitySchemes"].(map[string]any)["ConvaiApiKeyAuth"] = map[string]any{"$ref": "#/components/securitySchemes/ConvaiApiKeyAuth"}
+		}},
+		{"explicit override ignores root authentication", func(root map[string]any) {
+			operation := root["paths"].(map[string]any)["/character/list"].(map[string]any)["get"].(map[string]any)
+			root["security"] = operation["security"]
+			operation["security"] = []any{}
+		}},
+		{"authentication scope added", func(root map[string]any) {
+			root["paths"].(map[string]any)["/character/list"].(map[string]any)["get"].(map[string]any)["security"] = []any{map[string]any{"ConvaiApiKeyAuth": []any{"character:read"}}, map[string]any{"PersonalAccessTokenAuth": []any{}}}
+		}},
 		{"withdrawn approval", func(root map[string]any) {
 			root["paths"].(map[string]any)["/character/update"].(map[string]any)["post"].(map[string]any)["x-convai-mcp"].(map[string]any)["exposed"] = false
 		}},
@@ -104,6 +143,38 @@ func TestUpstreamDriftGate(t *testing.T) {
 			}
 			if err := contract.CheckUpstream(data); err == nil {
 				t.Fatal("breaking upstream drift was accepted")
+			}
+		})
+	}
+}
+
+func TestEquivalentUpstreamAuthentication(t *testing.T) {
+	t.Parallel()
+	for _, variant := range []string{"root inheritance", "alternative order", "referenced scheme"} {
+		t.Run(variant, func(t *testing.T) {
+			var document map[string]any
+			if err := json.Unmarshal(contract.Document, &document); err != nil {
+				t.Fatal(err)
+			}
+			operation := document["paths"].(map[string]any)["/character/list"].(map[string]any)["get"].(map[string]any)
+			switch variant {
+			case "root inheritance":
+				document["security"] = operation["security"]
+				delete(operation, "security")
+			case "alternative order":
+				alternatives := operation["security"].([]any)
+				alternatives[0], alternatives[1] = alternatives[1], alternatives[0]
+			case "referenced scheme":
+				schemes := document["components"].(map[string]any)["securitySchemes"].(map[string]any)
+				schemes["APIKeyDefinition"] = schemes["ConvaiApiKeyAuth"]
+				schemes["ConvaiApiKeyAuth"] = map[string]any{"$ref": "#/components/securitySchemes/APIKeyDefinition"}
+			}
+			data, err := json.Marshal(document)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := contract.CheckUpstream(data); err != nil {
+				t.Fatal(err)
 			}
 		})
 	}

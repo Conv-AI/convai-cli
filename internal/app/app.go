@@ -173,6 +173,8 @@ func (a *application) authLoginCommand() *cobra.Command {
 			if err := a.credentialStore.Set(profileName, parsed); err != nil {
 				return err
 			}
+			// Workspace flags affect verification, not the saved profile selection.
+			profile.WorkspaceID = cfg.Profiles[profileName].WorkspaceID
 			cfg.Profiles[profileName] = profile
 			cfg.CurrentProfile = profileName
 			if err := a.configStore.Save(cfg); err != nil {

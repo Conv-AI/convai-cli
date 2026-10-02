@@ -28,6 +28,10 @@ offset; the CLI does not infer their timezone. The original schemas, including
 `make contract-check` compares the reviewed operations to staging OpenAPI. CI
 and a daily scheduled workflow fail on withdrawn approval, changed scopes or
 safety, removed routes/inputs/success outputs, or tightened input constraints.
+It also compares effective OpenAPI authentication requirements (including root
+inheritance and explicit operation overrides) and referenced security schemes.
+Changed API-key headers or Bearer schemes require review. Alternative and scope
+ordering are ignored; other scheme changes are conservatively checked in full.
 Complex schema changes conservatively require review; this structural gate is
 not a substitute for E2E authorization or owner business-rule tests.
 All tool metadata is retained for comparison, including conditional scopes,

@@ -37,9 +37,10 @@ type Parameter struct {
 }
 
 type Operation struct {
-	OperationID string      `json:"operationId"`
-	Summary     string      `json:"summary"`
-	Parameters  []Parameter `json:"parameters"`
+	OperationID string                 `json:"operationId"`
+	Summary     string                 `json:"summary"`
+	Parameters  []Parameter            `json:"parameters"`
+	Security    *[]SecurityRequirement `json:"security"`
 	RequestBody struct {
 		Required bool `json:"required"`
 		Content  map[string]struct {
@@ -53,6 +54,8 @@ type Operation struct {
 	} `json:"responses"`
 	Metadata Metadata `json:"x-convai-mcp"`
 }
+
+type SecurityRequirement map[string][]string
 
 type Metadata struct {
 	Exposed bool `json:"exposed"`
@@ -77,8 +80,10 @@ func (m *Metadata) UnmarshalJSON(data []byte) error {
 
 type Spec struct {
 	Paths      map[string]map[string]Operation `json:"paths"`
+	Security   []SecurityRequirement           `json:"security"`
 	Components struct {
-		Schemas map[string]map[string]any `json:"schemas"`
+		Schemas         map[string]map[string]any `json:"schemas"`
+		SecuritySchemes map[string]map[string]any `json:"securitySchemes"`
 	} `json:"components"`
 }
 

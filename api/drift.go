@@ -32,6 +32,9 @@ func CheckUpstream(data []byte) error {
 		if !current.Metadata.Exposed || !reflect.DeepEqual(old.Metadata.Raw, current.Metadata.Raw) {
 			return fmt.Errorf("upstream changed tool approval, scopes, or safety for %s", command.OperationID)
 		}
+		if err := compatibleSecurity(pinned, upstream, old, current); err != nil {
+			return fmt.Errorf("%s: %w", command.OperationID, err)
+		}
 		if current.RequestBody.Required && !old.RequestBody.Required {
 			return fmt.Errorf("upstream now requires a request body for %s", command.OperationID)
 		}
@@ -83,6 +86,91 @@ func CheckUpstream(data []byte) error {
 		}
 	}
 	return nil
+}
+
+func (s Spec) effectiveSecurity(operation Operation) []SecurityRequirement {
+	if operation.Security != nil {
+		return *operation.Security
+	}
+	return s.Security
+}
+
+func compatibleSecurity(oldSpec, newSpec Spec, old, current Operation) error {
+	previous := normalizedSecurity(oldSpec.effectiveSecurity(old))
+	updated := normalizedSecurity(newSpec.effectiveSecurity(current))
+	if len(previous) != len(updated) {
+		return fmt.Errorf("upstream changed authentication alternatives")
+	}
+	for _, requirement := range previous {
+		if !slices.ContainsFunc(updated, func(value SecurityRequirement) bool {
+			return reflect.DeepEqual(requirement, value)
+		}) {
+			return fmt.Errorf("upstream changed authentication requirements")
+		}
+		for name := range requirement {
+			oldScheme, err := oldSpec.securityScheme(name, map[string]bool{})
+			if err != nil {
+				return err
+			}
+			newScheme, err := newSpec.securityScheme(name, map[string]bool{})
+			if err != nil {
+				return err
+			}
+			if !reflect.DeepEqual(oldScheme, newScheme) {
+				return fmt.Errorf("upstream changed authentication scheme %s", name)
+			}
+		}
+	}
+	return nil
+}
+
+// Alternative order and scope order do not change OpenAPI authorization.
+func normalizedSecurity(requirements []SecurityRequirement) []SecurityRequirement {
+	result := []SecurityRequirement{}
+	for _, requirement := range requirements {
+		value := SecurityRequirement{}
+		for name, scopes := range requirement {
+			ordered := append([]string{}, scopes...)
+			slices.Sort(ordered)
+			value[name] = slices.Compact(ordered)
+		}
+		if !slices.ContainsFunc(result, func(existing SecurityRequirement) bool {
+			return reflect.DeepEqual(existing, value)
+		}) {
+			result = append(result, value)
+		}
+	}
+	return result
+}
+
+func (s Spec) securityScheme(name string, seen map[string]bool) (map[string]any, error) {
+	scheme, exists := s.Components.SecuritySchemes[name]
+	if !exists || seen[name] {
+		return nil, fmt.Errorf("unresolved authentication scheme %s", name)
+	}
+	ref, isRef := scheme["$ref"].(string)
+	if !isRef {
+		return scheme, nil
+	}
+	const prefix = "#/components/securitySchemes/"
+	if !strings.HasPrefix(ref, prefix) {
+		return nil, fmt.Errorf("unsupported authentication scheme reference %s", name)
+	}
+	seen[name] = true
+	resolved, err := s.securityScheme(strings.TrimPrefix(ref, prefix), seen)
+	if err != nil {
+		return nil, err
+	}
+	result := map[string]any{}
+	for key, value := range resolved {
+		result[key] = value
+	}
+	for key, value := range scheme {
+		if key != "$ref" {
+			result[key] = value
+		}
+	}
+	return result, nil
 }
 
 func (s Spec) route(id string) (string, string) {

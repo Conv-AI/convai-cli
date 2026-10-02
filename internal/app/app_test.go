@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -278,6 +279,61 @@ func TestAuthLoginRestoresPreviousCredentialWhenConfigSaveFails(t *testing.T) {
 	stored, _ := credentialStore.Get("default")
 	if stored != old {
 		t.Fatalf("credential = %#v, want %#v", stored, old)
+	}
+}
+
+func TestAuthLoginWorkspaceOverrideDoesNotChangeSavedSelection(t *testing.T) {
+	t.Parallel()
+	const savedWorkspace = "11111111-1111-4111-8111-111111111111"
+	const overrideWorkspace = "22222222-2222-4222-8222-222222222222"
+	for _, selection := range []string{"personal", overrideWorkspace} {
+		for _, verify := range []bool{true, false} {
+			t.Run(selection+"/verify="+fmt.Sprint(verify), func(t *testing.T) {
+				called := false
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					called = true
+					want := selection
+					if selection == "personal" {
+						want = ""
+					}
+					if r.URL.Query().Get("workspace_id") != want {
+						t.Errorf("verification workspace = %q, want %q", r.URL.Query().Get("workspace_id"), want)
+					}
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(`{"items":[],"total":0,"limit":1,"offset":0}`))
+				}))
+				defer server.Close()
+				cfg := config.Default()
+				profile := cfg.Profiles["default"]
+				profile.WorkspaceID = savedWorkspace
+				cfg.Profiles["default"] = profile
+				store := &memoryConfigStore{cfg: cfg}
+				root, err := New(Options{
+					Stdin:  strings.NewReader("01234567890123456789012345678901\n"),
+					Stdout: io.Discard, Stderr: io.Discard, ConfigStore: store,
+					CredentialStore: &memoryCredentialStore{values: map[string]credential.Credential{}},
+					HTTPClient:      server.Client(),
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				args := []string{"auth", "login", "--token-stdin", "--workspace", selection, "--api-url", server.URL}
+				if !verify {
+					args = append(args, "--no-verify")
+				}
+				root.SetArgs(args)
+				if err := root.Execute(); err != nil {
+					t.Fatal(err)
+				}
+				stored := store.cfg.Profiles["default"]
+				if stored.WorkspaceID != savedWorkspace || stored.APIURL != server.URL || stored.CredentialType != config.CredentialAPIKey {
+					t.Fatalf("saved profile = %+v", stored)
+				}
+				if called != verify {
+					t.Fatalf("verification called = %v, want %v", called, verify)
+				}
+			})
+		}
 	}
 }
 
