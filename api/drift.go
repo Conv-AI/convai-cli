@@ -73,7 +73,7 @@ func operationSnapshot(root map[string]any, operation Operation) (contractSnapsh
 	value := map[string]any{}
 	for key, field := range operation.Raw {
 		switch key {
-		case "parameters", "security", "summary", "description", "tags", "externalDocs":
+		case "parameters", "security", "servers", "summary", "description", "tags", "externalDocs":
 			continue
 		}
 		value[key] = field
@@ -83,6 +83,11 @@ func operationSnapshot(root map[string]any, operation Operation) (contractSnapsh
 		parameters[parameter.In+":"+parameter.Name] = parameter.Raw
 	}
 	value["parameters"] = parameters
+	servers := []map[string]any{{"url": "/"}}
+	if operation.Servers != nil && len(*operation.Servers) > 0 {
+		servers = *operation.Servers
+	}
+	value["servers"] = servers
 	result := contractSnapshot{Operation: value, References: map[string]any{}}
 	queue := []string{}
 	if err := collectReferences(value, &queue); err != nil {

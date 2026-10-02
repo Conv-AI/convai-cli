@@ -50,6 +50,7 @@ func (p *Parameter) UnmarshalJSON(data []byte) error {
 type PathItem struct {
 	Ref        string
 	Parameters []Parameter
+	Servers    *[]map[string]any
 	Operations map[string]Operation
 }
 
@@ -66,6 +67,11 @@ func (p *PathItem) UnmarshalJSON(data []byte) error {
 	p.Operations = map[string]Operation{}
 	if parameters, exists := fields["parameters"]; exists {
 		if err := json.Unmarshal(parameters, &p.Parameters); err != nil {
+			return err
+		}
+	}
+	if servers, exists := fields["servers"]; exists {
+		if err := json.Unmarshal(servers, &p.Servers); err != nil {
 			return err
 		}
 	}
@@ -86,6 +92,7 @@ type Operation struct {
 	Summary     string                 `json:"summary"`
 	Parameters  []Parameter            `json:"parameters"`
 	Security    *[]SecurityRequirement `json:"security"`
+	Servers     *[]map[string]any      `json:"servers"`
 	RequestBody struct {
 		Required bool `json:"required"`
 		Content  map[string]struct {
@@ -125,6 +132,7 @@ type Metadata struct {
 type Spec struct {
 	Paths      map[string]PathItem   `json:"paths"`
 	Security   []SecurityRequirement `json:"security"`
+	Servers    []map[string]any      `json:"servers"`
 	Components struct {
 		Schemas         map[string]map[string]any `json:"schemas"`
 		SecuritySchemes map[string]map[string]any `json:"securitySchemes"`
@@ -182,6 +190,12 @@ func (s Spec) Find(id string) (Operation, bool) {
 				operation.Parameters, ok = s.effectiveParameters(item.Parameters, operation.Parameters)
 				if !ok {
 					return Operation{}, false
+				}
+				if operation.Servers == nil {
+					operation.Servers = item.Servers
+					if operation.Servers == nil {
+						operation.Servers = &s.Servers
+					}
 				}
 				return operation, true
 			}

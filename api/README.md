@@ -44,6 +44,10 @@ ordering are ignored; other scheme changes are conservatively checked in full.
 Effective parameters merge Path Item inheritance and operation overrides by
 name and location, resolving local parameter references. A reviewed route
 moving behind a Path Item reference fails closed pending a contract refresh.
+Effective server declarations follow [OpenAPI operation, Path Item, then root precedence](https://spec.openapis.org/oas/v3.1.0.html#operation-object),
+including variables and the default `/` origin-relative server. Changes require
+review; the CLI never automatically changes its configured origin or forwards
+credentials to a host advertised by an upstream contract.
 Tradeoff: even compatible additive schema changes (and schema annotation edits)
 require a reviewed pin refresh. This is deliberately a drift gate, not a partial
 semantic compatibility solver. Operation-level prose/tags, parameter ordering,

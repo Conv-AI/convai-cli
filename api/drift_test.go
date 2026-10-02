@@ -16,6 +16,18 @@ func TestUpstreamDriftGate(t *testing.T) {
 		name   string
 		mutate func(map[string]any)
 	}{
+		{"root servers changed", func(root map[string]any) {
+			root["servers"] = []any{map[string]any{"url": "https://other.example/v2"}}
+		}},
+		{"path servers changed", func(root map[string]any) {
+			root["paths"].(map[string]any)["/character/list"].(map[string]any)["servers"] = []any{map[string]any{"url": "https://other.example/v2"}}
+		}},
+		{"operation servers changed", func(root map[string]any) {
+			root["paths"].(map[string]any)["/character/list"].(map[string]any)["get"].(map[string]any)["servers"] = []any{map[string]any{"url": "https://other.example/v2"}}
+		}},
+		{"server variables need review", func(root map[string]any) {
+			root["paths"].(map[string]any)["/character/list"].(map[string]any)["servers"] = []any{map[string]any{"url": "https://{host}/v2", "variables": map[string]any{"host": map[string]any{"default": "other.example"}}}}
+		}},
 		{"duplicate operation ID", func(root map[string]any) {
 			paths := root["paths"].(map[string]any)
 			paths["/duplicate-list"] = paths["/character/list"]
@@ -203,6 +215,55 @@ func TestUpstreamDriftGate(t *testing.T) {
 			}
 			if err := contract.CheckUpstream(data); err == nil {
 				t.Fatal("unreviewed upstream drift was accepted")
+			}
+		})
+	}
+}
+
+func TestEquivalentUpstreamServers(t *testing.T) {
+	for _, variant := range []string{"root default", "path default", "operation default", "empty operation", "path overrides root", "operation overrides path", "unrelated path"} {
+		t.Run(variant, func(t *testing.T) {
+			var document map[string]any
+			if err := json.Unmarshal(contract.Document, &document); err != nil {
+				t.Fatal(err)
+			}
+			defaults := []any{map[string]any{"url": "/"}}
+			other := []any{map[string]any{"url": "https://other.example/v2"}}
+			paths := document["paths"].(map[string]any)
+			switch variant {
+			case "root default":
+				document["servers"] = defaults
+			case "path default":
+				paths["/character/list"].(map[string]any)["servers"] = defaults
+			case "operation default":
+				paths["/character/list"].(map[string]any)["get"].(map[string]any)["servers"] = defaults
+			case "empty operation":
+				paths["/character/list"].(map[string]any)["get"].(map[string]any)["servers"] = []any{}
+			case "path overrides root":
+				document["servers"] = other
+				for _, value := range paths {
+					value.(map[string]any)["servers"] = defaults
+				}
+			case "operation overrides path":
+				document["servers"] = other
+				for _, value := range paths {
+					item := value.(map[string]any)
+					item["servers"] = other
+					for _, method := range []string{"get", "put", "post", "delete", "options", "head", "patch", "trace"} {
+						if operation, ok := item[method].(map[string]any); ok {
+							operation["servers"] = defaults
+						}
+					}
+				}
+			case "unrelated path":
+				paths["/internal/unselected"] = map[string]any{"servers": other}
+			}
+			data, err := json.Marshal(document)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := contract.CheckUpstream(data); err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
