@@ -13,12 +13,9 @@ import (
 type catalog struct {
 	Version    int `yaml:"version"`
 	Operations []struct {
-		OperationID    string   `yaml:"operation_id"`
-		Group          string   `yaml:"group"`
-		Command        string   `yaml:"command"`
-		Stability      string   `yaml:"stability"`
-		Destructive    bool     `yaml:"destructive"`
-		RequiredScopes []string `yaml:"required_scopes"`
+		OperationID string `yaml:"operation_id"`
+		Group       string `yaml:"group"`
+		Command     string `yaml:"command"`
 	} `yaml:"operations"`
 }
 

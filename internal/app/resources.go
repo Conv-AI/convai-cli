@@ -136,7 +136,7 @@ func (a *application) resourceCommand(definition contract.Command, operation con
 				destructive = true
 			}
 			if destructive {
-				if err := a.confirm(cmd, yes); err != nil {
+				if err := a.confirm(cmd, yes, query, body); err != nil {
 					return err
 				}
 			}
@@ -245,7 +245,7 @@ func (a *application) inputObject(path string) (map[string]any, error) {
 	return result, nil
 }
 
-func (a *application) confirm(cmd *cobra.Command, yes bool) error {
+func (a *application) confirm(cmd *cobra.Command, yes bool, targets ...map[string]any) error {
 	if yes {
 		return nil
 	}
@@ -261,7 +261,7 @@ func (a *application) confirm(cmd *cobra.Command, yes bool) error {
 	if workspace == "" {
 		workspace = "personal"
 	}
-	fmt.Fprintf(cmd.ErrOrStderr(), "Confirm %s [%s, api=%s, workspace=%s] by typing yes: ", cmd.CommandPath(), name, profile.APIURL, workspace)
+	fmt.Fprintf(cmd.ErrOrStderr(), "Confirm %s [%s, api=%s, workspace=%s%s] by typing yes: ", cmd.CommandPath(), name, profile.APIURL, workspace, confirmationTargets(targets...))
 	answer, err := bufio.NewReader(a.stdin).ReadString('\n')
 	if err != nil {
 		return errors.New("confirmation cancelled")
@@ -270,6 +270,30 @@ func (a *application) confirm(cmd *cobra.Command, yes bool) error {
 		return errors.New("confirmation cancelled")
 	}
 	return nil
+}
+
+func confirmationTargets(inputs ...map[string]any) string {
+	values := map[string]string{}
+	for _, input := range inputs {
+		for key, value := range input {
+			if key == "workspace_id" || (!strings.HasSuffix(key, "_id") && key != "version" && key != "from" && key != "to") {
+				continue
+			}
+			if text, ok := value.(string); ok {
+				values[key] = text
+			}
+		}
+	}
+	keys := []string{}
+	for key := range values {
+		keys = append(keys, key)
+	}
+	slices.Sort(keys)
+	var result strings.Builder
+	for _, key := range keys {
+		fmt.Fprintf(&result, ", %s=%q", key, values[key])
+	}
+	return result.String()
 }
 
 func (a *application) associationCommands(group, collection, idName string) *cobra.Command {
@@ -309,7 +333,7 @@ func (a *application) associationCommands(group, collection, idName string) *cob
 				if err := contract.ValidateInput("character_update", query, data); err != nil {
 					return err
 				}
-				if err := a.confirm(cmd, yes); err != nil {
+				if err := a.confirm(cmd, yes, map[string]any{"character_id": args[0], idName: args[1]}); err != nil {
 					return err
 				}
 				client, err := a.apiClient()

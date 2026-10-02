@@ -1,6 +1,7 @@
 package contract
 
 import (
+	"bytes"
 	"crypto/sha256"
 	_ "embed"
 	"encoding/hex"
@@ -35,6 +36,15 @@ type Parameter struct {
 	In       string         `json:"in"`
 	Required bool           `json:"required"`
 	Schema   map[string]any `json:"schema"`
+	Raw      map[string]any `json:"-"`
+}
+
+func (p *Parameter) UnmarshalJSON(data []byte) error {
+	type plain Parameter
+	if err := json.Unmarshal(data, (*plain)(p)); err != nil {
+		return err
+	}
+	return json.Unmarshal(data, &p.Raw)
 }
 
 type PathItem struct {
@@ -87,7 +97,16 @@ type Operation struct {
 			Schema map[string]any `json:"schema"`
 		} `json:"content"`
 	} `json:"responses"`
-	Metadata Metadata `json:"x-convai-mcp"`
+	Metadata Metadata       `json:"x-convai-mcp"`
+	Raw      map[string]any `json:"-"`
+}
+
+func (o *Operation) UnmarshalJSON(data []byte) error {
+	type plain Operation
+	if err := json.Unmarshal(data, (*plain)(o)); err != nil {
+		return err
+	}
+	return json.Unmarshal(data, &o.Raw)
 }
 
 type SecurityRequirement map[string][]string
@@ -101,16 +120,6 @@ type Metadata struct {
 			Destructive bool `json:"destructiveHint"`
 		} `json:"safety"`
 	} `json:"tools"`
-	Raw map[string]any `json:"-"`
-}
-
-// Keep typed access for command UX and the full contract for drift comparison.
-func (m *Metadata) UnmarshalJSON(data []byte) error {
-	type plain Metadata
-	if err := json.Unmarshal(data, (*plain)(m)); err != nil {
-		return err
-	}
-	return json.Unmarshal(data, &m.Raw)
 }
 
 type Spec struct {
@@ -142,7 +151,9 @@ func Load() (Spec, []Command, error) {
 		Version  int       `yaml:"version"`
 		Commands []Command `yaml:"operations"`
 	}
-	if err := yaml.Unmarshal(catalogDocument, &catalog); err != nil {
+	decoder := yaml.NewDecoder(bytes.NewReader(catalogDocument))
+	decoder.KnownFields(true)
+	if err := decoder.Decode(&catalog); err != nil {
 		return Spec{}, nil, err
 	}
 	if catalog.Version != 1 {

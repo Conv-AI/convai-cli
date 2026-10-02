@@ -8,12 +8,17 @@ make vuln
 make contract-check
 ```
 
-Tests exercise every newly selected operation's command, method, route, auth
-header, local schema rejection, mutation confirmation, and KB/function
-association wire mapping. Separate matrices cover API key/PAT/OAuth headers and
+Tests exercise every newly selected operation's command, method, route, distinct
+resource IDs, exact query/body bindings, Workspace injection, auth header, local
+schema rejection, mutation confirmation, and KB/function association wire
+mapping. Separate matrices cover API key/PAT/OAuth headers and
 HTTP 401/403/404/409/422/429/502, request IDs, secret redaction, redirect rejection,
 legacy timestamps, and null/false/empty update preservation. Drift tests include
-request-level `$ref` siblings. Generation is checked for committed reproducibility.
+request-level `$ref` siblings, recursive/missing references, parameter
+serialization, unknown owner rules, removed constraints, and additive changes.
+All command paths test the same response limit, malformed/null/empty responses,
+body closure, redacted request IDs, and single-request/no-retry behavior.
+Generation is checked for committed reproducibility.
 
 These tests verify client behavior; they do not prove live entitlement policy.
 

@@ -18,7 +18,7 @@ import (
 )
 
 type Client struct {
-	generated *characterapi.ClientWithResponses
+	generated *characterapi.Client
 	secret    string
 	workspace string
 	sort      string
@@ -68,7 +68,7 @@ func New(baseURL string, auth credential.Credential, httpClient *http.Client) (*
 		request.Header.Set("User-Agent", "convai-cli")
 		return nil
 	}
-	generated, err := characterapi.NewClientWithResponses(
+	generated, err := characterapi.NewClient(
 		baseURL,
 		characterapi.WithHTTPClient(httpClient),
 		characterapi.WithRequestEditorFn(editor),
@@ -115,20 +115,21 @@ func (c *Client) ListCharacters(ctx context.Context, limit, offset int) ([]chara
 		sort := characterapi.CharacterListParamsSort(c.sort)
 		params.Sort = &sort
 	}
-	response, err := c.generated.CharacterListWithResponse(ctx, params)
+	response, err := c.generated.CharacterList(ctx, params)
 	if err != nil {
 		return nil, 0, c.safeError(transportError(err))
 	}
-	if response.JSON200 == nil {
-		return nil, 0, c.safeError(responseError(response.StatusCode(), response.Body, response.HTTPResponse))
+	var result characterapi.PageCharacterListItem
+	if err := c.decodeResponse(response, &result); err != nil {
+		return nil, 0, err
 	}
 	items := []characterapi.CharacterListItem{}
-	if response.JSON200.Items != nil {
-		items = *response.JSON200.Items
+	if result.Items != nil {
+		items = *result.Items
 	}
 	total := len(items)
-	if response.JSON200.Total != nil {
-		total = *response.JSON200.Total
+	if result.Total != nil {
+		total = *result.Total
 	}
 	return items, total, nil
 }
@@ -138,19 +139,16 @@ func (c *Client) GetCharacter(ctx context.Context, characterID string) (characte
 	if err != nil {
 		return characterapi.CharacterResponse{}, err
 	}
-	response, err := c.generated.CharacterGetWithResponse(ctx, &characterapi.CharacterGetParams{
+	response, err := c.generated.CharacterGet(ctx, &characterapi.CharacterGetParams{
 		CharacterId: characterID,
 		WorkspaceId: workspace,
 	})
 	if err != nil {
 		return characterapi.CharacterResponse{}, c.safeError(transportError(err))
 	}
-	if response.JSON200 == nil {
-		return characterapi.CharacterResponse{}, c.safeError(responseError(
-			response.StatusCode(), response.Body, response.HTTPResponse,
-		))
-	}
-	return *response.JSON200, nil
+	var result characterapi.CharacterResponse
+	err = c.decodeResponse(response, &result)
+	return result, err
 }
 
 func (c *Client) CreateCharacter(
@@ -163,16 +161,38 @@ func (c *Client) CreateCharacter(
 		}
 		request.WorkspaceId = &c.workspace
 	}
-	response, err := c.generated.CharacterCreateWithResponse(ctx, request)
+	response, err := c.generated.CharacterCreate(ctx, request)
 	if err != nil {
 		return characterapi.CharacterCreateResponse{}, c.safeError(transportError(err))
 	}
-	if response.JSON201 == nil {
-		return characterapi.CharacterCreateResponse{}, c.safeError(responseError(
-			response.StatusCode(), response.Body, response.HTTPResponse,
-		))
+	var result characterapi.CharacterCreateResponse
+	err = c.decodeResponse(response, &result)
+	return result, err
+}
+
+const maxResponseBytes = 16 << 20
+
+// Every command uses the same bounded reader and redacted HTTP error path,
+// including the typed convenience methods used by auth and character commands.
+func (c *Client) decodeResponse(response *http.Response, target any) error {
+	defer response.Body.Close()
+	data, err := io.ReadAll(io.LimitReader(response.Body, maxResponseBytes+1))
+	if err != nil {
+		return c.safeError(transportError(err))
 	}
-	return *response.JSON201, nil
+	if len(data) > maxResponseBytes {
+		if response.StatusCode < 200 || response.StatusCode >= 300 {
+			return c.safeError(&Error{StatusCode: response.StatusCode, Message: "response exceeds 16 MiB", RequestID: response.Header.Get("X-Request-ID")})
+		}
+		return errors.New("Convai response exceeds 16 MiB")
+	}
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return c.safeError(responseError(response.StatusCode, data, response))
+	}
+	if bytes.Equal(bytes.TrimSpace(data), []byte("null")) || json.Unmarshal(data, target) != nil {
+		return errors.New("Convai API returned invalid JSON response")
+	}
+	return nil
 }
 
 func (c *Client) workspaceUUID() (*uuid.UUID, error) {

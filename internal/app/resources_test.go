@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -53,8 +54,9 @@ func TestReviewedCommandCoverageAndWireRouting(t *testing.T) {
 				body["function_id"] = testUUID
 			}
 			args := append(strings.Fields(definition.Group), definition.Name)
-			for _, name := range definition.Arguments {
-				value := testUUID
+			wantQuery := map[string][]string{}
+			for index, name := range definition.Arguments {
+				value := fmt.Sprintf("%08x-aaaa-4aaa-8aaa-aaaaaaaaaaaa", index+1)
 				if name == "version" {
 					value = "1.0"
 				}
@@ -67,12 +69,49 @@ func TestReviewedCommandCoverageAndWireRouting(t *testing.T) {
 				args = append(args, value)
 				if contains(definition.BodyArguments, name) {
 					body[name] = value
+				} else {
+					wantQuery[name] = []string{value}
 				}
+			}
+			for _, parameter := range op.Parameters {
+				if parameter.Name == "workspace_id" {
+					wantQuery[parameter.Name] = []string{testUUID}
+				}
+			}
+			if _, ok := wantQuery["workspace_id"]; ok {
+				args = append(args, "--workspace", testUUID)
+			}
+			if definition.OperationID == "character_version_diff" {
+				args = append(args, "--view", "semantic")
+				wantQuery["view"] = []string{"semantic"}
+			}
+			if definition.OperationID == "get_available_voices_tts_get_available_voices_get" {
+				args = append(args, "--lang-code", "en", "--gender", "NEUTRAL", "--provider", "fixture-provider")
+				wantQuery["lang_code"] = []string{"en"}
+				wantQuery["gender"] = []string{"NEUTRAL"}
+				wantQuery["provider"] = []string{"fixture-provider"}
 			}
 			if definition.FileRequired || len(body) > 0 {
 				args = append(args, "--file", "-")
 			}
 			args = append(args, "--yes", "--output", "json")
+			data, err := json.Marshal(body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			// Expected injection is independent of the file sent to the command.
+			if content, ok := op.RequestBody.Content["application/json"]; ok {
+				properties, _ := spec.Resolve(content.Schema)["properties"].(map[string]any)
+				if _, supported := properties["workspace_id"]; supported && wantQuery["workspace_id"] != nil {
+					body["workspace_id"] = testUUID
+				}
+			}
+			if definition.OperationID == "character_version_create" {
+				body["make_latest"] = false
+			}
+			if definition.OperationID == "character_version_deprecate" {
+				body["deprecated"] = true
+			}
 			path, method := "", ""
 			for p, item := range spec.Paths {
 				for m, candidate := range item.Operations {
@@ -90,20 +129,40 @@ func TestReviewedCommandCoverageAndWireRouting(t *testing.T) {
 				if r.Header.Get("CONVAI-API-KEY") == "" {
 					t.Error("credential was not forwarded")
 				}
+				if !reflect.DeepEqual(map[string][]string(r.URL.Query()), wantQuery) {
+					t.Errorf("query=%v, want=%v", r.URL.Query(), wantQuery)
+				}
+				if len(op.RequestBody.Content) > 0 {
+					var actual map[string]any
+					if err := json.NewDecoder(r.Body).Decode(&actual); err != nil {
+						t.Error(err)
+					} else if !reflect.DeepEqual(actual, body) {
+						t.Errorf("body=%v, want=%v", actual, body)
+					}
+				}
 				w.Header().Set("Content-Type", "application/json")
 				_, _ = io.WriteString(w, `{"ok":true}`)
 			}))
 			defer server.Close()
-			data, err := json.Marshal(body)
-			if err != nil {
-				t.Fatal(err)
-			}
 			stdout, _, err := execute(t, server, strings.NewReader(string(data)), args...)
 			if err != nil {
 				t.Fatal(err)
 			}
 			if !called || !strings.Contains(stdout, `"ok": true`) {
 				t.Fatalf("called=%v, output=%s", called, stdout)
+			}
+			if op.Metadata.Tools[0].Safety.Destructive {
+				called = false
+				withoutConfirmation := []string{}
+				for _, argument := range args {
+					if argument != "--yes" {
+						withoutConfirmation = append(withoutConfirmation, argument)
+					}
+				}
+				_, _, err := execute(t, server, strings.NewReader(string(data)), withoutConfirmation...)
+				if err == nil || called {
+					t.Fatalf("unconfirmed owner-destructive command reached REST: error=%v, called=%v", err, called)
+				}
 			}
 		})
 	}
@@ -233,19 +292,30 @@ func TestAssociationCommandsUseOwnerRESTMapping(t *testing.T) {
 					if mode == "disconnect" {
 						status = "inactive"
 					}
-					if item["id"] != testUUID || item["status"] != status {
+					if item["id"] != "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" || item["status"] != status {
 						t.Error("wrong association payload")
 					}
 					w.Header().Set("Content-Type", "application/json")
 					_, _ = io.WriteString(w, `{"ok":true}`)
 				}))
 				defer server.Close()
-				_, _, err := execute(t, server, strings.NewReader(""), group, mode, testUUID, testUUID, "--yes")
+				_, _, err := execute(t, server, strings.NewReader(""), group, mode, testUUID, "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "--yes")
 				if err != nil {
 					t.Fatal(err)
 				}
+				if _, _, err := execute(t, server, strings.NewReader(""), group, mode, testUUID, "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"); err == nil {
+					t.Fatal("association mutation accepted without confirmation")
+				}
 			})
 		}
+	}
+}
+
+func TestConfirmationTargetsAreSpecificAndEscaped(t *testing.T) {
+	got := confirmationTargets(map[string]any{"character_id": "character", "workspace_id": "workspace", "backstory": "private"}, map[string]any{"version": "1.0", "function_id": "function\n", "description": "private"})
+	want := `, character_id="character", function_id="function\n", version="1.0"`
+	if got != want {
+		t.Fatalf("confirmation targets=%q, want=%q", got, want)
 	}
 }
 

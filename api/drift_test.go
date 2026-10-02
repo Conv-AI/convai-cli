@@ -16,6 +16,41 @@ func TestUpstreamDriftGate(t *testing.T) {
 		name   string
 		mutate func(map[string]any)
 	}{
+		{"duplicate operation ID", func(root map[string]any) {
+			paths := root["paths"].(map[string]any)
+			paths["/duplicate-list"] = paths["/character/list"]
+		}},
+		{"optional parameter addition needs review", func(root map[string]any) {
+			root["paths"].(map[string]any)["/character/list"].(map[string]any)["parameters"] = []any{map[string]any{"name": "tenant", "in": "query", "required": false, "schema": map[string]any{"type": "string"}}}
+		}},
+		{"query serialization changed", func(root map[string]any) {
+			operation := root["paths"].(map[string]any)["/character/list"].(map[string]any)["get"].(map[string]any)
+			operation["parameters"].([]any)[0].(map[string]any)["style"] = "deepObject"
+		}},
+		{"unknown constraint added", func(root map[string]any) {
+			root["components"].(map[string]any)["schemas"].(map[string]any)["CharacterCreate"].(map[string]any)["x-new-owner-rule"] = true
+		}},
+		{"dynamic reference needs explicit support", func(root map[string]any) {
+			root["components"].(map[string]any)["schemas"].(map[string]any)["CharacterResponse"].(map[string]any)["$dynamicRef"] = "#character"
+		}},
+		{"input constraint removed", func(root map[string]any) {
+			delete(root["components"].(map[string]any)["schemas"].(map[string]any)["CharacterCreate"].(map[string]any)["properties"].(map[string]any)["charName"].(map[string]any), "maxLength")
+		}},
+		{"additive property needs review", func(root map[string]any) {
+			root["components"].(map[string]any)["schemas"].(map[string]any)["CharacterCreate"].(map[string]any)["properties"].(map[string]any)["new_field"] = map[string]any{"type": "string"}
+		}},
+		{"recursive schema change terminates", func(root map[string]any) {
+			root["components"].(map[string]any)["schemas"].(map[string]any)["CharacterResponse"].(map[string]any)["properties"].(map[string]any)["self"] = map[string]any{"$ref": "#/components/schemas/CharacterResponse"}
+		}},
+		{"missing schema reference", func(root map[string]any) {
+			root["components"].(map[string]any)["schemas"].(map[string]any)["CharacterResponse"].(map[string]any)["properties"].(map[string]any)["self"] = map[string]any{"$ref": "#/components/schemas/Missing"}
+		}},
+		{"external schema reference", func(root map[string]any) {
+			root["components"].(map[string]any)["schemas"].(map[string]any)["CharacterResponse"].(map[string]any)["properties"].(map[string]any)["self"] = map[string]any{"$ref": "https://example.com/schema.json"}
+		}},
+		{"response header changed", func(root map[string]any) {
+			root["paths"].(map[string]any)["/character/get"].(map[string]any)["get"].(map[string]any)["responses"].(map[string]any)["200"].(map[string]any)["headers"] = map[string]any{"X-Request-ID": map[string]any{"schema": map[string]any{"type": "string"}}}
+		}},
 		{"removed operation", func(root map[string]any) { delete(root["paths"].(map[string]any), "/character/delete") }},
 		{"release default becomes promotion", func(root map[string]any) {
 			root["components"].(map[string]any)["schemas"].(map[string]any)["CharacterVersionCreate"].(map[string]any)["properties"].(map[string]any)["make_latest"].(map[string]any)["default"] = true
@@ -167,7 +202,7 @@ func TestUpstreamDriftGate(t *testing.T) {
 				t.Fatal(err)
 			}
 			if err := contract.CheckUpstream(data); err == nil {
-				t.Fatal("breaking upstream drift was accepted")
+				t.Fatal("unreviewed upstream drift was accepted")
 			}
 		})
 	}
@@ -207,7 +242,7 @@ func TestEquivalentUpstreamAuthentication(t *testing.T) {
 
 func TestCompatiblePathItemParameters(t *testing.T) {
 	t.Parallel()
-	for _, variant := range []string{"optional inherited parameter", "move parameters to path", "operation override", "referenced inherited parameter"} {
+	for _, variant := range []string{"move parameters to path", "operation override", "referenced inherited parameter", "unrelated schema", "operation documentation"} {
 		t.Run(variant, func(t *testing.T) {
 			var document map[string]any
 			if err := json.Unmarshal(contract.Document, &document); err != nil {
@@ -216,8 +251,10 @@ func TestCompatiblePathItemParameters(t *testing.T) {
 			item := document["paths"].(map[string]any)["/character/list"].(map[string]any)
 			operation := item["get"].(map[string]any)
 			switch variant {
-			case "optional inherited parameter":
-				item["parameters"] = []any{map[string]any{"name": "tenant", "in": "query", "required": false, "schema": map[string]any{"type": "string"}}}
+			case "unrelated schema":
+				document["components"].(map[string]any)["schemas"].(map[string]any)["UnusedInternalSchema"] = map[string]any{"type": "boolean"}
+			case "operation documentation":
+				operation["description"] = "Updated prose without wire changes"
 			case "move parameters to path":
 				item["parameters"] = operation["parameters"]
 				delete(operation, "parameters")

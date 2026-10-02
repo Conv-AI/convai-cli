@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
-	"io"
 
 	contract "github.com/Conv-AI/convai-cli/api"
 )
@@ -30,24 +28,7 @@ func (c *Client) Call(ctx context.Context, operation string, query map[string]an
 	if err != nil {
 		return nil, c.safeError(transportError(err))
 	}
-	defer response.Body.Close()
-	const maxResponse = 16 << 20
-	data, err := io.ReadAll(io.LimitReader(response.Body, maxResponse+1))
-	if err != nil {
-		return nil, c.safeError(transportError(err))
-	}
-	if len(data) > maxResponse {
-		return nil, fmt.Errorf("Convai response exceeds 16 MiB")
-	}
-	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return nil, c.safeError(responseError(response.StatusCode, data, response))
-	}
-	if len(data) == 0 {
-		return map[string]any{"status": response.StatusCode}, nil
-	}
 	var result any
-	if err := json.Unmarshal(data, &result); err != nil {
-		return nil, fmt.Errorf("Convai API returned invalid JSON")
-	}
-	return result, nil
+	err = c.decodeResponse(response, &result)
+	return result, err
 }

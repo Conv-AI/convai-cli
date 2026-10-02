@@ -3,12 +3,14 @@ package contract
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"reflect"
 	"slices"
 	"strings"
 )
 
-// CheckUpstream checks only reviewed operations, not unrelated internal routes.
+// CheckUpstream is a reviewed-contract drift gate, not a semantic compatibility
+// solver. Any change to a selected wire contract requires an owner-pin refresh.
 func CheckUpstream(data []byte) error {
 	pinned, commands, err := Load()
 	if err != nil {
@@ -18,74 +20,142 @@ func CheckUpstream(data []byte) error {
 	if err := json.Unmarshal(data, &upstream); err != nil {
 		return fmt.Errorf("decode upstream OpenAPI: %w", err)
 	}
+	var oldRoot, newRoot map[string]any
+	if err := json.Unmarshal(Document, &oldRoot); err != nil {
+		return err
+	}
+	if err := json.Unmarshal(data, &newRoot); err != nil {
+		return err
+	}
+	for _, key := range []string{"openapi", "jsonSchemaDialect"} {
+		if !reflect.DeepEqual(oldRoot[key], newRoot[key]) {
+			return fmt.Errorf("upstream changed %s", key)
+		}
+	}
 	for _, command := range commands {
 		old, _ := pinned.Find(command.OperationID)
 		current, ok := upstream.Find(command.OperationID)
 		if !ok {
-			return fmt.Errorf("upstream removed operation %s", command.OperationID)
+			return fmt.Errorf("upstream removed or cannot resolve operation %s", command.OperationID)
 		}
 		oldPath, oldMethod := pinned.route(command.OperationID)
 		path, method := upstream.route(command.OperationID)
 		if path != oldPath || method != oldMethod {
-			return fmt.Errorf("upstream changed route for %s", command.OperationID)
-		}
-		if !current.Metadata.Exposed || !reflect.DeepEqual(old.Metadata.Raw, current.Metadata.Raw) {
-			return fmt.Errorf("upstream changed tool approval, scopes, or safety for %s", command.OperationID)
+			return fmt.Errorf("upstream changed or duplicated route for %s", command.OperationID)
 		}
 		if err := compatibleSecurity(pinned, upstream, old, current); err != nil {
 			return fmt.Errorf("%s: %w", command.OperationID, err)
 		}
-		if current.RequestBody.Required && !old.RequestBody.Required {
-			return fmt.Errorf("upstream now requires a request body for %s", command.OperationID)
+		previous, err := operationSnapshot(oldRoot, old)
+		if err != nil {
+			return fmt.Errorf("%s: %w", command.OperationID, err)
 		}
-		oldParams := map[string]Parameter{}
-		for _, parameter := range old.Parameters {
-			oldParams[parameter.In+":"+parameter.Name] = parameter
+		updated, err := operationSnapshot(newRoot, current)
+		if err != nil {
+			return fmt.Errorf("%s: %w", command.OperationID, err)
 		}
-		for _, parameter := range current.Parameters {
-			previous, exists := oldParams[parameter.In+":"+parameter.Name]
-			if parameter.Required && (!exists || !previous.Required) {
-				return fmt.Errorf("upstream added required parameter %s to %s", parameter.Name, command.OperationID)
-			}
-			if exists {
-				if err := compatibleInput(pinned, upstream, previous.Schema, parameter.Schema, parameter.Name); err != nil {
-					return fmt.Errorf("%s: %w", command.OperationID, err)
+		if !reflect.DeepEqual(previous, updated) {
+			return fmt.Errorf("upstream changed reviewed contract for %s; refresh the immutable owner pin after review", command.OperationID)
+		}
+	}
+	return nil
+}
+
+type contractSnapshot struct {
+	Operation  map[string]any
+	References map[string]any
+}
+
+// Compare opaque schema keywords, serialization options, response headers,
+// errors, and all owner metadata rather than maintaining a keyword allowlist.
+// Traverse the reference graph once; recursive schemas cannot recurse forever.
+func operationSnapshot(root map[string]any, operation Operation) (contractSnapshot, error) {
+	value := map[string]any{}
+	for key, field := range operation.Raw {
+		switch key {
+		case "parameters", "security", "summary", "description", "tags", "externalDocs":
+			continue
+		}
+		value[key] = field
+	}
+	parameters := map[string]any{}
+	for _, parameter := range operation.Parameters {
+		parameters[parameter.In+":"+parameter.Name] = parameter.Raw
+	}
+	value["parameters"] = parameters
+	result := contractSnapshot{Operation: value, References: map[string]any{}}
+	queue := []string{}
+	if err := collectReferences(value, &queue); err != nil {
+		return contractSnapshot{}, err
+	}
+	for len(queue) > 0 {
+		ref := queue[0]
+		queue = queue[1:]
+		if _, visited := result.References[ref]; visited {
+			continue
+		}
+		resolved, err := localReference(root, ref)
+		if err != nil {
+			return contractSnapshot{}, err
+		}
+		result.References[ref] = resolved
+		if err := collectReferences(resolved, &queue); err != nil {
+			return contractSnapshot{}, err
+		}
+	}
+	return result, nil
+}
+
+func collectReferences(value any, queue *[]string) error {
+	switch value := value.(type) {
+	case map[string]any:
+		for key, field := range value {
+			switch key {
+			case "$dynamicRef", "$recursiveRef":
+				return fmt.Errorf("unsupported contract reference keyword %s", key)
+			case "$ref":
+				ref, ok := field.(string)
+				if !ok {
+					return fmt.Errorf("contract reference must be a string")
 				}
-				delete(oldParams, parameter.In+":"+parameter.Name)
-			}
-		}
-		if len(oldParams) > 0 {
-			return fmt.Errorf("upstream removed a supported parameter from %s", command.OperationID)
-		}
-		for encoding, previous := range old.RequestBody.Content {
-			currentBody, exists := current.RequestBody.Content[encoding]
-			if !exists {
-				return fmt.Errorf("upstream removed %s request encoding from %s", encoding, command.OperationID)
-			}
-			if err := compatibleInput(pinned, upstream, previous.Schema, currentBody.Schema, "body"); err != nil {
-				return fmt.Errorf("%s: %w", command.OperationID, err)
-			}
-		}
-		for status, previous := range old.Responses {
-			if !strings.HasPrefix(status, "2") {
-				continue
-			}
-			response, exists := current.Responses[status]
-			if !exists {
-				return fmt.Errorf("upstream removed successful response %s from %s", status, command.OperationID)
-			}
-			for encoding, content := range previous.Content {
-				updated, exists := response.Content[encoding]
-				if !exists {
-					return fmt.Errorf("upstream removed response encoding from %s", command.OperationID)
+				*queue = append(*queue, ref)
+			default:
+				if err := collectReferences(field, queue); err != nil {
+					return err
 				}
-				if err := compatibleOutput(pinned, upstream, content.Schema, updated.Schema, "response"); err != nil {
-					return fmt.Errorf("%s: %w", command.OperationID, err)
-				}
+			}
+		}
+	case []any:
+		for _, field := range value {
+			if err := collectReferences(field, queue); err != nil {
+				return err
 			}
 		}
 	}
 	return nil
+}
+
+func localReference(root map[string]any, ref string) (any, error) {
+	if !strings.HasPrefix(ref, "#/components/") {
+		return nil, fmt.Errorf("unsupported contract reference %q", ref)
+	}
+	pointer, err := url.PathUnescape(strings.TrimPrefix(ref, "#/"))
+	if err != nil {
+		return nil, fmt.Errorf("invalid contract reference %q", ref)
+	}
+	var result any = root
+	for _, token := range strings.Split(pointer, "/") {
+		token = strings.ReplaceAll(strings.ReplaceAll(token, "~1", "/"), "~0", "~")
+		object, ok := result.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("unresolved contract reference %q", ref)
+		}
+		result, ok = object[token]
+		if !ok || result == nil {
+			return nil, fmt.Errorf("unresolved contract reference %q", ref)
+		}
+	}
+	return result, nil
 }
 
 func (s Spec) effectiveSecurity(operation Operation) []SecurityRequirement {
@@ -174,182 +244,16 @@ func (s Spec) securityScheme(name string, seen map[string]bool) (map[string]any,
 }
 
 func (s Spec) route(id string) (string, string) {
+	foundPath, foundMethod := "", ""
 	for path, item := range s.Paths {
 		for method, op := range item.Operations {
 			if op.OperationID == id {
-				return path, method
+				if foundPath != "" {
+					return "", ""
+				}
+				foundPath, foundMethod = path, method
 			}
 		}
 	}
-	return "", ""
-}
-
-func compatibleInput(oldSpec, newSpec Spec, old, current map[string]any, path string) error {
-	old, current = inputSchema(oldSpec, old), inputSchema(newSpec, current)
-	if old == nil || current == nil {
-		return fmt.Errorf("unresolved schema at %s", path)
-	}
-	previousDefault, hadDefault := old["default"]
-	currentDefault, hasDefault := current["default"]
-	if hadDefault != hasDefault || !reflect.DeepEqual(previousDefault, currentDefault) {
-		return fmt.Errorf("upstream changed default at %s", path)
-	}
-	for _, key := range []string{"pattern", "const", "type", "format", "not", "if", "then", "else", "dependentSchemas", "dependentRequired", "uniqueItems", "additionalProperties", "propertyNames", "patternProperties", "contentEncoding", "contentMediaType", "contentSchema", "contains", "prefixItems", "unevaluatedProperties", "unevaluatedItems", "multipleOf"} {
-		// The owner artifact adds a scalar type to nullable query schemas for
-		// generators. The anyOf branches remain the authority in that case.
-		if key == "type" && (old["anyOf"] != nil || current["anyOf"] != nil) {
-			continue
-		}
-		if current[key] != nil && !reflect.DeepEqual(old[key], current[key]) {
-			return fmt.Errorf("upstream changed %s at %s", key, path)
-		}
-	}
-	for _, key := range []string{"minimum", "exclusiveMinimum", "minLength", "minItems", "minProperties", "minContains"} {
-		if value, ok := current[key].(float64); ok {
-			previous, had := old[key].(float64)
-			if !had || value > previous {
-				return fmt.Errorf("upstream tightened %s at %s", key, path)
-			}
-		}
-	}
-	for _, key := range []string{"maximum", "exclusiveMaximum", "maxLength", "maxItems", "maxProperties", "maxContains", "x-convai-maxLines"} {
-		if value, ok := current[key].(float64); ok {
-			previous, had := old[key].(float64)
-			if !had || value < previous {
-				return fmt.Errorf("upstream tightened %s at %s", key, path)
-			}
-		}
-	}
-	for key, value := range current {
-		if strings.HasPrefix(key, "x-convai-") && key != "x-convai-maxLines" && !reflect.DeepEqual(old[key], value) {
-			return fmt.Errorf("upstream changed custom constraint %s at %s", key, path)
-		}
-	}
-	if values, ok := current["enum"].([]any); ok {
-		previous, had := old["enum"].([]any)
-		if !had {
-			return fmt.Errorf("upstream restricted values at %s", path)
-		}
-		for _, value := range previous {
-			if !slices.ContainsFunc(values, func(v any) bool { return reflect.DeepEqual(value, v) }) {
-				return fmt.Errorf("upstream removed a value at %s", path)
-			}
-		}
-	}
-	previousRequired, _ := old["required"].([]any)
-	currentRequired, _ := current["required"].([]any)
-	for _, name := range currentRequired {
-		if !slices.Contains(previousRequired, name) {
-			return fmt.Errorf("upstream added required field %v at %s", name, path)
-		}
-	}
-	previousProperties, _ := old["properties"].(map[string]any)
-	currentProperties, _ := current["properties"].(map[string]any)
-	for name, property := range previousProperties {
-		updated, exists := currentProperties[name]
-		if !exists {
-			return fmt.Errorf("upstream removed field %s at %s", name, path)
-		}
-		if err := compatibleInput(oldSpec, newSpec, property.(map[string]any), updated.(map[string]any), path+"/"+name); err != nil {
-			return err
-		}
-	}
-	for _, key := range []string{"anyOf", "oneOf", "allOf"} {
-		previous, had := old[key].([]any)
-		updated, has := current[key].([]any)
-		if had != has || len(previous) != len(updated) {
-			return fmt.Errorf("upstream changed %s at %s", key, path)
-		}
-		for i, branch := range previous {
-			if err := compatibleInput(oldSpec, newSpec, branch.(map[string]any), updated[i].(map[string]any), path+"/"+key); err != nil {
-				return err
-			}
-		}
-	}
-	if items, ok := old["items"].(map[string]any); ok {
-		updated, ok := current["items"].(map[string]any)
-		if !ok {
-			return fmt.Errorf("upstream removed item schema at %s", path)
-		}
-		if err := compatibleInput(oldSpec, newSpec, items, updated, path+"/items"); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// JSON Schema applies $ref siblings as an intersection, not an override.
-func inputSchema(spec Spec, schema map[string]any) map[string]any {
-	if _, ok := schema["$ref"].(string); !ok {
-		return schema
-	}
-	base := spec.Resolve(schema)
-	if base == nil {
-		return nil
-	}
-	siblings := map[string]any{}
-	for key, value := range schema {
-		if key != "$ref" && key != "title" && key != "description" {
-			siblings[key] = value
-		}
-	}
-	if len(siblings) == 0 {
-		return base
-	}
-	return map[string]any{"allOf": []any{base, siblings}}
-}
-
-func compatibleOutput(oldSpec, newSpec Spec, old, current map[string]any, path string) error {
-	old, current = inputSchema(oldSpec, old), inputSchema(newSpec, current)
-	if old == nil || current == nil {
-		return fmt.Errorf("unresolved output schema at %s", path)
-	}
-	if !reflect.DeepEqual(old["type"], current["type"]) {
-		return fmt.Errorf("upstream changed output type at %s", path)
-	}
-	for _, key := range []string{"anyOf", "oneOf", "allOf"} {
-		previous, had := old[key].([]any)
-		updated, has := current[key].([]any)
-		if had != has || len(previous) != len(updated) {
-			return fmt.Errorf("upstream changed output %s at %s", key, path)
-		}
-		for i, branch := range previous {
-			if err := compatibleOutput(oldSpec, newSpec, branch.(map[string]any), updated[i].(map[string]any), fmt.Sprintf("%s/%s/%d", path, key, i)); err != nil {
-				return err
-			}
-		}
-	}
-	previousRequired, _ := old["required"].([]any)
-	currentRequired, _ := current["required"].([]any)
-	for _, name := range previousRequired {
-		if !slices.Contains(currentRequired, name) {
-			return fmt.Errorf("upstream made required output field %v optional at %s", name, path)
-		}
-	}
-	oldProperties, _ := old["properties"].(map[string]any)
-	newProperties, _ := current["properties"].(map[string]any)
-	for name, property := range oldProperties {
-		updated, exists := newProperties[name]
-		if !exists {
-			return fmt.Errorf("upstream removed output field %s at %s", name, path)
-		}
-		if err := compatibleOutput(oldSpec, newSpec, property.(map[string]any), updated.(map[string]any), path+"/"+name); err != nil {
-			return err
-		}
-	}
-	if items, ok := old["items"].(map[string]any); ok {
-		updated, ok := current["items"].(map[string]any)
-		if !ok {
-			return fmt.Errorf("upstream changed output items at %s", path)
-		}
-		return compatibleOutput(oldSpec, newSpec, items, updated, path+"/items")
-	}
-	if values, ok := old["additionalProperties"].(map[string]any); ok {
-		updated, ok := current["additionalProperties"].(map[string]any)
-		if !ok {
-			return fmt.Errorf("upstream changed output map values at %s", path)
-		}
-		return compatibleOutput(oldSpec, newSpec, values, updated, path+"/additionalProperties")
-	}
-	return nil
+	return foundPath, foundMethod
 }

@@ -26,9 +26,13 @@ offset; the CLI does not infer their timezone. The original schemas, including
 `$ref` siblings, are used directly for local JSON Schema validation.
 
 `make contract-check` compares the reviewed operations to staging OpenAPI. CI
-and a daily scheduled workflow fail on withdrawn approval, changed scopes or
-safety, removed routes/inputs/success outputs, or tightened input constraints.
-Changed, added, or removed request defaults also fail the gate.
+and a daily scheduled workflow fail on any selected wire-contract change:
+parameters, serialization, request/response schemas and encodings, defaults,
+headers, errors, and all owner tool metadata. Reachable local component references
+are compared in full, preserving reference siblings and unknown keywords;
+recursive schema graphs are visited once. Missing/external references, dynamic
+references, and duplicate selected operation IDs fail closed pending explicit
+contract support.
 It also compares effective OpenAPI authentication requirements (including root
 inheritance and explicit operation overrides) and referenced security schemes.
 Changed API-key headers or Bearer schemes require review. Alternative and scope
@@ -36,12 +40,13 @@ ordering are ignored; other scheme changes are conservatively checked in full.
 Effective parameters merge Path Item inheritance and operation overrides by
 name and location, resolving local parameter references. A reviewed route
 moving behind a Path Item reference fails closed pending a contract refresh.
-Complex schema changes conservatively require review; this structural gate is
-not a substitute for E2E authorization or owner business-rule tests.
-All tool metadata is retained for comparison, including conditional scopes,
-association templates, transport support, and safety hints. Custom constraints
-such as `x-convai-maxLines` participate in drift checks; enforcement of custom
-keywords and business policy remains in REST rather than a separate CLI policy.
+Tradeoff: even compatible additive schema changes (and schema annotation edits)
+require a reviewed pin refresh. This is deliberately a drift gate, not a partial
+semantic compatibility solver. Operation-level prose/tags, parameter ordering,
+equivalent inheritance, and unrelated routes/components do not cause failures.
+The gate is not a substitute for E2E authorization or owner business-rule tests.
+Enforcement of custom keywords and business policy remains in REST rather than
+a separate CLI policy.
 
 To refresh: select an immutable owner commit, copy its reviewed artifact, update
 the lock checksum/provenance, regenerate, review the complete diff, and run native

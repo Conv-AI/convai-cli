@@ -20,8 +20,9 @@ command UX.
 ## Contracts
 
 The low-level client is generated from a pinned OpenAPI snapshot. The reviewed
-operation catalog selects stable operation IDs and records command grouping,
-stability, destructive behavior, and required PAT scopes.
+operation catalog selects stable operation IDs and records only command UX:
+grouping, arguments, and file inputs. Approval, destructive behavior, and scopes
+come from the owner contract, not a duplicate CLI policy.
 
 Command UX is hand-authored. Fully generated CLIs tend to expose unstable
 schema names, poor defaults, and unsafe mutation behavior.
@@ -46,7 +47,9 @@ Profile metadata contains an API origin and optional Workspace UUID, never a
 credential. API origins require HTTPS except loopback development endpoints;
 redirects are not followed, preventing credential forwarding across origins.
 Mutations have bounded inputs and explicit confirmation where owner safety
-metadata requires it. HTTP errors retain status and request IDs while redacting
+metadata requires it. Confirmation shows resource targets as well as the origin
+and Workspace. Every command shares a 16 MiB bounded response reader, with no
+automatic retries. HTTP errors retain status and request IDs while redacting
 the exact supplied credential.
 
 The CLI accepts existing audience-valid OAuth access tokens but does not acquire

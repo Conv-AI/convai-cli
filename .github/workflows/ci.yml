@@ -28,7 +28,7 @@ jobs:
       - name: Scan reachable Go vulnerabilities
         run: make vuln
 
-      - name: Check upstream Character API compatibility
+      - name: Check upstream Character API contract drift
         run: make contract-check
 
       - name: Validate release configuration
