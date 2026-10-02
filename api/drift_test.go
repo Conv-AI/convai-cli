@@ -17,6 +17,19 @@ func TestUpstreamDriftGate(t *testing.T) {
 		mutate func(map[string]any)
 	}{
 		{"removed operation", func(root map[string]any) { delete(root["paths"].(map[string]any), "/character/delete") }},
+		{"required inherited query", func(root map[string]any) {
+			root["paths"].(map[string]any)["/character/list"].(map[string]any)["parameters"] = []any{map[string]any{"name": "tenant", "in": "query", "required": true, "schema": map[string]any{"type": "string"}}}
+		}},
+		{"required inherited header", func(root map[string]any) {
+			root["paths"].(map[string]any)["/character/list"].(map[string]any)["parameters"] = []any{map[string]any{"name": "X-Tenant", "in": "header", "required": true, "schema": map[string]any{"type": "string"}}}
+		}},
+		{"required inherited parameter reference", func(root map[string]any) {
+			root["components"].(map[string]any)["parameters"] = map[string]any{"Tenant": map[string]any{"name": "tenant", "in": "query", "required": true, "schema": map[string]any{"type": "string"}}}
+			root["paths"].(map[string]any)["/character/list"].(map[string]any)["parameters"] = []any{map[string]any{"$ref": "#/components/parameters/Tenant"}}
+		}},
+		{"missing parameter reference", func(root map[string]any) {
+			root["paths"].(map[string]any)["/character/list"].(map[string]any)["parameters"] = []any{map[string]any{"$ref": "#/components/parameters/Missing"}}
+		}},
 		{"removed API key alternative", func(root map[string]any) {
 			root["paths"].(map[string]any)["/character/list"].(map[string]any)["get"].(map[string]any)["security"] = []any{map[string]any{"PersonalAccessTokenAuth": []any{}}}
 		}},
@@ -168,6 +181,41 @@ func TestEquivalentUpstreamAuthentication(t *testing.T) {
 				schemes := document["components"].(map[string]any)["securitySchemes"].(map[string]any)
 				schemes["APIKeyDefinition"] = schemes["ConvaiApiKeyAuth"]
 				schemes["ConvaiApiKeyAuth"] = map[string]any{"$ref": "#/components/securitySchemes/APIKeyDefinition"}
+			}
+			data, err := json.Marshal(document)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := contract.CheckUpstream(data); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestCompatiblePathItemParameters(t *testing.T) {
+	t.Parallel()
+	for _, variant := range []string{"optional inherited parameter", "move parameters to path", "operation override", "referenced inherited parameter"} {
+		t.Run(variant, func(t *testing.T) {
+			var document map[string]any
+			if err := json.Unmarshal(contract.Document, &document); err != nil {
+				t.Fatal(err)
+			}
+			item := document["paths"].(map[string]any)["/character/list"].(map[string]any)
+			operation := item["get"].(map[string]any)
+			switch variant {
+			case "optional inherited parameter":
+				item["parameters"] = []any{map[string]any{"name": "tenant", "in": "query", "required": false, "schema": map[string]any{"type": "string"}}}
+			case "move parameters to path":
+				item["parameters"] = operation["parameters"]
+				delete(operation, "parameters")
+			case "operation override":
+				item["parameters"] = []any{map[string]any{"name": "limit", "in": "query", "required": true, "schema": map[string]any{"type": "integer"}}}
+			case "referenced inherited parameter":
+				parameters := operation["parameters"].([]any)
+				document["components"].(map[string]any)["parameters"] = map[string]any{"ListParameter": parameters[0]}
+				item["parameters"] = []any{map[string]any{"$ref": "#/components/parameters/ListParameter"}}
+				operation["parameters"] = parameters[1:]
 			}
 			data, err := json.Marshal(document)
 			if err != nil {

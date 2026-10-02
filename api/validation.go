@@ -78,8 +78,8 @@ func initializeValidators() {
 	}
 	bodyValidators = map[string]*jsonschema.Schema{}
 	queryValidators = map[string]*jsonschema.Schema{}
-	for path, methods := range spec.Paths {
-		for method, op := range methods {
+	for path, item := range spec.Paths {
+		for method, op := range item.Operations {
 			if _, ok := queries[op.OperationID]; !ok {
 				continue
 			}

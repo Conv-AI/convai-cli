@@ -32,6 +32,9 @@ It also compares effective OpenAPI authentication requirements (including root
 inheritance and explicit operation overrides) and referenced security schemes.
 Changed API-key headers or Bearer schemes require review. Alternative and scope
 ordering are ignored; other scheme changes are conservatively checked in full.
+Effective parameters merge Path Item inheritance and operation overrides by
+name and location, resolving local parameter references. A reviewed route
+moving behind a Path Item reference fails closed pending a contract refresh.
 Complex schema changes conservatively require review; this structural gate is
 not a substitute for E2E authorization or owner business-rule tests.
 All tool metadata is retained for comparison, including conditional scopes,

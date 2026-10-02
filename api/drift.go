@@ -174,8 +174,8 @@ func (s Spec) securityScheme(name string, seen map[string]bool) (map[string]any,
 }
 
 func (s Spec) route(id string) (string, string) {
-	for path, methods := range s.Paths {
-		for method, op := range methods {
+	for path, item := range s.Paths {
+		for method, op := range item.Operations {
 			if op.OperationID == id {
 				return path, method
 			}

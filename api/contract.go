@@ -30,10 +30,45 @@ type Command struct {
 }
 
 type Parameter struct {
+	Ref      string         `json:"$ref"`
 	Name     string         `json:"name"`
 	In       string         `json:"in"`
 	Required bool           `json:"required"`
 	Schema   map[string]any `json:"schema"`
+}
+
+type PathItem struct {
+	Ref        string
+	Parameters []Parameter
+	Operations map[string]Operation
+}
+
+func (p *PathItem) UnmarshalJSON(data []byte) error {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	if ref, exists := fields["$ref"]; exists {
+		if err := json.Unmarshal(ref, &p.Ref); err != nil {
+			return err
+		}
+	}
+	p.Operations = map[string]Operation{}
+	if parameters, exists := fields["parameters"]; exists {
+		if err := json.Unmarshal(parameters, &p.Parameters); err != nil {
+			return err
+		}
+	}
+	for _, method := range []string{"get", "put", "post", "delete", "options", "head", "patch", "trace"} {
+		if value, exists := fields[method]; exists {
+			var operation Operation
+			if err := json.Unmarshal(value, &operation); err != nil {
+				return err
+			}
+			p.Operations[method] = operation
+		}
+	}
+	return nil
 }
 
 type Operation struct {
@@ -79,11 +114,12 @@ func (m *Metadata) UnmarshalJSON(data []byte) error {
 }
 
 type Spec struct {
-	Paths      map[string]map[string]Operation `json:"paths"`
-	Security   []SecurityRequirement           `json:"security"`
+	Paths      map[string]PathItem   `json:"paths"`
+	Security   []SecurityRequirement `json:"security"`
 	Components struct {
 		Schemas         map[string]map[string]any `json:"schemas"`
 		SecuritySchemes map[string]map[string]any `json:"securitySchemes"`
+		Parameters      map[string]Parameter      `json:"parameters"`
 	} `json:"components"`
 }
 
@@ -125,14 +161,52 @@ func Load() (Spec, []Command, error) {
 }
 
 func (s Spec) Find(id string) (Operation, bool) {
-	for _, methods := range s.Paths {
-		for _, operation := range methods {
+	for _, item := range s.Paths {
+		for _, operation := range item.Operations {
 			if operation.OperationID == id {
+				if item.Ref != "" {
+					return Operation{}, false
+				}
+				var ok bool
+				operation.Parameters, ok = s.effectiveParameters(item.Parameters, operation.Parameters)
+				if !ok {
+					return Operation{}, false
+				}
 				return operation, true
 			}
 		}
 	}
 	return Operation{}, false
+}
+
+func (s Spec) effectiveParameters(inherited, declared []Parameter) ([]Parameter, bool) {
+	result := []Parameter{}
+	positions := map[string]int{}
+	for _, parameters := range [][]Parameter{inherited, declared} {
+		for _, parameter := range parameters {
+			seen := map[string]bool{}
+			for parameter.Ref != "" {
+				const prefix = "#/components/parameters/"
+				if !strings.HasPrefix(parameter.Ref, prefix) || seen[parameter.Ref] {
+					return nil, false
+				}
+				seen[parameter.Ref] = true
+				var exists bool
+				parameter, exists = s.Components.Parameters[strings.TrimPrefix(parameter.Ref, prefix)]
+				if !exists {
+					return nil, false
+				}
+			}
+			key := parameter.In + ":" + parameter.Name
+			if index, exists := positions[key]; exists {
+				result[index] = parameter
+			} else {
+				positions[key] = len(result)
+				result = append(result, parameter)
+			}
+		}
+	}
+	return result, true
 }
 
 func (s Spec) Resolve(schema map[string]any) map[string]any {

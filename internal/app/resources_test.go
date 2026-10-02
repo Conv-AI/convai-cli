@@ -74,8 +74,8 @@ func TestReviewedCommandCoverageAndWireRouting(t *testing.T) {
 			}
 			args = append(args, "--yes", "--output", "json")
 			path, method := "", ""
-			for p, methods := range spec.Paths {
-				for m, candidate := range methods {
+			for p, item := range spec.Paths {
+				for m, candidate := range item.Operations {
 					if candidate.OperationID == op.OperationID {
 						path, method = p, strings.ToUpper(m)
 					}
