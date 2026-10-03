@@ -3,6 +3,7 @@ package contract_test
 import (
 	"encoding/json"
 	"os"
+	"slices"
 	"testing"
 
 	contract "github.com/Conv-AI/convai-cli/api"
@@ -80,6 +81,22 @@ func TestCatalogReferencesStableOpenAPIOperationsAndGeneratorSelection(t *testin
 	}
 	if len(selected) != len(seen) {
 		t.Fatalf("generator selects %d operations but catalog contains %d", len(selected), len(seen))
+	}
+}
+
+func TestCommandScopesMatchReviewedLoginDefaults(t *testing.T) {
+	t.Parallel()
+	spec, commands, err := contract.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	// A catalog change that needs a new scope must update these reviewed
+	// browser-login defaults and the documentation deliberately.
+	if got, want := contract.CommandScopes(spec, commands, false), []string{"character:read", "character:write"}; !slices.Equal(got, want) {
+		t.Fatalf("default scopes = %v, want %v", got, want)
+	}
+	if got, want := contract.CommandScopes(spec, commands, true), []string{"character:read"}; !slices.Equal(got, want) {
+		t.Fatalf("read-only scopes = %v, want %v", got, want)
 	}
 }
 

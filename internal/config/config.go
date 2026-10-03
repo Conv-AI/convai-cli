@@ -1,12 +1,16 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/gofrs/flock"
 	"github.com/google/uuid"
 	"gopkg.in/yaml.v3"
 )
@@ -39,10 +43,72 @@ type Config struct {
 type Store interface {
 	Load() (Config, error)
 	Save(Config) error
+	// Lock serializes read-modify-write of this configuration across
+	// processes. Callers hold it only around local reads and saves.
+	Lock(ctx context.Context) (unlock func(), err error)
 }
 
 type FileStore struct {
 	Path string
+}
+
+// resolve returns the canonical configuration file: absolute, with symlinks in
+// the directory and in the file itself resolved. Load, Save, and Lock all use
+// it, so equivalent paths read, write, and lock the same file, and Save
+// replaces the symlink target rather than the symlink. A file symlink whose
+// target is missing is rejected instead of being replaced by a regular file.
+// With create, a missing directory is created first.
+func (s *FileStore) resolve(create bool) (string, error) {
+	path, err := filepath.Abs(s.Path)
+	if err != nil {
+		return "", fmt.Errorf("resolve config path: %w", err)
+	}
+	if create {
+		if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+			return "", fmt.Errorf("create config directory: %w", err)
+		}
+	}
+	if info, err := os.Lstat(path); err == nil && info.Mode()&os.ModeSymlink != 0 {
+		target, err := filepath.EvalSymlinks(path)
+		if err != nil {
+			// Not wrapped: a dangling link must not read as a missing config.
+			return "", fmt.Errorf("resolve config symlink: %v", err)
+		}
+		return target, nil
+	} else if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return "", fmt.Errorf("resolve config path: %w", err)
+	}
+	dir, err := filepath.EvalSymlinks(filepath.Dir(path))
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return "", err
+		}
+		return "", fmt.Errorf("resolve config directory: %w", err)
+	}
+	return filepath.Join(dir, filepath.Base(path)), nil
+}
+
+// Lock takes an advisory OS file lock beside the canonical configuration
+// file, so processes that reach one configuration through different paths
+// share it. It is separate from the per-profile credential lock and is always
+// acquired after it, never before.
+func (s *FileStore) Lock(ctx context.Context) (func(), error) {
+	target, err := s.resolve(true)
+	if err != nil {
+		return nil, err
+	}
+	lock := flock.New(target+".lock", flock.SetPermissions(0o600))
+	locked, err := lock.TryLockContext(ctx, 20*time.Millisecond)
+	if err != nil {
+		if ctx.Err() != nil {
+			return nil, fmt.Errorf("wait for another convai process updating the configuration: %w", ctx.Err())
+		}
+		return nil, fmt.Errorf("lock configuration: %w", err)
+	}
+	if !locked {
+		return nil, errors.New("lock configuration: lock unavailable")
+	}
+	return func() { _ = lock.Unlock() }, nil
 }
 
 func DefaultPath() (string, error) {
@@ -74,7 +140,14 @@ func Default() Config {
 }
 
 func (s *FileStore) Load() (Config, error) {
-	data, err := os.ReadFile(s.Path)
+	path, err := s.resolve(false)
+	if errors.Is(err, os.ErrNotExist) {
+		return Default(), nil
+	}
+	if err != nil {
+		return Config{}, err
+	}
+	data, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return Default(), nil
 	}
@@ -99,11 +172,11 @@ func (s *FileStore) Save(cfg Config) error {
 	if err != nil {
 		return fmt.Errorf("encode config: %w", err)
 	}
-	dir := filepath.Dir(s.Path)
-	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return fmt.Errorf("create config directory: %w", err)
+	path, err := s.resolve(true)
+	if err != nil {
+		return err
 	}
-	temp, err := os.CreateTemp(dir, ".config-*.tmp")
+	temp, err := os.CreateTemp(filepath.Dir(path), ".config-*.tmp")
 	if err != nil {
 		return fmt.Errorf("create temporary config: %w", err)
 	}
@@ -124,7 +197,7 @@ func (s *FileStore) Save(cfg Config) error {
 	if err := temp.Close(); err != nil {
 		return fmt.Errorf("close temporary config: %w", err)
 	}
-	if err := os.Rename(tempName, s.Path); err != nil {
+	if err := os.Rename(tempName, path); err != nil {
 		return fmt.Errorf("replace config: %w", err)
 	}
 	return nil
@@ -204,5 +277,16 @@ func NormalizeAPIURL(raw string) (string, error) {
 	if parsed.Path != "" && parsed.Path != "/" {
 		return "", errors.New("API URL must not contain a path")
 	}
-	return strings.TrimSuffix(parsed.String(), "/"), nil
+	// Canonical origin: lower-case host and no scheme-default port, so trust
+	// lookup and credential binding can compare equivalent URLs exactly.
+	host, port := strings.ToLower(parsed.Hostname()), parsed.Port()
+	if (parsed.Scheme == "https" && port == "443") || (parsed.Scheme == "http" && port == "80") {
+		port = ""
+	}
+	if port != "" {
+		host = net.JoinHostPort(host, port)
+	} else if strings.Contains(host, ":") {
+		host = "[" + host + "]"
+	}
+	return parsed.Scheme + "://" + host, nil
 }

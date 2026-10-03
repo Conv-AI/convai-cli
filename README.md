@@ -47,7 +47,7 @@ make verify
 ./bin/convai --help
 ```
 
-## Configure Staging
+## Authentication
 
 Create a staging profile:
 
@@ -58,13 +58,79 @@ convai config use staging
 convai doctor
 ```
 
-Interactive credentials are stored in the operating-system keychain. Supported
-credentials are API keys, scoped PATs (`cvpat_`), and already-issued OAuth access
-tokens (`cvoat_`). PAT/OAuth use Bearer authentication; API keys use
-`CONVAI-API-KEY`. OAuth refresh tokens, authorization codes, and Web SDK JWTs are
-not accepted. Browser login and automatic OAuth refresh are not implemented.
+### Browser login
 
-For CI, inject a secret as `CONVAI_TOKEN` through the environment:
+> Activation gate: browser login uses the dedicated `convai-cli` OAuth client.
+> It works only after that client is registered with Convai Authentication in
+> the target environment and the staging customer flow has passed. Until then,
+> use token import below.
+
+In an interactive terminal, `convai auth login` opens your browser to the normal
+Convai sign-in and consent page, receives the authorization on a one-time
+loopback address (`http://127.0.0.1:<random port>/callback`), and stores a
+refreshable session in the operating-system keychain. If the browser cannot be
+opened, the CLI prints the sign-in URL; it contains no credential. Sign-in
+times out after five minutes, and Ctrl+C cancels it without storing anything.
+
+Browser login is available only for the Convai-hosted APIs, each with a fixed
+sign-in issuer:
+
+| API URL | Sign-in issuer |
+| --- | --- |
+| `https://api2-stg.convai.com` | `https://login-stg.convai.com` |
+| `https://api2-preview.convai.com` | `https://login-preview.convai.com` |
+| `https://api2.convai.com` | `https://login.convai.com` |
+
+Other API URLs support token import only. By default the CLI requests the scopes
+that its commands use, `character:read character:write`. Narrow them with
+`--read-only` (`character:read`) or `--scopes character:read`; Convai sign-in may
+also grant fewer scopes than requested. The REST API enforces scopes, Workspace
+access, ownership, and plan entitlements on every command.
+
+Login is complete when Convai sign-in issues the session. If the session has
+`character:read`, login also checks it with a read-only character list: HTTP 401
+fails and revokes the new session; other denials, such as a Workspace or plan
+403, are reported as a warning because they are command authorization, not
+sign-in. `--no-verify` skips the check.
+
+Sessions refresh automatically shortly before the access token expires,
+including in `auth status --check` and `doctor`. Refresh is serialized across
+concurrent CLI processes for a profile, and a refresh token is never retried after
+Convai sign-in has rejected or consumed it. A stored session is bound to its API
+URL, issuer, client, and audience: switching the profile or `--api-url` to
+another API requires a new login rather than sending the session elsewhere.
+`auth status` shows the login type, scopes, issuer, and access-token expiry, never
+the tokens.
+
+Configuration changes made in another terminal while you sign in, such as
+`config set workspace-id` or `config use`, are kept. If the profile's API URL is
+changed or the profile is removed during sign-in, login fails and revokes the
+new session instead of overwriting that change.
+
+`convai auth logout` revokes a browser login through Convai sign-in and then
+removes it from the keychain. If revocation fails, the session is kept so logout
+can be retried; `convai auth logout --local` removes only the local copy and
+leaves the session valid until it expires. Logging in again revokes the
+previous browser session first.
+
+### Token import and CI
+
+Import an API key, scoped PAT (`cvpat_`), or already-issued OAuth access token
+(`cvoat_`) into the keychain:
+
+```bash
+convai auth login --method token          # prompts without echo
+printf '%s\n' "$TOKEN" | convai auth login --token-stdin
+```
+
+PAT/OAuth use Bearer authentication; API keys use `CONVAI-API-KEY`. OAuth refresh
+tokens, authorization codes, Web SDK JWTs, and stored browser-login records are
+not accepted as credentials.
+Imported credentials are not refreshed. Obtain a PAT from its existing issuing
+service; the CLI does not create or manage PATs.
+
+For CI, inject a secret as `CONVAI_TOKEN` through the environment. Browser login
+is rejected immediately without a terminal.
 
 ```bash
 export CONVAI_TOKEN="cvpat_..."
@@ -72,9 +138,13 @@ convai character list --output json
 ```
 
 Do not pass credentials as command arguments or commit them to configuration.
-`auth logout` removes the local keychain credential, not the server-side grant.
-Revoke grants through their issuing service. Environment credentials continue to
-take precedence until the environment variable is removed.
+`auth logout` removes an imported credential from the keychain only; revoke API
+keys and PATs where they were issued. Environment credentials take precedence
+over the keychain, including a browser login, until the variable is removed.
+
+Keychain entries written by earlier CLI versions keep working. A browser-login
+entry uses a versioned record that earlier CLI versions cannot read; log in again
+after downgrading.
 
 Select a Workspace explicitly or persist it in the profile:
 
