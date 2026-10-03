@@ -21,6 +21,8 @@ var ErrNotFound = errors.New("credential not found")
 type Credential struct {
 	Type  config.CredentialType
 	Value string
+	// Session is set only for a managed browser login stored in the keychain.
+	Session *Session
 }
 
 type Store interface {
@@ -39,14 +41,20 @@ func (KeyringStore) Get(profile string) (Credential, error) {
 	if err != nil {
 		return Credential{}, fmt.Errorf("read operating-system credential store: %w", err)
 	}
-	return Parse(value)
+	return decodeStored(value)
 }
 
 func (KeyringStore) Set(profile string, credential Credential) error {
-	if _, err := Parse(credential.Value); err != nil {
+	value := credential.Value
+	if credential.Managed() {
+		var err error
+		if value, err = encodeSession(credential); err != nil {
+			return err
+		}
+	} else if _, err := Parse(credential.Value); err != nil {
 		return err
 	}
-	if err := keyring.Set(ServiceName, profile, credential.Value); err != nil {
+	if err := keyring.Set(ServiceName, profile, value); err != nil {
 		return fmt.Errorf("write operating-system credential store: %w", err)
 	}
 	return nil
@@ -88,10 +96,8 @@ func Parse(value string) (Credential, error) {
 	if len(value) < 20 || len(value) > 512 {
 		return Credential{}, errors.New("credential length is invalid")
 	}
-	for _, r := range value {
-		if unicode.IsSpace(r) || unicode.IsControl(r) {
-			return Credential{}, errors.New("credential must not contain whitespace or control characters")
-		}
+	if strings.ContainsFunc(value, isUnsafeRune) {
+		return Credential{}, errors.New("credential must not contain whitespace or control characters")
 	}
 	kind := config.CredentialAPIKey
 	if strings.HasPrefix(value, "cvpat_") {
@@ -102,4 +108,8 @@ func Parse(value string) (Credential, error) {
 		return Credential{}, errors.New("use an API key, PAT, or OAuth access token, not a refresh, authorization-code, or runtime token")
 	}
 	return Credential{Type: kind, Value: value}, nil
+}
+
+func isUnsafeRune(r rune) bool {
+	return unicode.IsSpace(r) || unicode.IsControl(r)
 }

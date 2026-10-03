@@ -1,8 +1,8 @@
 package app
 
 import (
-	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	contract "github.com/Conv-AI/convai-cli/api"
 
@@ -17,6 +18,7 @@ import (
 	"github.com/Conv-AI/convai-cli/internal/characterapi"
 	"github.com/Conv-AI/convai-cli/internal/config"
 	"github.com/Conv-AI/convai-cli/internal/credential"
+	"github.com/Conv-AI/convai-cli/internal/oauth"
 	"github.com/Conv-AI/convai-cli/internal/output"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
@@ -31,6 +33,17 @@ type Options struct {
 	CredentialStore credential.Store
 	HTTPClient      *http.Client
 	ReadSecret      func(int) ([]byte, error)
+	// Locker serializes credential changes across processes. The default is
+	// an OS file lock keyed to the keychain entry.
+	Locker credential.Locker
+	// OpenBrowser, Interactive, Now, and LoginTimeout are browser-login seams.
+	OpenBrowser  func(string) error
+	Interactive  func() bool
+	Now          func() time.Time
+	LoginTimeout time.Duration
+	// OAuthEnvironments replaces the trusted API-to-issuer mapping. Tests use
+	// it to point at local stubs; issuer and endpoint checks still apply.
+	OAuthEnvironments []oauth.Environment
 }
 
 type application struct {
@@ -42,6 +55,12 @@ type application struct {
 	credentialStore credential.Store
 	httpClient      *http.Client
 	readSecret      func(int) ([]byte, error)
+	locker          credential.Locker
+	openBrowser     func(string) error
+	interactive     func() bool
+	now             func() time.Time
+	loginTimeout    time.Duration
+	environments    []oauth.Environment
 	profileFlag     string
 	apiURLFlag      string
 	outputFlag      string
@@ -73,6 +92,21 @@ func New(options Options) (*cobra.Command, error) {
 	if options.ReadSecret == nil {
 		options.ReadSecret = term.ReadPassword
 	}
+	if options.OpenBrowser == nil {
+		options.OpenBrowser = oauth.OpenBrowser
+	}
+	if options.Interactive == nil {
+		options.Interactive = stdinIsTerminal(options.Stdin)
+	}
+	if options.Now == nil {
+		options.Now = time.Now
+	}
+	if options.LoginTimeout <= 0 {
+		options.LoginTimeout = defaultLoginTimeout
+	}
+	if options.OAuthEnvironments == nil {
+		options.OAuthEnvironments = oauth.Environments
+	}
 	spec, commands, err := contract.Load()
 	if err != nil {
 		return nil, err
@@ -86,6 +120,12 @@ func New(options Options) (*cobra.Command, error) {
 		credentialStore: options.CredentialStore,
 		httpClient:      options.HTTPClient,
 		readSecret:      options.ReadSecret,
+		locker:          options.Locker,
+		openBrowser:     options.OpenBrowser,
+		interactive:     options.Interactive,
+		now:             options.Now,
+		loginTimeout:    options.LoginTimeout,
+		environments:    options.OAuthEnvironments,
 		spec:            spec,
 		commands:        commands,
 	}
@@ -122,150 +162,6 @@ func (a *application) rootCommand() *cobra.Command {
 	)
 	a.addResourceCommands(root)
 	return root
-}
-
-func (a *application) authCommand() *cobra.Command {
-	auth := &cobra.Command{Use: "auth", Short: "Manage Convai credentials"}
-	auth.AddCommand(a.authLoginCommand(), a.authStatusCommand(), a.authLogoutCommand())
-	return auth
-}
-
-func (a *application) authLoginCommand() *cobra.Command {
-	var tokenStdin bool
-	var noVerify bool
-	command := &cobra.Command{
-		Use:   "login",
-		Short: "Store an API key, PAT, or issued OAuth access token in the OS keychain",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			cfg, profileName, profile, err := a.profile()
-			if err != nil {
-				return err
-			}
-			value, err := a.readCredential(tokenStdin)
-			if err != nil {
-				return err
-			}
-			parsed, err := credential.Parse(value)
-			if err != nil {
-				return err
-			}
-			profile.CredentialType = parsed.Type
-			if a.apiURLFlag != "" {
-				profile.APIURL, err = config.NormalizeAPIURL(a.apiURLFlag)
-				if err != nil {
-					return err
-				}
-			}
-			if !noVerify {
-				client, err := api.New(profile.APIURL, parsed, a.httpClient)
-				if err != nil {
-					return err
-				}
-				if _, _, err := client.WithWorkspace(profile.WorkspaceID).ListCharacters(cmd.Context(), 1, 0); err != nil {
-					return fmt.Errorf("verify credential: %w", err)
-				}
-			}
-			previous, previousErr := a.credentialStore.Get(profileName)
-			if previousErr != nil && !errors.Is(previousErr, credential.ErrNotFound) {
-				return previousErr
-			}
-			if err := a.credentialStore.Set(profileName, parsed); err != nil {
-				return err
-			}
-			// Workspace flags affect verification, not the saved profile selection.
-			profile.WorkspaceID = cfg.Profiles[profileName].WorkspaceID
-			cfg.Profiles[profileName] = profile
-			cfg.CurrentProfile = profileName
-			if err := a.configStore.Save(cfg); err != nil {
-				if previousErr == nil {
-					_ = a.credentialStore.Set(profileName, previous)
-				} else {
-					_ = a.credentialStore.Delete(profileName)
-				}
-				return err
-			}
-			fmt.Fprintf(cmd.OutOrStdout(), "Stored %s credential for profile %s\n", parsed.Type, profileName)
-			return nil
-		},
-	}
-	command.Flags().BoolVar(&tokenStdin, "token-stdin", false, "read the credential from stdin")
-	command.Flags().BoolVar(&noVerify, "no-verify", false, "store without a read-only API verification")
-	return command
-}
-
-func (a *application) authStatusCommand() *cobra.Command {
-	var check bool
-	command := &cobra.Command{
-		Use:   "status",
-		Short: "Show credential metadata without exposing the credential",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			_, profileName, profile, err := a.profile()
-			if err != nil {
-				return err
-			}
-			resolved, source, err := credential.Resolve(a.credentialStore, profileName)
-			if err != nil {
-				return err
-			}
-			status := map[string]any{
-				"profile":         profileName,
-				"api_url":         profile.APIURL,
-				"credential_type": resolved.Type,
-				"source":          source,
-				"workspace_id":    profile.WorkspaceID,
-			}
-			if check {
-				client, err := api.New(profile.APIURL, resolved, a.httpClient)
-				if err != nil {
-					return err
-				}
-				if _, _, err := client.WithWorkspace(profile.WorkspaceID).ListCharacters(cmd.Context(), 1, 0); err != nil {
-					return err
-				}
-				status["verified"] = true
-			}
-			format, err := output.Parse(a.outputFlag)
-			if err != nil {
-				return err
-			}
-			if format == output.Table {
-				fmt.Fprintf(cmd.OutOrStdout(), "Profile: %s\nAPI URL: %s\nWorkspace: %s\nCredential: %s (%s)\n", profileName, profile.APIURL, workspaceLabel(profile.WorkspaceID), resolved.Type, source)
-				if check {
-					fmt.Fprintln(cmd.OutOrStdout(), "Verified: true")
-				}
-				return nil
-			}
-			return output.Structured(cmd.OutOrStdout(), format, status)
-		},
-	}
-	command.Flags().BoolVar(&check, "check", false, "verify with a read-only Character API request")
-	return command
-}
-
-func (a *application) authLogoutCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:   "logout",
-		Short: "Remove the profile credential from the operating-system keychain",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			_, profileName, _, err := a.profile()
-			if err != nil {
-				return err
-			}
-			err = a.credentialStore.Delete(profileName)
-			if errors.Is(err, credential.ErrNotFound) {
-				fmt.Fprintf(cmd.OutOrStdout(), "No stored credential for profile %s\n", profileName)
-				return nil
-			}
-			if err != nil {
-				return err
-			}
-			fmt.Fprintf(cmd.OutOrStdout(), "Removed credential for profile %s\n", profileName)
-			return nil
-		},
-	}
 }
 
 func (a *application) configCommand() *cobra.Command {
@@ -406,7 +302,7 @@ func (a *application) characterListCommand() *cobra.Command {
 			if offset < 0 {
 				return errors.New("--offset must be at least 0")
 			}
-			client, err := a.apiClient()
+			client, err := a.apiClient(cmd.Context())
 			if err != nil {
 				return err
 			}
@@ -463,7 +359,7 @@ func (a *application) characterGetCommand() *cobra.Command {
 		Short: "Get one owned character",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, err := a.apiClient()
+			client, err := a.apiClient(cmd.Context())
 			if err != nil {
 				return err
 			}
@@ -501,7 +397,7 @@ func (a *application) characterCreateCommand() *cobra.Command {
 			if a.workspaceFlag == "personal" && request.WorkspaceId != nil && *request.WorkspaceId != "" {
 				return errors.New("input workspace conflicts with explicit personal selection")
 			}
-			client, err := a.apiClient()
+			client, err := a.apiClient(cmd.Context())
 			if err != nil {
 				return err
 			}
@@ -525,12 +421,11 @@ func (a *application) doctorCommand() *cobra.Command {
 		Short: "Verify configuration, credential access, and Character API connectivity",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			cfg, name, profile, err := a.profile()
+			_, name, profile, err := a.profile()
 			if err != nil {
 				return err
 			}
-			_ = cfg
-			resolved, source, err := credential.Resolve(a.credentialStore, name)
+			resolved, source, err := a.credentialFor(cmd.Context(), name, profile)
 			if err != nil {
 				return err
 			}
@@ -608,44 +503,23 @@ func workspaceLabel(value string) string {
 	return value
 }
 
-func (a *application) apiClient() (*api.Client, error) {
+func (a *application) apiClient(ctx context.Context) (*api.Client, error) {
 	_, name, profile, err := a.profile()
 	if err != nil {
 		return nil, err
 	}
-	resolved, _, err := credential.Resolve(a.credentialStore, name)
-	if err != nil {
+	resolved, _, err := a.credentialFor(ctx, name, profile)
+	if errors.Is(err, credential.ErrNotFound) {
 		return nil, fmt.Errorf("resolve credential for profile %s: %w; run `convai auth login --profile %s` or set %s", name, err, name, credential.EnvironmentToken)
+	}
+	if err != nil {
+		return nil, err
 	}
 	client, err := api.New(profile.APIURL, resolved, a.httpClient)
 	if err != nil {
 		return nil, err
 	}
 	return client.WithWorkspace(profile.WorkspaceID), nil
-}
-
-func (a *application) readCredential(fromStdin bool) (string, error) {
-	if fromStdin {
-		scanner := bufio.NewScanner(io.LimitReader(a.stdin, 1024))
-		if !scanner.Scan() {
-			if err := scanner.Err(); err != nil {
-				return "", fmt.Errorf("read credential from stdin: %w", err)
-			}
-			return "", errors.New("credential stdin is empty")
-		}
-		return scanner.Text(), nil
-	}
-	file, ok := a.stdin.(*os.File)
-	if !ok || !term.IsTerminal(int(file.Fd())) {
-		return "", errors.New("stdin is not a terminal; use --token-stdin")
-	}
-	fmt.Fprint(a.stderr, "Convai API key, PAT, or issued OAuth access token: ")
-	value, err := a.readSecret(int(file.Fd()))
-	fmt.Fprintln(a.stderr)
-	if err != nil {
-		return "", fmt.Errorf("read credential: %w", err)
-	}
-	return string(value), nil
 }
 
 func (a *application) createRequest(name, voice, backstory, inputFile string) (characterapi.CharacterCreate, error) {
@@ -707,19 +581,5 @@ func validateCreateRequest(request characterapi.CharacterCreate) error {
 }
 
 func RedactError(err error) string {
-	message := err.Error()
-	for _, prefix := range []string{"cvpat_", "cvoat_", "cvort_", "cvoac_", "ck_live_", "sk_"} {
-		for {
-			index := strings.Index(message, prefix)
-			if index < 0 {
-				break
-			}
-			end := index
-			for end < len(message) && !strings.ContainsRune(" \t\r\n\"'()[]{}", rune(message[end])) {
-				end++
-			}
-			message = message[:index] + "[REDACTED]" + message[end:]
-		}
-	}
-	return message
+	return credential.Redact(err.Error())
 }

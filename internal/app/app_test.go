@@ -203,6 +203,7 @@ func TestUnknownProfileFailsBeforeNetwork(t *testing.T) {
 		},
 	}
 	root, err := New(Options{
+		Locker:          testLocker(t),
 		Stdin:           strings.NewReader(""),
 		Stdout:          io.Discard,
 		Stderr:          io.Discard,
@@ -229,6 +230,7 @@ func TestAuthLoginStoresCredentialWithoutPrintingIt(t *testing.T) {
 	credentialStore := &memoryCredentialStore{values: map[string]credential.Credential{}}
 	var stdout, stderr bytes.Buffer
 	root, err := New(Options{
+		Locker:          testLocker(t),
 		Version:         "test",
 		Stdin:           strings.NewReader("01234567890123456789012345678901\n"),
 		Stdout:          &stdout,
@@ -263,6 +265,7 @@ func TestAuthLoginRestoresPreviousCredentialWhenConfigSaveFails(t *testing.T) {
 		values: map[string]credential.Credential{"default": old},
 	}
 	root, err := New(Options{
+		Locker:          testLocker(t),
 		Stdin:           strings.NewReader("new-credential-0123456789012345\n"),
 		Stdout:          io.Discard,
 		Stderr:          io.Discard,
@@ -309,6 +312,7 @@ func TestAuthLoginWorkspaceOverrideDoesNotChangeSavedSelection(t *testing.T) {
 				cfg.Profiles["default"] = profile
 				store := &memoryConfigStore{cfg: cfg}
 				root, err := New(Options{
+					Locker: testLocker(t),
 					Stdin:  strings.NewReader("01234567890123456789012345678901\n"),
 					Stdout: io.Discard, Stderr: io.Discard, ConfigStore: store,
 					CredentialStore: &memoryCredentialStore{values: map[string]credential.Credential{}},
@@ -367,7 +371,8 @@ func TestDefaultMetadataOutputShowsEffectiveWorkspace(t *testing.T) {
 				cfg.Profiles["default"] = profile
 				var stdout bytes.Buffer
 				root, err := New(Options{
-					Stdin: strings.NewReader(""), Stdout: &stdout, Stderr: io.Discard,
+					Locker: testLocker(t),
+					Stdin:  strings.NewReader(""), Stdout: &stdout, Stderr: io.Discard,
 					ConfigStore: &memoryConfigStore{cfg: cfg},
 					CredentialStore: &memoryCredentialStore{values: map[string]credential.Credential{
 						"default": {Type: config.CredentialAPIKey, Value: "01234567890123456789012345678901"},
@@ -422,6 +427,7 @@ func execute(t *testing.T, server *httptest.Server, stdin io.Reader, args ...str
 	}
 	var stdout, stderr bytes.Buffer
 	root, err := New(Options{
+		Locker:          testLocker(t),
 		Version:         "test",
 		Stdin:           stdin,
 		Stdout:          &stdout,
@@ -436,6 +442,12 @@ func execute(t *testing.T, server *httptest.Server, stdin io.Reader, args ...str
 	root.SetArgs(args)
 	err = root.Execute()
 	return stdout.String(), stderr.String(), err
+}
+
+// testLocker keeps credential locks out of the developer's account home.
+func testLocker(t *testing.T) credential.Locker {
+	t.Helper()
+	return credential.FileLocker{Dir: t.TempDir()}
 }
 
 func cloneConfig(cfg config.Config) config.Config {

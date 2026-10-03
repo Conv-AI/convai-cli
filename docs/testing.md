@@ -46,6 +46,43 @@ the normal CI `make verify`; they do not need live secrets or browser consent.
 
 These tests verify client behavior; they do not prove live entitlement policy.
 
+### Browser login
+
+Browser login is tested offline against a local TLS Auth stub and a local REST
+stub, through the real `convai` command tree with injected browser, clock,
+interactivity, lock-directory, and trusted-environment seams. The stub enforces
+the `convai-cli` client, absence of `resource`, PKCE S256, single-use codes,
+rotating single-use refresh tokens, paired revocation, and active-token
+introspection; the production trust checks are not relaxed for it. Tests use
+`t.TempDir()` lock directories, in-memory or mock keychains, and no network
+beyond loopback.
+
+Coverage includes login, a REST request, expiry refresh and rotation, status,
+and logout revocation; browser-launch failure with the printed URL;
+noninteractive, custom-API, and invalid-flag rejection before any request;
+denial, timeout, and cancellation; scope defaults, `--read-only`, explicit and
+server-narrowed scopes, and overbroad grants; the managed verification policy
+(401 revokes, 403 warns, no check without `character:read`) versus strict token
+import; keychain-write, config-save, and rollback failures; replacing a previous
+session, including failed revocation and failure after revocation; API-origin
+binding and mismatched issuer, client, or audience records; logout failure and
+`--local`; `invalid_grant`, oversized, truncated, and unsaved refresh responses
+with no later replay; an ambiguous transport failure; concurrent CLI instances
+refreshing once; `auth status --check` and `doctor` refresh; `CONVAI_TOKEN`
+precedence without refresh; and no mutation replay after HTTP 401. Every
+invocation is checked for issued tokens and codes in stdout, stderr, and errors.
+
+Protocol tests cover the trusted environment mapping, the RFC 7636 PKCE vector,
+discovery issuer and endpoint trust and redirect rejection, callback method,
+path, `Host`, state, duplicate-parameter, issuer, denial, and replay handling,
+token-response validation (type, lifetime bounds including int64 overflow,
+duplicates, trailing data, scopes), revocation of every token in a rejected
+successful response, and redaction of request secrets from error codes,
+descriptions, and transport errors before truncation. Credential tests cover the
+versioned keychain record through the go-keyring mock, legacy raw entries,
+strict record decoding, and a child-process test proving the file lock blocks
+another process for the same profile, case-insensitively.
+
 ## Opt-In Staging E2E
 
 Inject `CONVAI_E2E_TOKEN` from a local secret store or CI secret, not a command
@@ -150,8 +187,9 @@ are prerequisites, not long-lived credentials to hardcode into CI.
 Cleanup failures fail the run. Preserve sanitized test results, and investigate
 temporary fixtures before retrying if the process is killed, the callback times
 out, or Auth omits a usable revocation ID. Go cleanup callbacks cannot guarantee
-cleanup after process termination. This harness does not implement product CLI
-browser login, token refresh, publishing, or account-plan mutation.
+cleanup after process termination. This harness uses the staging `codex` test
+client to issue imported tokens; it does not exercise the `convai-cli` browser
+login, publishing, or account-plan mutation.
 
 ## Evidence and Remaining Gates
 
@@ -164,5 +202,14 @@ The writable OAuth and managed PAT matrices remain unverified until their live
 runs pass. PAT issuance currently lacks a fresh Firebase management credential.
 The strict release gate must remain red until both matrices pass. Unentitled-plan
 testing remains a separate fixture-dependent gate; these tests do not change
-plans. Product browser OAuth acquisition/refresh, public releases/installers,
-and local stdio/plugin packaging remain separate work.
+plans. Public releases/installers and local stdio/plugin packaging remain
+separate work.
+
+Browser login is implemented and verified offline only. Its activation gates,
+in order: the `convai-cli` client registration is applied to staging Auth; a
+developer-attended staging customer flow passes on a real account (`auth login`,
+`auth status --check`, a character read and disposable write, forced refresh,
+`auth logout`, then HTTP 401 for the revoked access token and `invalid_grant`
+for the revoked refresh token); then Preview and production registration and
+their own checks. Until the staging flow passes, documentation must not present
+browser login as available.

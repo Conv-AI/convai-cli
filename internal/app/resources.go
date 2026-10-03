@@ -138,7 +138,7 @@ func (a *application) resourceCommand(definition contract.Command, operation con
 					return err
 				}
 			}
-			client, err := a.apiClient()
+			client, err := a.apiClient(cmd.Context())
 			if err != nil {
 				return err
 			}
@@ -315,7 +315,7 @@ func (a *application) associationCommands(group, collection, idName string) *cob
 				if err := a.confirm(cmd, yes, map[string]any{"character_id": args[0], idName: args[1]}); err != nil {
 					return err
 				}
-				client, err := a.apiClient()
+				client, err := a.apiClient(cmd.Context())
 				if err != nil {
 					return err
 				}

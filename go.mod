@@ -4,6 +4,7 @@ go 1.27.0
 
 require (
 	github.com/dlclark/regexp2 v1.11.0
+	github.com/gofrs/flock v0.13.1
 	github.com/google/uuid v1.6.0
 	github.com/oapi-codegen/runtime v1.6.0
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2

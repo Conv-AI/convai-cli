@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/Conv-AI/convai-cli/internal/jsonwire"
@@ -179,6 +180,37 @@ func Load() (Spec, []Command, error) {
 		seen[key] = true
 	}
 	return spec, catalog.Commands, nil
+}
+
+// CommandScopes returns the sorted union of owner-required scopes for the
+// curated command catalog. With readOnly, it includes only operations whose
+// every required scope is a read scope, so browser login can request the
+// least privilege that still serves the selected commands.
+func CommandScopes(spec Spec, commands []Command, readOnly bool) []string {
+	seen := map[string]bool{}
+	for _, command := range commands {
+		operation, ok := spec.Find(command.OperationID)
+		if !ok {
+			continue
+		}
+		for _, tool := range operation.Metadata.Tools {
+			writes := slices.ContainsFunc(tool.RequiredScopes, func(scope string) bool {
+				return !strings.HasSuffix(scope, ":read")
+			})
+			if readOnly && writes {
+				continue
+			}
+			for _, scope := range tool.RequiredScopes {
+				seen[scope] = true
+			}
+		}
+	}
+	scopes := make([]string, 0, len(seen))
+	for scope := range seen {
+		scopes = append(scopes, scope)
+	}
+	slices.Sort(scopes)
+	return scopes
 }
 
 func (s Spec) Find(id string) (Operation, bool) {

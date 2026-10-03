@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os"
+	"os/signal"
 
 	"github.com/Conv-AI/convai-cli/internal/app"
 )
@@ -19,7 +20,12 @@ func main() {
 	if err != nil {
 		os.Exit(app.ReportError(os.Stderr, "table", err))
 	}
-	if err := root.ExecuteContext(context.Background()); err != nil {
+	// Interrupts cancel the command context so browser login and credential
+	// rotation can revoke anything they issued before the process exits.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	err = root.ExecuteContext(ctx)
+	stop()
+	if err != nil {
 		format, _ := root.PersistentFlags().GetString("output")
 		os.Exit(app.ReportError(os.Stderr, format, err))
 	}
