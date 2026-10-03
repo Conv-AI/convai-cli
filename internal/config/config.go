@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"strings"
@@ -204,5 +205,16 @@ func NormalizeAPIURL(raw string) (string, error) {
 	if parsed.Path != "" && parsed.Path != "/" {
 		return "", errors.New("API URL must not contain a path")
 	}
-	return strings.TrimSuffix(parsed.String(), "/"), nil
+	// Canonical origin: lower-case host and no scheme-default port, so trust
+	// lookup and credential binding can compare equivalent URLs exactly.
+	host, port := strings.ToLower(parsed.Hostname()), parsed.Port()
+	if (parsed.Scheme == "https" && port == "443") || (parsed.Scheme == "http" && port == "80") {
+		port = ""
+	}
+	if port != "" {
+		host = net.JoinHostPort(host, port)
+	} else if strings.Contains(host, ":") {
+		host = "[" + host + "]"
+	}
+	return parsed.Scheme + "://" + host, nil
 }

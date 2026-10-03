@@ -81,7 +81,8 @@ convai auth login
   default audience `convai-api`, which Character API already accepts through
   introspection. `convai-api` is not an RFC 8707 URI and is never sent.
 - Trust: only the staging, Preview, and production API URLs map to their
-  fixed issuers. Discovery must return that exact issuer, S256 support, and
+  fixed issuers. API URLs from config or `--api-url` are compared in canonical
+  form (lower-case host, no trailing slash or scheme-default port). Discovery must return that exact issuer, S256 support, and
   token, authorization, and revocation endpoints on the issuer's HTTPS origin
   without userinfo, query, fragment, encoded path, or another port. OAuth
   requests never follow redirects. Custom API URLs support token import only.

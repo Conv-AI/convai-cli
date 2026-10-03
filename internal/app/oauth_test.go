@@ -539,6 +539,9 @@ func TestEquivalentStoredAPIURLUsesTrustedMappingAndBinding(t *testing.T) {
 	if _, _, err := f.exec("character", "list", "--api-url", f.rest.server.URL+"/"); err != nil {
 		t.Fatalf("equivalent --api-url broke the session binding: %v", err)
 	}
+	if _, _, err := f.exec("character", "list", "--api-url", strings.Replace(f.rest.server.URL, "http://", "HTTP://", 1)); err != nil {
+		t.Fatalf("equivalent scheme case broke the session binding: %v", err)
+	}
 	// Canonicalization does not widen trust: other origins stay untrusted.
 	for _, apiURL := range []string{"https://custom.example.com/", strings.Replace(f.rest.server.URL, "127.0.0.1", "localhost", 1) + "/"} {
 		if _, _, err := f.exec("auth", "login", "--api-url", apiURL); err == nil || !strings.Contains(err.Error(), "--method token") {
@@ -547,6 +550,73 @@ func TestEquivalentStoredAPIURLUsesTrustedMappingAndBinding(t *testing.T) {
 	}
 	if _, _, err := f.exec("character", "list", "--api-url", "http://api2.convai.com/"); err == nil || !strings.Contains(err.Error(), "HTTPS") {
 		t.Fatalf("non-HTTPS origin = %v", err)
+	}
+}
+
+// Equivalent spellings of a production API URL use its trusted issuer, while
+// look-alike origins stay custom. Noninteractive login stops after the trust
+// decision, so no network is used.
+func TestProductionAPIURLEquivalentsUseTrustedMapping(t *testing.T) {
+	t.Parallel()
+	for apiURL, trusted := range map[string]bool{
+		"https://api2.convai.com":             true,
+		"HTTPS://API2.CONVAI.COM/":            true,
+		"https://Api2-Stg.Convai.com:443":     true,
+		"https://api2-preview.convai.com:443": true,
+		"https://api2.convai.com:8443":        false,
+		"https://api2.convai.com.":            false,
+		"https://api2.convai.com.example.com": false,
+	} {
+		root, err := New(Options{
+			Stdin: strings.NewReader(""), Stdout: io.Discard, Stderr: io.Discard,
+			ConfigStore:     &memoryConfigStore{cfg: config.Default()},
+			CredentialStore: &memoryCredentialStore{values: map[string]credential.Credential{}},
+			Locker:          testLocker(t), Interactive: func() bool { return false },
+			HTTPClient: &http.Client{Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {
+				t.Error("trust classification used the network")
+				return nil, errors.New("unexpected request")
+			})},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		root.SetArgs([]string{"auth", "login", "--api-url", apiURL})
+		err = root.Execute()
+		if trusted != (err != nil && strings.Contains(err.Error(), "interactive terminal")) {
+			t.Fatalf("%s trusted=%v, error = %v", apiURL, trusted, err)
+		}
+	}
+}
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
+
+func TestBrowserLoginKeepsConfigChangesMadeDuringConsent(t *testing.T) {
+	t.Parallel()
+	f := newOAuthFixture(t)
+	const workspace = "11111111-1111-4111-8111-111111111111"
+	f.browser = func(raw string) error {
+		// Another process edits the configuration while the user consents.
+		cfg, _ := f.configs.Load()
+		profile := cfg.Profiles["default"]
+		profile.WorkspaceID = workspace
+		cfg.Profiles["default"] = profile
+		cfg.Profiles["other"] = config.Profile{APIURL: "https://custom.example.com", CredentialType: config.CredentialPAT}
+		if err := f.configs.Save(cfg); err != nil {
+			t.Error(err)
+		}
+		go f.auth.visit(raw)
+		return nil
+	}
+	f.login("--workspace", "personal")
+	cfg, _ := f.configs.Load()
+	saved := cfg.Profiles["default"]
+	if saved.WorkspaceID != workspace || saved.CredentialType != config.CredentialOAuth || saved.APIURL != f.rest.server.URL {
+		t.Fatalf("saved profile = %+v", saved)
+	}
+	if _, ok := cfg.Profiles["other"]; !ok || cfg.CurrentProfile != "default" {
+		t.Fatal("login discarded a concurrently created profile")
 	}
 }
 

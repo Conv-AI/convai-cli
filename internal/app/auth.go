@@ -71,7 +71,7 @@ func (a *application) authLoginCommand() *cobra.Command {
 			default:
 				return errors.New("--method must be browser or token")
 			}
-			cfg, profileName, profile, err := a.profile()
+			_, profileName, profile, err := a.profile()
 			if err != nil {
 				return err
 			}
@@ -84,13 +84,13 @@ func (a *application) authLoginCommand() *cobra.Command {
 				if err != nil {
 					return err
 				}
-				return a.storeLogin(cmd, cfg, profileName, profile, parsed, noVerify, nil)
+				return a.storeLogin(cmd, profileName, profile, parsed, noVerify, nil)
 			}
 			requested, err := a.loginScopes(scopes, readOnly)
 			if err != nil {
 				return err
 			}
-			return a.browserLogin(cmd, cfg, profileName, profile, requested, noVerify)
+			return a.browserLogin(cmd, profileName, profile, requested, noVerify)
 		},
 	}
 	command.Flags().StringVar(&method, "method", "", "browser (default) or token")
@@ -127,7 +127,7 @@ func (a *application) loginScopes(requested string, readOnly bool) ([]string, er
 	return slices.Compact(selected), nil
 }
 
-func (a *application) browserLogin(cmd *cobra.Command, cfg config.Config, name string, profile config.Profile, scopes []string, noVerify bool) error {
+func (a *application) browserLogin(cmd *cobra.Command, name string, profile config.Profile, scopes []string, noVerify bool) error {
 	ctx := cmd.Context()
 	issuer, trusted := oauth.IssuerFor(a.environments, profile.APIURL)
 	if !trusted {
@@ -188,7 +188,7 @@ func (a *application) browserLogin(cmd *cobra.Command, cfg config.Config, name s
 	if err != nil {
 		return a.revokeAfterFailure(ctx, err, revoke)
 	}
-	return a.storeLogin(cmd, cfg, name, profile, session, noVerify, revoke)
+	return a.storeLogin(cmd, name, profile, session, noVerify, revoke)
 }
 
 // storeLogin verifies and persists a new credential. A newly issued browser
@@ -197,7 +197,6 @@ func (a *application) browserLogin(cmd *cobra.Command, cfg config.Config, name s
 // nothing changes and its revocation handle stays in the keychain.
 func (a *application) storeLogin(
 	cmd *cobra.Command,
-	cfg config.Config,
 	name string,
 	profile config.Profile,
 	value credential.Credential,
@@ -251,10 +250,17 @@ func (a *application) storeLogin(
 		}
 		return fail(err)
 	}
+	// Browser consent can take minutes. Reload the configuration now and change
+	// only this login's metadata, so concurrent `config` changes are kept.
 	// Workspace flags affect verification, not the saved profile selection.
-	profile.WorkspaceID = cfg.Profiles[name].WorkspaceID
-	profile.CredentialType = value.Type
-	cfg.Profiles[name] = profile
+	cfg, err := a.configStore.Load()
+	if err != nil {
+		return fail(rollback(err))
+	}
+	saved := cfg.Profiles[name]
+	saved.APIURL = profile.APIURL
+	saved.CredentialType = value.Type
+	cfg.Profiles[name] = saved
 	cfg.CurrentProfile = name
 	if err := a.configStore.Save(cfg); err != nil {
 		return fail(rollback(err))

@@ -17,6 +17,13 @@ func TestNormalizeAPIURL(t *testing.T) {
 	}{
 		{name: "https", input: "https://api2.convai.com/", want: "https://api2.convai.com"},
 		{name: "loopback", input: "http://127.0.0.1:8080", want: "http://127.0.0.1:8080"},
+		{name: "host case", input: "HTTPS://API2.Convai.COM", want: "https://api2.convai.com"},
+		{name: "default https port", input: "https://api2.convai.com:443/", want: "https://api2.convai.com"},
+		{name: "explicit port kept", input: "https://api2.convai.com:8443", want: "https://api2.convai.com:8443"},
+		{name: "default http port", input: "http://127.0.0.1:80", want: "http://127.0.0.1"},
+		{name: "ipv6 loopback", input: "http://[::1]:80/", want: "http://[::1]"},
+		{name: "ipv6 loopback port", input: "http://[::1]:8080", want: "http://[::1]:8080"},
+		{name: "insecure remote upper", input: "HTTP://API2.CONVAI.COM", wantErr: true},
 		{name: "insecure remote", input: "http://api2.convai.com", wantErr: true},
 		{name: "credentials", input: "https://user:secret@api2.convai.com", wantErr: true},
 		{name: "path", input: "https://api2.convai.com/character", wantErr: true},
