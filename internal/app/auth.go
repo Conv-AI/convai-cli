@@ -71,10 +71,11 @@ func (a *application) authLoginCommand() *cobra.Command {
 			default:
 				return errors.New("--method must be browser or token")
 			}
-			_, profileName, profile, err := a.profile()
+			cfg, profileName, profile, err := a.profile()
 			if err != nil {
 				return err
 			}
+			base := newLoginBase(cfg, profileName)
 			if method == "token" {
 				value, err := a.readCredential(tokenStdin)
 				if err != nil {
@@ -84,13 +85,13 @@ func (a *application) authLoginCommand() *cobra.Command {
 				if err != nil {
 					return err
 				}
-				return a.storeLogin(cmd, profileName, profile, parsed, noVerify, nil)
+				return a.storeLogin(cmd, base, profile, parsed, noVerify, nil)
 			}
 			requested, err := a.loginScopes(scopes, readOnly)
 			if err != nil {
 				return err
 			}
-			return a.browserLogin(cmd, profileName, profile, requested, noVerify)
+			return a.browserLogin(cmd, base, profile, requested, noVerify)
 		},
 	}
 	command.Flags().StringVar(&method, "method", "", "browser (default) or token")
@@ -127,8 +128,36 @@ func (a *application) loginScopes(requested string, readOnly bool) ([]string, er
 	return slices.Compact(selected), nil
 }
 
-func (a *application) browserLogin(cmd *cobra.Command, name string, profile config.Profile, scopes []string, noVerify bool) error {
+// loginBase records the saved configuration a login started from. Browser
+// consent can take minutes, so the final save compares against it to keep
+// concurrent changes and to detect conflicting ones.
+type loginBase struct {
+	name, apiURL, currentProfile string
+}
+
+func newLoginBase(cfg config.Config, name string) loginBase {
+	// Loaded configurations are validated, so the stored URL normalizes.
+	apiURL, _ := config.NormalizeAPIURL(cfg.Profiles[name].APIURL)
+	return loginBase{name: name, apiURL: apiURL, currentProfile: cfg.CurrentProfile}
+}
+
+// conflict reports a concurrent change that a login must not overwrite: the
+// profile was removed, or its saved API URL changed, so the new credential's
+// API binding no longer matches what the user chose.
+func (b loginBase) conflict(cfg config.Config) error {
+	saved, ok := cfg.Profiles[b.name]
+	if !ok {
+		return fmt.Errorf("profile %s was removed while signing in; nothing was saved", b.name)
+	}
+	if current, _ := config.NormalizeAPIURL(saved.APIURL); current != b.apiURL {
+		return fmt.Errorf("the API URL of profile %s changed to %s while signing in; nothing was saved. Run `convai auth login --profile %s` again", b.name, current, b.name)
+	}
+	return nil
+}
+
+func (a *application) browserLogin(cmd *cobra.Command, base loginBase, profile config.Profile, scopes []string, noVerify bool) error {
 	ctx := cmd.Context()
+	name := base.name
 	issuer, trusted := oauth.IssuerFor(a.environments, profile.APIURL)
 	if !trusted {
 		return fmt.Errorf("browser login is available only for the Convai-hosted APIs (%s); for %s use `convai auth login --method token`", a.trustedAPIs(), profile.APIURL)
@@ -188,22 +217,28 @@ func (a *application) browserLogin(cmd *cobra.Command, name string, profile conf
 	if err != nil {
 		return a.revokeAfterFailure(ctx, err, revoke)
 	}
-	return a.storeLogin(cmd, name, profile, session, noVerify, revoke)
+	return a.storeLogin(cmd, base, profile, session, noVerify, revoke)
 }
 
 // storeLogin verifies and persists a new credential. A newly issued browser
 // grant is revoked on any failure, so no issued credential is left untracked.
 // A previous browser grant is revoked before it is replaced; if that fails,
 // nothing changes and its revocation handle stays in the keychain.
+//
+// Locks: the profile's credential lock is held across the keychain update and
+// the configuration lock is taken inside it, only for the final local
+// read-merge-save. Configuration writers never take a credential lock, so the
+// order cannot invert.
 func (a *application) storeLogin(
 	cmd *cobra.Command,
-	name string,
+	base loginBase,
 	profile config.Profile,
 	value credential.Credential,
 	noVerify bool,
 	revokeNew func(context.Context) error,
 ) error {
 	ctx := cmd.Context()
+	name := base.name
 	fail := func(err error) error { return a.revokeAfterFailure(ctx, err, revokeNew) }
 	if !noVerify {
 		if err := a.verifyLogin(ctx, profile, value); err != nil {
@@ -215,6 +250,15 @@ func (a *application) storeLogin(
 		return fail(err)
 	}
 	defer unlock()
+	// Detect a conflicting configuration change before touching the previous
+	// credential; the locked save below re-checks it authoritatively.
+	latest, err := a.configStore.Load()
+	if err != nil {
+		return fail(err)
+	}
+	if err := base.conflict(latest); err != nil {
+		return fail(err)
+	}
 	previous, previousErr := a.credentialStore.Get(name)
 	if previousErr != nil && !errors.Is(previousErr, credential.ErrNotFound) {
 		return fail(previousErr)
@@ -250,19 +294,25 @@ func (a *application) storeLogin(
 		}
 		return fail(err)
 	}
-	// Browser consent can take minutes. Reload the configuration now and change
-	// only this login's metadata, so concurrent `config` changes are kept.
-	// Workspace flags affect verification, not the saved profile selection.
-	cfg, err := a.configStore.Load()
+	// Merge only this login's metadata into the latest configuration under the
+	// configuration lock. Concurrent Workspace and other-profile changes are
+	// kept, and the profile becomes current only if nothing else changed the
+	// current profile in the meantime. Workspace flags affect verification,
+	// not the saved selection.
+	err = a.updateConfig(ctx, func(cfg *config.Config) error {
+		if err := base.conflict(*cfg); err != nil {
+			return err
+		}
+		saved := cfg.Profiles[name]
+		saved.APIURL = profile.APIURL
+		saved.CredentialType = value.Type
+		cfg.Profiles[name] = saved
+		if cfg.CurrentProfile == base.currentProfile {
+			cfg.CurrentProfile = name
+		}
+		return nil
+	})
 	if err != nil {
-		return fail(rollback(err))
-	}
-	saved := cfg.Profiles[name]
-	saved.APIURL = profile.APIURL
-	saved.CredentialType = value.Type
-	cfg.Profiles[name] = saved
-	cfg.CurrentProfile = name
-	if err := a.configStore.Save(cfg); err != nil {
 		return fail(rollback(err))
 	}
 	if value.Managed() {

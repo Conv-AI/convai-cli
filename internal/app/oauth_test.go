@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"path/filepath"
 	"slices"
 	"strings"
 	"sync"
@@ -329,21 +330,52 @@ func (s *sharedStore) stored(profile string) (credential.Credential, bool) {
 	return value, ok
 }
 
-type syncConfigStore struct {
-	mu sync.Mutex
-	memoryConfigStore
+// fileConfigStore is the real FileStore in a temporary directory, including its
+// cross-process lock, with save-failure injection.
+type fileConfigStore struct {
+	*config.FileStore
+	mu      sync.Mutex
+	saveErr error
 }
 
-func (s *syncConfigStore) Load() (config.Config, error) {
+func (s *fileConfigStore) Save(cfg config.Config) error {
 	s.mu.Lock()
-	defer s.mu.Unlock()
-	return s.memoryConfigStore.Load()
+	err := s.saveErr
+	s.mu.Unlock()
+	if err != nil {
+		return err
+	}
+	return s.FileStore.Save(cfg)
 }
 
-func (s *syncConfigStore) Save(cfg config.Config) error {
+func (s *fileConfigStore) failSaves(err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return s.memoryConfigStore.Save(cfg)
+	s.saveErr = err
+}
+
+// edit plays another process changing the configuration under its lock.
+func (s *fileConfigStore) edit(t *testing.T, change func(*config.Config)) {
+	t.Helper()
+	unlock, err := s.FileStore.Lock(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer unlock()
+	cfg := s.current(t)
+	change(&cfg)
+	if err := s.FileStore.Save(cfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func (s *fileConfigStore) current(t *testing.T) config.Config {
+	t.Helper()
+	cfg, err := s.FileStore.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return cfg
 }
 
 type oauthFixture struct {
@@ -352,7 +384,7 @@ type oauthFixture struct {
 	rest        *fakeREST
 	other       *fakeREST
 	store       *sharedStore
-	configs     *syncConfigStore
+	configs     *fileConfigStore
 	lockDir     string
 	now         time.Time
 	nowMu       sync.Mutex
@@ -374,7 +406,10 @@ func newOAuthFixture(t *testing.T) *oauthFixture {
 	profile := cfg.Profiles["default"]
 	profile.APIURL = f.rest.server.URL
 	cfg.Profiles["default"] = profile
-	f.configs = &syncConfigStore{memoryConfigStore: memoryConfigStore{cfg: cfg}}
+	f.configs = &fileConfigStore{FileStore: &config.FileStore{Path: filepath.Join(t.TempDir(), "convai", "config.yaml")}}
+	if err := f.configs.Save(cfg); err != nil {
+		t.Fatal(err)
+	}
 	return f
 }
 
@@ -465,7 +500,7 @@ func TestBrowserLoginRequestRefreshRotationAndLogout(t *testing.T) {
 		t.Fatalf("login output = %q / %q", stdout, stderr)
 	}
 	first := f.session()
-	if f.configs.cfg.Profiles["default"].CredentialType != config.CredentialOAuth || first.Session.ClientID != oauth.ClientID ||
+	if f.configs.current(t).Profiles["default"].CredentialType != config.CredentialOAuth || first.Session.ClientID != oauth.ClientID ||
 		first.Session.Audience != oauth.Audience || first.Session.Issuer != f.auth.server.URL || first.Session.APIURL != f.rest.server.URL {
 		t.Fatalf("session binding = %+v", first.Session)
 	}
@@ -522,17 +557,18 @@ func TestBrowserLoginRequestRefreshRotationAndLogout(t *testing.T) {
 func TestEquivalentStoredAPIURLUsesTrustedMappingAndBinding(t *testing.T) {
 	t.Parallel()
 	f := newOAuthFixture(t)
-	profile := f.configs.cfg.Profiles["default"]
-	profile.APIURL = f.rest.server.URL + "/"
-	f.configs.cfg.Profiles["default"] = profile
+	// A legacy or hand-edited profile keeps its trailing slash until saved.
+	trailingSlash := func(cfg *config.Config) {
+		profile := cfg.Profiles["default"]
+		profile.APIURL = f.rest.server.URL + "/"
+		cfg.Profiles["default"] = profile
+	}
+	f.configs.edit(t, trailingSlash)
 	f.login()
 	if got := f.session().Session.APIURL; got != f.rest.server.URL {
 		t.Fatalf("session bound to %q", got)
 	}
-	// A legacy or hand-edited profile keeps its trailing slash until saved.
-	profile = f.configs.cfg.Profiles["default"]
-	profile.APIURL = f.rest.server.URL + "/"
-	f.configs.cfg.Profiles["default"] = profile
+	f.configs.edit(t, trailingSlash)
 	if _, _, err := f.exec("character", "list"); err != nil {
 		t.Fatalf("equivalent API URL broke the session binding: %v", err)
 	}
@@ -592,31 +628,122 @@ type roundTripFunc func(*http.Request) (*http.Response, error)
 
 func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
-func TestBrowserLoginKeepsConfigChangesMadeDuringConsent(t *testing.T) {
-	t.Parallel()
-	f := newOAuthFixture(t)
-	const workspace = "11111111-1111-4111-8111-111111111111"
+// duringConsent runs CLI commands as another process while the user is on
+// the consent page. They would block on the configuration lock if login held
+// it across consent.
+func (f *oauthFixture) duringConsent(commands ...[]string) {
 	f.browser = func(raw string) error {
-		// Another process edits the configuration while the user consents.
-		cfg, _ := f.configs.Load()
-		profile := cfg.Profiles["default"]
-		profile.WorkspaceID = workspace
-		cfg.Profiles["default"] = profile
-		cfg.Profiles["other"] = config.Profile{APIURL: "https://custom.example.com", CredentialType: config.CredentialPAT}
-		if err := f.configs.Save(cfg); err != nil {
-			t.Error(err)
+		for _, args := range commands {
+			if _, _, err := f.exec(args...); err != nil {
+				f.t.Errorf("%v during consent: %v", args, err)
+			}
 		}
 		go f.auth.visit(raw)
 		return nil
 	}
+}
+
+func TestBrowserLoginMergesConfigChangesMadeDuringConsent(t *testing.T) {
+	t.Parallel()
+	f := newOAuthFixture(t)
+	const workspace = "11111111-1111-4111-8111-111111111111"
+	f.duringConsent(
+		[]string{"config", "set", "workspace-id", workspace, "--profile", "default"},
+		[]string{"config", "set", "api-url", "https://custom.example.com", "--profile", "other"},
+		[]string{"config", "use", "other"},
+	)
 	f.login("--workspace", "personal")
-	cfg, _ := f.configs.Load()
+	cfg := f.configs.current(t)
 	saved := cfg.Profiles["default"]
 	if saved.WorkspaceID != workspace || saved.CredentialType != config.CredentialOAuth || saved.APIURL != f.rest.server.URL {
 		t.Fatalf("saved profile = %+v", saved)
 	}
-	if _, ok := cfg.Profiles["other"]; !ok || cfg.CurrentProfile != "default" {
+	if other, ok := cfg.Profiles["other"]; !ok || other.APIURL != "https://custom.example.com" {
 		t.Fatal("login discarded a concurrently created profile")
+	}
+	if cfg.CurrentProfile != "other" {
+		t.Fatal("login overrode a concurrent current-profile change")
+	}
+	f.session()
+}
+
+func TestBrowserLoginRejectsConflictingConfigChangesDuringConsent(t *testing.T) {
+	t.Parallel()
+	t.Run("API URL changed", func(t *testing.T) {
+		f := newOAuthFixture(t)
+		f.duringConsent([]string{"config", "set", "api-url", f.other.server.URL, "--profile", "default"})
+		_, _, err := f.exec("auth", "login")
+		if err == nil || !strings.Contains(err.Error(), "changed to "+f.other.server.URL) || !strings.Contains(err.Error(), "was revoked") {
+			t.Fatalf("error = %v", err)
+		}
+		saved := f.configs.current(t).Profiles["default"]
+		if saved.APIURL != f.other.server.URL || saved.CredentialType != config.CredentialPAT {
+			t.Fatalf("conflicting change was overwritten: %+v", saved)
+		}
+		if _, ok := f.store.stored("default"); ok || len(f.auth.revokedTokens()) != 2 {
+			t.Fatal("conflicting login was stored or not revoked")
+		}
+	})
+	t.Run("profile removed", func(t *testing.T) {
+		f := newOAuthFixture(t)
+		f.configs.edit(t, func(cfg *config.Config) {
+			cfg.Profiles["spare"] = config.Profile{APIURL: config.DefaultAPIURL, CredentialType: config.CredentialPAT}
+		})
+		f.browser = func(raw string) error {
+			f.configs.edit(t, func(cfg *config.Config) {
+				delete(cfg.Profiles, "default")
+				cfg.CurrentProfile = "spare"
+			})
+			go f.auth.visit(raw)
+			return nil
+		}
+		_, _, err := f.exec("auth", "login", "--profile", "default")
+		if err == nil || !strings.Contains(err.Error(), "was removed") || !strings.Contains(err.Error(), "was revoked") {
+			t.Fatalf("error = %v", err)
+		}
+		if _, ok := f.configs.current(t).Profiles["default"]; ok {
+			t.Fatal("login resurrected a removed profile")
+		}
+		if _, ok := f.store.stored("default"); ok {
+			t.Fatal("login stored a credential for a removed profile")
+		}
+	})
+}
+
+func TestConcurrentConfigWritersKeepEveryChange(t *testing.T) {
+	t.Parallel()
+	f := newOAuthFixture(t)
+	const writers = 12
+	var wait sync.WaitGroup
+	for i := range writers {
+		wait.Add(1)
+		go func() {
+			defer wait.Done()
+			profile := fmt.Sprintf("p%d", i)
+			workspace := fmt.Sprintf("%08d-1111-4111-8111-111111111111", i)
+			if _, _, err := f.exec("config", "set", "workspace-id", workspace, "--profile", profile); err != nil {
+				t.Errorf("config set %s: %v", profile, err)
+			}
+		}()
+	}
+	// A login for another profile runs concurrently with the writers.
+	wait.Add(1)
+	go func() {
+		defer wait.Done()
+		if _, _, err := f.exec("auth", "login"); err != nil {
+			t.Errorf("login: %v", err)
+		}
+	}()
+	wait.Wait()
+	cfg := f.configs.current(t)
+	for i := range writers {
+		want := fmt.Sprintf("%08d-1111-4111-8111-111111111111", i)
+		if got := cfg.Profiles[fmt.Sprintf("p%d", i)].WorkspaceID; got != want {
+			t.Fatalf("profile p%d workspace = %q; a concurrent write was lost", i, got)
+		}
+	}
+	if cfg.Profiles["default"].CredentialType != config.CredentialOAuth {
+		t.Fatal("concurrent writers lost the login metadata")
 	}
 }
 
@@ -847,7 +974,7 @@ func TestBrowserLoginStorageFailuresRevokeNewGrant(t *testing.T) {
 	})
 	t.Run("config save", func(t *testing.T) {
 		f := newOAuthFixture(t)
-		f.configs.saveErr = errors.New("disk full")
+		f.configs.failSaves(errors.New("disk full"))
 		_, _, err := f.exec("auth", "login")
 		if err == nil || !strings.Contains(err.Error(), "disk full") || len(f.auth.revokedTokens()) != 2 {
 			t.Fatalf("error = %v", err)
@@ -858,7 +985,7 @@ func TestBrowserLoginStorageFailuresRevokeNewGrant(t *testing.T) {
 	})
 	t.Run("config save and rollback", func(t *testing.T) {
 		f := newOAuthFixture(t)
-		f.configs.saveErr = errors.New("disk full")
+		f.configs.failSaves(errors.New("disk full"))
 		f.store.deleteErr = errors.New("keychain unavailable")
 		_, _, err := f.exec("auth", "login")
 		if err == nil || !strings.Contains(err.Error(), "removing the stored credential failed: keychain unavailable") || !strings.Contains(err.Error(), "was revoked") {
@@ -869,7 +996,7 @@ func TestBrowserLoginStorageFailuresRevokeNewGrant(t *testing.T) {
 		f := newOAuthFixture(t)
 		previous := credential.Credential{Type: config.CredentialAPIKey, Value: "01234567890123456789012345678901"}
 		f.store.values["default"] = previous
-		f.configs.saveErr = errors.New("disk full")
+		f.configs.failSaves(errors.New("disk full"))
 		_, _, err := f.run(context.Background(), "cvpat_0123456789012345678901234567890123456789\n", "auth", "login", "--token-stdin", "--no-verify")
 		if err == nil || !strings.Contains(err.Error(), "the previous credential was restored") {
 			t.Fatalf("error = %v", err)
@@ -913,7 +1040,7 @@ func TestReplacingBrowserLoginRevokesPreviousGrantFirst(t *testing.T) {
 		f := newOAuthFixture(t)
 		f.login()
 		old := f.session()
-		f.configs.saveErr = errors.New("disk full")
+		f.configs.failSaves(errors.New("disk full"))
 		_, _, err := f.exec("auth", "login")
 		if err == nil || !strings.Contains(err.Error(), "the previous browser login had already been revoked") || strings.Contains(err.Error(), "restored") {
 			t.Fatalf("error = %v", err)

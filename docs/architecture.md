@@ -112,6 +112,22 @@ convai auth login
   revoked. A transport failure whose outcome at Auth is unknown is reported
   and not retried in that command. An HTTP 401 from REST is returned as-is; no
   request, including a mutation, is replayed.
+- Configuration: `config set`, `config use`, and login's final metadata write
+  each do one read-modify-write under a second OS file lock beside the
+  configuration file. Its identity is the canonical file (absolute, directory
+  and file symlinks resolved), and load, save, and lock all use that same
+  path, so a symlinked configuration is updated in place rather than replaced.
+  A dangling configuration symlink is an error. The lock is held only for
+  local reads and the save, never during browser consent or network calls.
+  Login records the profile's saved API URL and the current profile when it
+  starts, then merges only its API URL and credential type into the latest
+  configuration: concurrent Workspace, other-profile, and current-profile
+  changes are kept, and the profile becomes current only if no one else
+  changed the current profile meanwhile. If the profile was removed or its
+  saved API URL changed during sign-in, login fails, revokes the new grant,
+  and writes nothing. Logout does not write the configuration. Lock order is
+  fixed: the per-profile credential lock is taken first, the configuration
+  lock inside it; configuration writers never take a credential lock.
 - Logout and replacement: logout revokes the refresh and access tokens through
   RFC 7009 before deleting the record, after validating every binding; on
   failure the record is kept for retry, and `--local` removes only the local

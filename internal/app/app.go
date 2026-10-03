@@ -208,15 +208,14 @@ func (a *application) configUseCommand() *cobra.Command {
 			if err := config.ValidateProfileName(args[0]); err != nil {
 				return err
 			}
-			cfg, err := a.configStore.Load()
+			err := a.updateConfig(cmd.Context(), func(cfg *config.Config) error {
+				if _, ok := cfg.Profiles[args[0]]; !ok {
+					return fmt.Errorf("profile %q does not exist", args[0])
+				}
+				cfg.CurrentProfile = args[0]
+				return nil
+			})
 			if err != nil {
-				return err
-			}
-			if _, ok := cfg.Profiles[args[0]]; !ok {
-				return fmt.Errorf("profile %q does not exist", args[0])
-			}
-			cfg.CurrentProfile = args[0]
-			if err := a.configStore.Save(cfg); err != nil {
 				return err
 			}
 			fmt.Fprintf(cmd.OutOrStdout(), "Current profile: %s\n", args[0])
@@ -234,40 +233,41 @@ func (a *application) configSetCommand() *cobra.Command {
 			if args[0] != "api-url" && args[0] != "workspace-id" {
 				return errors.New("only api-url and workspace-id can be set")
 			}
-			cfg, err := a.configStore.Load()
-			if err != nil {
-				return err
-			}
-			name := a.profileFlag
-			if name == "" {
-				name = cfg.CurrentProfile
-			}
-			if err := config.ValidateProfileName(name); err != nil {
-				return err
-			}
-			profile, ok := cfg.Profiles[name]
-			if !ok {
-				profile.CredentialType = config.CredentialPAT
-				profile.APIURL = config.DefaultAPIURL
-			}
-			value := args[1]
-			if args[0] == "api-url" {
-				profile.APIURL, err = config.NormalizeAPIURL(value)
-			} else {
-				if value == "personal" {
-					value = ""
+			var name string
+			err := a.updateConfig(cmd.Context(), func(cfg *config.Config) error {
+				name = a.profileFlag
+				if name == "" {
+					name = cfg.CurrentProfile
 				}
-				err = config.ValidateWorkspaceID(value)
-				profile.WorkspaceID = value
-			}
+				if err := config.ValidateProfileName(name); err != nil {
+					return err
+				}
+				profile, ok := cfg.Profiles[name]
+				if !ok {
+					profile.CredentialType = config.CredentialPAT
+					profile.APIURL = config.DefaultAPIURL
+				}
+				value := args[1]
+				var err error
+				if args[0] == "api-url" {
+					profile.APIURL, err = config.NormalizeAPIURL(value)
+				} else {
+					if value == "personal" {
+						value = ""
+					}
+					err = config.ValidateWorkspaceID(value)
+					profile.WorkspaceID = value
+				}
+				if err != nil {
+					return err
+				}
+				cfg.Profiles[name] = profile
+				if cfg.CurrentProfile == "" {
+					cfg.CurrentProfile = name
+				}
+				return nil
+			})
 			if err != nil {
-				return err
-			}
-			cfg.Profiles[name] = profile
-			if cfg.CurrentProfile == "" {
-				cfg.CurrentProfile = name
-			}
-			if err := a.configStore.Save(cfg); err != nil {
 				return err
 			}
 			fmt.Fprintf(cmd.OutOrStdout(), "Set %s %s to %s\n", name, args[0], args[1])
@@ -499,6 +499,28 @@ func (a *application) profile() (config.Config, string, config.Profile, error) {
 		return config.Config{}, "", config.Profile{}, err
 	}
 	return cfg, name, profile, nil
+}
+
+// updateConfig applies one read-modify-write under the cross-process
+// configuration lock, so concurrent CLI processes do not lose each other's
+// changes. Callers must not perform network calls or wait for the user inside
+// change. Lock order: a credential lock, when held, is taken before this one.
+func (a *application) updateConfig(ctx context.Context, change func(*config.Config) error) error {
+	ctx, cancel := context.WithTimeout(ctx, lockTimeout)
+	unlock, err := a.configStore.Lock(ctx)
+	cancel()
+	if err != nil {
+		return err
+	}
+	defer unlock()
+	cfg, err := a.configStore.Load()
+	if err != nil {
+		return err
+	}
+	if err := change(&cfg); err != nil {
+		return err
+	}
+	return a.configStore.Save(cfg)
 }
 
 func workspaceLabel(value string) string {

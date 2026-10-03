@@ -102,6 +102,11 @@ another API requires a new login rather than sending the session elsewhere.
 `auth status` shows the login type, scopes, issuer, and access-token expiry, never
 the tokens.
 
+Configuration changes made in another terminal while you sign in, such as
+`config set workspace-id` or `config use`, are kept. If the profile's API URL is
+changed or the profile is removed during sign-in, login fails and revokes the
+new session instead of overwriting that change.
+
 `convai auth logout` revokes a browser login through Convai sign-in and then
 removes it from the keychain. If revocation fails, the session is kept so logout
 can be retried; `convai auth logout --local` removes only the local copy and

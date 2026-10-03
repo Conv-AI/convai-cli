@@ -2,12 +2,14 @@ package app
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/Conv-AI/convai-cli/internal/config"
@@ -17,6 +19,12 @@ import (
 type memoryConfigStore struct {
 	cfg     config.Config
 	saveErr error
+	lock    sync.Mutex
+}
+
+func (s *memoryConfigStore) Lock(context.Context) (func(), error) {
+	s.lock.Lock()
+	return s.lock.Unlock, nil
 }
 
 func (s *memoryConfigStore) Load() (config.Config, error) {

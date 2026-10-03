@@ -66,7 +66,11 @@ server-narrowed scopes, and overbroad grants; the managed verification policy
 import; keychain-write, config-save, and rollback failures; replacing a previous
 session, including failed revocation and failure after revocation; API-origin
 binding and mismatched issuer, client, or audience records; logout failure and
-`--local`; `invalid_grant`, oversized, truncated, and unsaved refresh responses
+`--local`; configuration changes during consent made through real `config set`
+and `config use` commands (merged), conflicting API URL changes and profile
+removal (rejected and revoked), and concurrent configuration writers on
+different profiles alongside a login (no lost update), all on a temporary-file
+configuration with its real lock; `invalid_grant`, oversized, truncated, and unsaved refresh responses
 with no later replay; an ambiguous transport failure; concurrent CLI instances
 refreshing once; `auth status --check` and `doctor` refresh; `CONVAI_TOKEN`
 precedence without refresh; and no mutation replay after HTTP 401. Every
@@ -80,6 +84,8 @@ duplicates, trailing data, scopes), revocation of every token in a rejected
 successful response, and redaction of request secrets from error codes,
 descriptions, and transport errors before truncation. Credential tests cover the
 versioned keychain record through the go-keyring mock, legacy raw entries,
+configuration load, save, and lock through symlinked file and directory paths
+(one canonical file, symlink preserved, dangling links rejected),
 strict record decoding, and a child-process test proving the file lock blocks
 another process for the same profile, case-insensitively.
 
