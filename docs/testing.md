@@ -39,7 +39,8 @@ without converting numeric scalars to floats.
 Generation is checked for committed reproducibility.
 The E2E package's offline tests also validate credential isolation, fail-closed
 fixture requirements, Auth PAT issuance/revocation bindings, revocation of both
-OAuth tokens even when one fails, bounded/redacted management errors, staging-only
+OAuth tokens even when one fails, post-revocation refresh denial and cleanup of
+unexpectedly refreshed credentials, bounded/redacted management errors, staging-only
 OAuth discovery, and single-use state-checked loopback callbacks. These run in
 the normal CI `make verify`; they do not need live secrets or browser consent.
 
@@ -111,9 +112,18 @@ For each credential type the matrix verifies:
    same-account character returns 403, and owner readback remains unchanged.
 3. Both credentials: real foreign character returns 404 and a verified
    inaccessible Workspace returns 403/404.
-4. Cleanup: characters are deleted and owner get verifies 404 while write credentials are valid, then
-   PATs or OAuth access and refresh tokens are revoked through Auth. Reusing
-   each revoked access credential must return 401 and process exit code 3.
+4. OAuth refresh: the fresh access credential verifies successfully, then a
+   refresh grant must succeed and rotate both credentials. The CLI matrix uses
+   the rotated access token. This proves the refresh token was usable, not an
+   already-invalid fixture that would trivially pass a negative probe.
+5. Cleanup: characters are deleted and owner get verifies 404 while write
+   credentials are valid, then PATs or OAuth access and refresh tokens are
+   revoked through Auth. Reusing each revoked access credential must return
+   401 and process exit code 3. Each OAuth response must include a refresh token;
+   the original and rotated pairs are both revoked. Refreshing either after
+   cleanup must return 400 with `error=invalid_grant`.
+   A revocation acknowledgment alone is insufficient. Unexpected refreshed
+   credentials are revoked before failing the run.
 
 Run one matrix while preparing fixtures; missing fixtures must fail:
 

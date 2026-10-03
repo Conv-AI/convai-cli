@@ -134,6 +134,84 @@ func TestOAuthRevocationAttemptsBothTokens(t *testing.T) {
 	}
 }
 
+func TestOAuthExchangeRequiresRefreshToken(t *testing.T) {
+	var revoked bool
+	client := fakeManagement(t, func(r *http.Request) (int, string) {
+		if r.URL.Path == "/auth/oauth/revoke" {
+			revoked = true
+			return 200, `{}`
+		}
+		return 200, `{"access_token":"cvoat_secret"}`
+	})
+	if _, err := client.exchangeOAuth("/auth/oauth/token", url.Values{}); err == nil || !revoked {
+		t.Fatal("missing refresh token falsely passed or left the access token live")
+	}
+}
+
+func TestOAuthRefreshRevocationEvidence(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		status  int
+		body    string
+		pass    bool
+		cleanup int
+	}{
+		{"revoked", 400, `{"error":"invalid_grant"}`, true, 0},
+		{"wrong-client", 400, `{"error":"invalid_client"}`, false, 0},
+		{"wrong-request", 400, `{"error":"invalid_request"}`, false, 0},
+		{"outage", 503, `{"error":"server_error"}`, false, 0},
+		{"unexpected-success", 200, `{"access_token":"cvoat_new","refresh_token":"refresh-new"}`, false, 2},
+		{"mixed-error-credentials", 400, `{"error":"invalid_grant","access_token":"cvoat_new","refresh_token":"refresh-new"}`, false, 2},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var cleaned []string
+			client := fakeManagement(t, func(r *http.Request) (int, string) {
+				body, _ := io.ReadAll(r.Body)
+				form, _ := url.ParseQuery(string(body))
+				if r.Method != "POST" || r.Header.Get("Content-Type") != "application/x-www-form-urlencoded" || r.Header.Get("Authorization") != "" || form.Get("client_id") != "codex" {
+					t.Fatal("invalid refresh/revocation request binding")
+				}
+				if r.URL.Path == "/auth/oauth/revoke" {
+					cleaned = append(cleaned, form.Get("token"))
+					return 200, `{}`
+				}
+				if r.URL.Path != "/auth/oauth/token" || form.Get("grant_type") != "refresh_token" || form.Get("refresh_token") != "refresh-old" || form.Get("resource") != stagingResource {
+					t.Fatal("revocation probe did not use the original refresh grant")
+				}
+				return test.status, test.body
+			})
+			err := client.verifyOAuthRefreshRevoked(issuedCredential{RefreshToken: "refresh-old"})
+			if (err == nil) != test.pass || len(cleaned) != test.cleanup {
+				t.Fatal("refresh revocation falsely passed or skipped unexpected-credential cleanup")
+			}
+			if test.cleanup != 0 && strings.Join(cleaned, ",") != "cvoat_new,refresh-new" {
+				t.Fatal("refresh probe revoked the wrong credentials")
+			}
+			if err != nil && (strings.Contains(err.Error(), "cvoat_new") || strings.Contains(err.Error(), "refresh-new") || strings.Contains(err.Error(), "refresh-old")) {
+				t.Fatal("refresh revocation diagnostic exposed a credential")
+			}
+		})
+	}
+	if err := newManagementClient().verifyOAuthRefreshRevoked(issuedCredential{}); err == nil {
+		t.Fatal("missing refresh token passed revocation verification")
+	}
+}
+
+func TestOAuthPositiveRefreshBinding(t *testing.T) {
+	client := fakeManagement(t, func(r *http.Request) (int, string) {
+		body, _ := io.ReadAll(r.Body)
+		form, _ := url.ParseQuery(string(body))
+		if r.Method != "POST" || r.URL.Path != "/auth/oauth/token" || r.Header.Get("Content-Type") != "application/x-www-form-urlencoded" || r.Header.Get("Authorization") != "" || form.Get("grant_type") != "refresh_token" || form.Get("client_id") != "codex" || form.Get("refresh_token") != "refresh-old" || form.Get("resource") != stagingResource {
+			t.Fatal("positive refresh did not use the same valid grant as the revocation probe")
+		}
+		return 200, `{"access_token":"cvoat_new","refresh_token":"refresh-new"}`
+	})
+	rotated, err := client.refreshOAuth(issuedCredential{RefreshToken: "refresh-old"})
+	if err != nil || rotated.AccessToken != "cvoat_new" || rotated.RefreshToken != "refresh-new" {
+		t.Fatal("positive refresh did not return the new pair")
+	}
+}
+
 func TestManagementErrorsAreBoundedAndRedacted(t *testing.T) {
 	for _, test := range []struct {
 		name   string

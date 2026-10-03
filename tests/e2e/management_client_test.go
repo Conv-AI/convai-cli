@@ -46,20 +46,21 @@ func (c managementClient) request(method, path, contentType, bearer string, body
 		return errors.New("staging management request failed")
 	}
 	defer response.Body.Close()
+	var statusError error
 	if response.StatusCode != expected {
-		return fmt.Errorf("staging management HTTP %d; expected %d", response.StatusCode, expected)
+		statusError = fmt.Errorf("staging management HTTP %d; expected %d", response.StatusCode, expected)
 	}
 	if dst == nil {
-		return nil
+		return statusError
 	}
 	data, err := io.ReadAll(io.LimitReader(response.Body, (1<<20)+1))
 	if err != nil || len(data) > 1<<20 {
-		return errors.New("invalid staging management response size")
+		return errors.Join(statusError, errors.New("invalid staging management response size"))
 	}
 	if json.Unmarshal(data, dst) != nil {
-		return errors.New("invalid staging management JSON response")
+		return errors.Join(statusError, errors.New("invalid staging management JSON response"))
 	}
-	return nil
+	return statusError
 }
 
 func (c managementClient) createPAT(firebase string, scopes []string) (issuedCredential, error) {
@@ -101,6 +102,9 @@ func (c managementClient) exchangeOAuth(path string, form url.Values) (issuedCre
 	if err == nil && !strings.HasPrefix(credential.AccessToken, "cvoat_") {
 		err = errors.New("unexpected OAuth access-token type")
 	}
+	if err == nil && credential.RefreshToken == "" {
+		err = errors.New("OAuth fixture omitted its refresh token")
+	}
 	if err != nil {
 		if cleanup := c.revokeOAuth(credential); cleanup != nil {
 			err = errors.Join(err, fmt.Errorf("OAuth cleanup failed: %w", cleanup))
@@ -126,4 +130,36 @@ func (c managementClient) revokeOAuth(credential issuedCredential) error {
 		}
 	}
 	return errors.Join(failures...)
+}
+
+func (c managementClient) verifyOAuthRefreshRevoked(credential issuedCredential) error {
+	if credential.RefreshToken == "" {
+		return errors.New("cannot verify revocation without an issued refresh token")
+	}
+	form := oauthRefreshForm(credential)
+	var result struct {
+		issuedCredential
+		Error string `json:"error"`
+	}
+	err := c.request("POST", "/auth/oauth/token", "application/x-www-form-urlencoded", "", []byte(form.Encode()), 400, &result)
+	if err == nil && result.Error == "invalid_grant" && result.AccessToken == "" && result.RefreshToken == "" {
+		return nil
+	}
+	err = errors.Join(errors.New("revoked OAuth refresh grant was not rejected with HTTP 400 invalid_grant"), err)
+	// A broken revocation boundary can issue a fresh pair; revoke it before failing.
+	if cleanup := c.revokeOAuth(result.issuedCredential); cleanup != nil {
+		err = errors.Join(err, fmt.Errorf("unexpected refresh credentials cleanup failed: %w", cleanup))
+	}
+	return err
+}
+
+func (c managementClient) refreshOAuth(credential issuedCredential) (issuedCredential, error) {
+	return c.exchangeOAuth("/auth/oauth/token", oauthRefreshForm(credential))
+}
+
+func oauthRefreshForm(credential issuedCredential) url.Values {
+	return url.Values{
+		"grant_type": {"refresh_token"}, "client_id": {"codex"},
+		"refresh_token": {credential.RefreshToken}, "resource": {stagingResource},
+	}
 }

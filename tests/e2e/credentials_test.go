@@ -52,13 +52,34 @@ func TestStagingOAuthCredentialMatrix(t *testing.T) {
 		}
 		h := primary
 		h.token, h.workspace = credential.AccessToken, "personal"
+		pairs := []issuedCredential{credential}
 		t.Cleanup(func() {
-			if err := client.revokeOAuth(credential); err != nil {
-				t.Errorf("revoke temporary OAuth credentials: %v", err)
-				return
+			for _, pair := range pairs {
+				if err := client.revokeOAuth(pair); err != nil {
+					t.Errorf("revoke temporary OAuth credentials: %v", err)
+				}
 			}
-			verifyRevoked(t, h)
+			for _, pair := range pairs {
+				probe := h
+				probe.token = pair.AccessToken
+				verifyRevoked(t, probe)
+				if err := client.verifyOAuthRefreshRevoked(pair); err != nil {
+					t.Errorf("verify refresh-token revocation: %v", err)
+				}
+			}
 		})
+		if _, ok := h.run(t, "", "auth", "status", "--check"); !ok {
+			t.Fatal("fresh OAuth access credential verification failed")
+		}
+		rotated, err := client.refreshOAuth(credential)
+		if err != nil {
+			t.Fatalf("positive OAuth refresh verification: %v", err)
+		}
+		pairs = append(pairs, rotated)
+		if rotated.AccessToken == credential.AccessToken || rotated.RefreshToken == credential.RefreshToken {
+			t.Fatal("OAuth refresh did not rotate both credentials")
+		}
+		h.token = rotated.AccessToken
 		return h
 	})
 }
