@@ -154,6 +154,10 @@ git diff -- internal/characterapi/client.gen.go
 See [`docs/architecture.md`](docs/architecture.md) for the CLI, local MCP, and
 distribution boundaries, and [`docs/testing.md`](docs/testing.md) for staging
 verification and the remaining credential-dependent release gates.
+`make e2e` is exploratory and may skip absent staging fixtures. `make e2e-auth`
+is the strict, developer-attended PAT/OAuth release gate: missing prerequisites
+fail before issuance, and successful runs must include cleanup and revoked-token
+denial. See the testing guide for management-login and browser-consent setup.
 
 ## Releases
 

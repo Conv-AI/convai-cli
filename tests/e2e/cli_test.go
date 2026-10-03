@@ -2,7 +2,9 @@ package e2e
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,10 +17,11 @@ type harness struct{ binary, home, token, workspace string }
 
 func newHarness(t *testing.T) harness {
 	t.Helper()
-	token := os.Getenv("CONVAI_E2E_TOKEN")
-	if token == "" {
-		t.Skip("set CONVAI_E2E_TOKEN for opt-in staging E2E")
-	}
+	return newCredentialHarness(t, fixture(t, "CONVAI_E2E_TOKEN"))
+}
+
+func newCredentialHarness(t *testing.T, token string) harness {
+	t.Helper()
 	dir := t.TempDir()
 	binary := filepath.Join(dir, "convai")
 	build := exec.Command("go", "build", "-trimpath", "-o", binary, "./cmd/convai")
@@ -42,8 +45,10 @@ func (h harness) run(t *testing.T, body string, args ...string) (map[string]any,
 func (h harness) runWithStatus(t *testing.T, body string, args ...string) (map[string]any, int, bool) {
 	t.Helper()
 	args = append(args, "--api-url", "https://api2-stg.convai.com", "--workspace", h.workspace, "--output", "json")
-	command := exec.Command(h.binary, args...)
-	command.Env = append(os.Environ(), "HOME="+h.home, "XDG_CONFIG_HOME="+h.home, "CONVAI_TOKEN="+h.token)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	command := exec.CommandContext(ctx, h.binary, args...)
+	command.Env = commandEnvironment(os.Environ(), h)
 	command.Stdin = strings.NewReader(body)
 	var stdout, stderr bytes.Buffer
 	command.Stdout, command.Stderr = &stdout, &stderr
@@ -52,16 +57,19 @@ func (h harness) runWithStatus(t *testing.T, body string, args ...string) (map[s
 		t.Fatal("CLI exposed the test credential")
 	}
 	if err != nil {
-		// Log only sanitized, bounded CLI diagnostics, never command.Env.
-		message := strings.ReplaceAll(stderr.String(), h.token, "[REDACTED]")
-		if len(message) > 1000 {
-			message = message[:1000]
-		}
-		t.Logf("CLI %s failed: %s", strings.Join(args[:min(2, len(args))], " "), message)
+		// An error is evidence only when the actual CLI returned a structured HTTP status.
 		var diagnostic struct {
 			StatusCode int `json:"status_code"`
+			ExitCode   int `json:"exit_code"`
 		}
-		_ = json.Unmarshal(stderr.Bytes(), &diagnostic)
+		if json.Unmarshal(stderr.Bytes(), &diagnostic) != nil {
+			t.Fatal("CLI failed without a structured diagnostic")
+		}
+		var exit *exec.ExitError
+		if !errors.As(err, &exit) || diagnostic.ExitCode != exit.ExitCode() || ((diagnostic.StatusCode == 401 || diagnostic.StatusCode == 403) && exit.ExitCode() != 3) {
+			t.Fatal("CLI diagnostic and process exit status disagree")
+		}
+		t.Logf("CLI %s: HTTP %d", strings.Join(args[:min(2, len(args))], " "), diagnostic.StatusCode)
 		return nil, diagnostic.StatusCode, false
 	}
 	var value map[string]any
@@ -73,9 +81,34 @@ func (h harness) runWithStatus(t *testing.T, body string, args ...string) (map[s
 
 func TestStagingReadAndAuthentication(t *testing.T) {
 	h := newHarness(t)
+	verifyReads(t, h, true)
+}
+
+func verifyReads(t *testing.T, h harness, discovery bool) {
+	t.Helper()
 	if _, ok := h.run(t, "", "auth", "status", "--check"); !ok {
 		t.Fatal("credential verification failed")
 	}
+	id, _ := firstOwnedCharacter(t, h)
+	if discovery {
+		for _, group := range []string{"voice", "language", "model"} {
+			if _, ok := h.run(t, "", group, "list"); !ok {
+				t.Fatalf("%s catalog failed", group)
+			}
+		}
+	}
+	if _, ok := h.run(t, "", "character", "version", "list", id); !ok {
+		t.Fatal("version listing failed")
+	}
+	invalid := h
+	invalid.token = "cvpat_00000000000000000000000000000000"
+	if _, status, ok := invalid.runWithStatus(t, "", "character", "list"); ok || status != 401 {
+		t.Fatalf("invalid credential denial must be HTTP 401, got %d", status)
+	}
+}
+
+func firstOwnedCharacter(t *testing.T, h harness) (string, map[string]any) {
+	t.Helper()
 	listed, ok := h.run(t, "", "character", "list", "--limit", "1")
 	if !ok {
 		t.Fatal("list failed")
@@ -92,26 +125,17 @@ func TestStagingReadAndAuthentication(t *testing.T) {
 	if !ok || got["character_id"] != id {
 		t.Fatal("owned-character get failed")
 	}
-	for _, group := range []string{"voice", "language", "model"} {
-		if _, ok := h.run(t, "", group, "list"); !ok {
-			t.Fatalf("%s catalog failed", group)
-		}
-	}
-	if _, ok := h.run(t, "", "character", "version", "list", id); !ok {
-		t.Fatal("version listing failed")
-	}
-	invalid := h
-	invalid.token = "cvpat_00000000000000000000000000000000"
-	if _, status, ok := invalid.runWithStatus(t, "", "character", "list"); ok || status != 401 {
-		t.Fatalf("invalid credential denial must be HTTP 401, got %d", status)
-	}
+	return id, got
 }
 
 func TestStagingAuthoringLifecycle(t *testing.T) {
-	if os.Getenv("CONVAI_E2E_MUTATIONS") != "1" {
-		t.Skip("set CONVAI_E2E_MUTATIONS=1 to create and clean up temporary staging fixtures")
-	}
+	requireOptIn(t, "CONVAI_E2E_MUTATIONS")
 	h := newHarness(t)
+	authoringLifecycle(t, h)
+}
+
+func authoringLifecycle(t *testing.T, h harness) {
+	t.Helper()
 	name := "CLI E2E " + time.Now().UTC().Format("20060102150405")
 	body, _ := json.Marshal(map[string]any{"charName": name, "backstory": "A temporary CLI regression fixture. Delete after testing.", "autoSelectAssets": false})
 	created, ok := h.run(t, string(body), "character", "create", "--file", "-")
@@ -122,11 +146,7 @@ func TestStagingAuthoringLifecycle(t *testing.T) {
 	if !ok || id == "" {
 		t.Fatal("create did not return a character ID")
 	}
-	t.Cleanup(func() {
-		if _, ok := h.run(t, "", "character", "delete", id, "--yes"); !ok {
-			t.Errorf("cleanup failed for temporary character %s", id)
-		}
-	})
+	cleanupCharacter(t, h, id)
 	if _, ok := h.run(t, `{"backstory":"Updated temporary CLI fixture.","speaking_style_description":null,"actions_enabled":false}`, "character", "update", id, "--file", "-", "--yes"); !ok {
 		t.Fatal("update failed")
 	}
@@ -152,46 +172,35 @@ func TestStagingAuthoringLifecycle(t *testing.T) {
 	if !ok || cloneID == "" || cloneID == id {
 		t.Fatal("clone identity was invalid")
 	}
-	t.Cleanup(func() {
-		if _, ok := h.run(t, "", "character", "delete", cloneID, "--yes"); !ok {
-			t.Errorf("cleanup failed for temporary clone %s", cloneID)
-		}
-	})
+	cleanupCharacter(t, h, cloneID)
 }
 
 func TestStagingReadOnlyPATCannotWrite(t *testing.T) {
-	if os.Getenv("CONVAI_E2E_READ_ONLY_PAT") == "" {
-		t.Skip("set CONVAI_E2E_READ_ONLY_PAT for real scope-denial proof")
-	}
+	token := fixture(t, "CONVAI_E2E_READ_ONLY_PAT")
+	requireOptIn(t, "CONVAI_E2E_MUTATIONS")
 	h := newHarness(t)
-	h.token = os.Getenv("CONVAI_E2E_READ_ONLY_PAT")
-	listed, ok := h.run(t, "", "character", "list", "--limit", "1")
-	if !ok {
-		t.Fatal("read-only PAT could not read")
-	}
-	items, ok := listed["items"].([]any)
-	if !ok || len(items) == 0 {
-		t.Fatal("read-only fixture needs an owned character")
-	}
-	id := items[0].(map[string]any)["character_id"].(string)
-	got, ok := h.run(t, "", "character", "get", id)
-	if !ok || got["backstory"] == nil {
-		t.Fatal("fixture must have a readable backstory")
-	}
-	// Submit an idempotent update, not an invalid body rejected locally.
-	body, _ := json.Marshal(map[string]any{"backstory": got["backstory"]})
-	if _, status, ok := h.runWithStatus(t, string(body), "character", "update", id, "--file", "-", "--yes"); ok || status != 403 {
-		t.Fatalf("read-only PAT write denial must be HTTP 403, got %d", status)
-	}
+	id, _ := temporaryCharacter(t, h)
+	readOnly := h
+	readOnly.token = token
+	verifyReadOnly(t, h, readOnly, id)
 }
 
 func TestStagingOwnershipAndWorkspaceDenials(t *testing.T) {
-	foreign := os.Getenv("CONVAI_E2E_FOREIGN_CHARACTER_ID")
-	workspace := os.Getenv("CONVAI_E2E_FORBIDDEN_WORKSPACE")
-	if foreign == "" || workspace == "" {
-		t.Skip("set foreign-character and forbidden-Workspace fixtures for live ownership checks")
-	}
+	foreign := fixture(t, "CONVAI_E2E_FOREIGN_CHARACTER_ID")
+	workspace := fixture(t, "CONVAI_E2E_FORBIDDEN_WORKSPACE")
+	ownerToken := fixture(t, "CONVAI_E2E_FOREIGN_OWNER_TOKEN")
 	h := newHarness(t)
+	owner := h
+	owner.token, owner.workspace = ownerToken, workspace
+	got, ok := owner.run(t, "", "character", "get", foreign)
+	if !ok || got["workspace_id"] != workspace {
+		t.Fatal("foreign fixture existence/owner verification failed")
+	}
+	_, own := firstOwnedCharacter(t, h)
+	verifyDistinctOwners(t, own, got)
+	if _, ok := owner.run(t, "", "character", "list", "--limit", "1"); !ok {
+		t.Fatal("foreign Workspace existence/owner verification failed")
+	}
 	if _, status, ok := h.runWithStatus(t, "", "character", "get", foreign); ok || status != 404 {
 		t.Fatalf("foreign character must be hidden with HTTP 404, got %d", status)
 	}
@@ -202,10 +211,7 @@ func TestStagingOwnershipAndWorkspaceDenials(t *testing.T) {
 }
 
 func TestStagingPlanDenial(t *testing.T) {
-	token := os.Getenv("CONVAI_E2E_UNENTITLED_TOKEN")
-	if token == "" {
-		t.Skip("set a separately provisioned unentitled staging token for live plan-denial proof")
-	}
+	token := fixture(t, "CONVAI_E2E_UNENTITLED_TOKEN")
 	h := newHarness(t)
 	h.token = token
 	if _, status, ok := h.runWithStatus(t, "", "character", "list"); ok || status != 403 {

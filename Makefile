@@ -3,7 +3,7 @@ GOFMT ?= gofmt
 OAPI_CODEGEN_VERSION ?= v2.8.0
 GOVULNCHECK_VERSION ?= v1.6.0
 
-.PHONY: build test vet vuln fmt-check generate generate-check verify contract-check e2e
+.PHONY: build test vet vuln fmt-check generate generate-check verify contract-check e2e e2e-auth
 
 build:
 	$(GO) build -trimpath -o bin/convai ./cmd/convai
@@ -12,7 +12,10 @@ test:
 	$(GO) test -race ./...
 
 e2e:
-	$(GO) test -count=1 -v ./tests/e2e
+	$(GO) test -count=1 -timeout=30m -v -run '^TestStaging' ./tests/e2e
+
+e2e-auth:
+	CONVAI_E2E_REQUIRED=1 $(GO) test -count=1 -timeout=30m -v -run '^TestAuthReleaseStaging$$' ./tests/e2e
 
 vet:
 	$(GO) vet ./...

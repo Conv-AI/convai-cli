@@ -61,6 +61,15 @@ approved loopback redirects, scopes/resources, keychain refresh-token lifecycle,
 and revocation tests. Do not reuse the Codex connector client identity. This is a
 separate activation gate, not part of an API-key/PAT authoring MVP.
 
+The staging test harness may obtain disposable OAuth credentials using the
+already-registered staging `codex` client and MCP resource, then inject the
+access token into the native REST CLI. This verifies imported-token authoring
+and denial behavior; it does not activate a CLI OAuth client or change the
+production browser-login boundary. Auth alone issues/revokes credentials, and
+Character API remains responsible for scope, Workspace, and ownership checks.
+The strict `make e2e-auth` gate is developer-attended and requires both managed
+PAT and OAuth matrices, including cleanup and post-revocation denial.
+
 ## MCP
 
 `convai mcp serve --transport stdio` will be a local adapter over the same
@@ -76,7 +85,8 @@ command; MCP is optional tool discovery, not a dependency of native commands.
 The Confluence companion is [Convai CLI and Agent Plugins: Architecture and Distribution](https://convaixr.atlassian.net/wiki/spaces/Engineerin/pages/532185115/Convai+CLI+and+Agent+Plugins+Architecture+and+Distribution).
 After merge, its current-command/status sections need the expanded catalog,
 immutable owner-contract pin, optional default voice, Workspace selection,
-OAuth-import versus browser-login boundary, and the test gates below. Release
+OAuth-import versus browser-login boundary, strict versus exploratory staging
+tests, live credential evidence, and pending gates. Release
 and installer claims must remain pre-release until publishing is verified.
 
 ## Distribution
