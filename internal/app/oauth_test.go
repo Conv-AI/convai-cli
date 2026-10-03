@@ -519,6 +519,73 @@ func TestBrowserLoginRequestRefreshRotationAndLogout(t *testing.T) {
 	}
 }
 
+func TestEquivalentStoredAPIURLUsesTrustedMappingAndBinding(t *testing.T) {
+	t.Parallel()
+	f := newOAuthFixture(t)
+	profile := f.configs.cfg.Profiles["default"]
+	profile.APIURL = f.rest.server.URL + "/"
+	f.configs.cfg.Profiles["default"] = profile
+	f.login()
+	if got := f.session().Session.APIURL; got != f.rest.server.URL {
+		t.Fatalf("session bound to %q", got)
+	}
+	// A legacy or hand-edited profile keeps its trailing slash until saved.
+	profile = f.configs.cfg.Profiles["default"]
+	profile.APIURL = f.rest.server.URL + "/"
+	f.configs.cfg.Profiles["default"] = profile
+	if _, _, err := f.exec("character", "list"); err != nil {
+		t.Fatalf("equivalent API URL broke the session binding: %v", err)
+	}
+	if _, _, err := f.exec("character", "list", "--api-url", f.rest.server.URL+"/"); err != nil {
+		t.Fatalf("equivalent --api-url broke the session binding: %v", err)
+	}
+	// Canonicalization does not widen trust: other origins stay untrusted.
+	for _, apiURL := range []string{"https://custom.example.com/", strings.Replace(f.rest.server.URL, "127.0.0.1", "localhost", 1) + "/"} {
+		if _, _, err := f.exec("auth", "login", "--api-url", apiURL); err == nil || !strings.Contains(err.Error(), "--method token") {
+			t.Fatalf("login for %s = %v", apiURL, err)
+		}
+	}
+	if _, _, err := f.exec("character", "list", "--api-url", "http://api2.convai.com/"); err == nil || !strings.Contains(err.Error(), "HTTPS") {
+		t.Fatalf("non-HTTPS origin = %v", err)
+	}
+}
+
+func TestSerializedSessionIsNeverImportedAsACredential(t *testing.T) {
+	f := newOAuthFixture(t)
+	f.login("--read-only")
+	session := f.session()
+	s := session.Session
+	data, err := json.Marshal(map[string]any{
+		"convai_credential_version": 1, "kind": "oauth_session", "access_token": session.Value,
+		"refresh_token": s.RefreshToken, "expires_at": s.ExpiresAt.Format(time.RFC3339), "scope": "character:read",
+		"issuer": s.Issuer, "client_id": s.ClientID, "audience": s.Audience, "api_url": s.APIURL,
+	})
+	if err != nil || len(data) > 512 || bytes.ContainsAny(data, " \t\n") {
+		t.Fatalf("fixture must be a compact record (%d bytes)", len(data))
+	}
+	before := len(f.rest.requests())
+	for _, args := range [][]string{
+		{"auth", "login", "--token-stdin"},
+		{"auth", "login", "--method", "token", "--token-stdin", "--no-verify"},
+	} {
+		if _, _, err := f.run(context.Background(), string(data)+"\n", args...); err == nil {
+			t.Fatalf("%v imported a serialized session", args)
+		}
+	}
+	t.Setenv(credential.EnvironmentToken, string(data))
+	for _, args := range [][]string{{"character", "list"}, {"doctor"}, {"auth", "status", "--check"}} {
+		if _, _, err := f.exec(args...); err == nil {
+			t.Fatalf("%v used a serialized session from %s", args, credential.EnvironmentToken)
+		}
+	}
+	if len(f.rest.requests()) != before {
+		t.Fatal("a serialized session was sent to REST")
+	}
+	if stored := f.session(); stored.Value != session.Value {
+		t.Fatal("a rejected import changed the stored login")
+	}
+}
+
 func TestBrowserLaunchFailurePrintsURLWithoutCredentials(t *testing.T) {
 	t.Parallel()
 	f := newOAuthFixture(t)

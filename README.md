@@ -119,7 +119,8 @@ printf '%s\n' "$TOKEN" | convai auth login --token-stdin
 ```
 
 PAT/OAuth use Bearer authentication; API keys use `CONVAI-API-KEY`. OAuth refresh
-tokens, authorization codes, and Web SDK JWTs are not accepted as credentials.
+tokens, authorization codes, Web SDK JWTs, and stored browser-login records are
+not accepted as credentials.
 Imported credentials are not refreshed. Obtain a PAT from its existing issuing
 service; the CLI does not create or manage PATs.
 

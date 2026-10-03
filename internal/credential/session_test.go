@@ -110,10 +110,61 @@ func mustEncode(t *testing.T, value Credential) string {
 	return encoded
 }
 
+func TestParseRejectsSerializedSessionsAndEmbeddedRefreshTokens(t *testing.T) {
+	t.Parallel()
+	compact := testSession(t)
+	readOnly := *compact.Session
+	readOnly.Scopes = []string{"character:read"}
+	compact.Session = &readOnly
+	record := mustEncode(t, compact)
+	if len(record) > 512 || strings.ContainsAny(record, " \t\n") {
+		t.Fatalf("fixture must be a compact record that passes the generic length and whitespace checks (%d bytes)", len(record))
+	}
+	for name, value := range map[string]string{
+		"compact record":   record,
+		"array":            `["` + sessionAccess + `"]`,
+		"quoted":           `"` + sessionAccess + `"`,
+		"embedded refresh": "prefix-" + sessionRefresh,
+		"embedded code":    "prefix-cvoac_0123456789abcdef0123456789abcdef_Y29kZQ",
+	} {
+		_, err := Parse(value)
+		if err == nil {
+			t.Fatalf("%s was accepted as a credential", name)
+		}
+		if strings.Contains(err.Error(), sessionRefresh) || strings.Contains(err.Error(), sessionAccess) {
+			t.Fatalf("%s error exposed a credential", name)
+		}
+	}
+	for value, kind := range map[string]config.CredentialType{
+		"01234567890123456789012345678901":               config.CredentialAPIKey,
+		"AbC-_.~+/=0123456789abcdefgh":                   config.CredentialAPIKey,
+		"cvpat_0123456789012345678901234567890123456789": config.CredentialPAT,
+		sessionAccess: config.CredentialOAuth,
+		// Random typed secrets can contain refresh or code markers.
+		"cvpat_0123456789abcdef0123456789abcdef_xcvort_y": config.CredentialPAT,
+		"cvpat_0123456789abcdef0123456789abcdef_xcvoac_y": config.CredentialPAT,
+		"cvoat_0123456789abcdef0123456789abcdef_xcvort_y": config.CredentialOAuth,
+		"cvoat_0123456789abcdef0123456789abcdef_xcvoac_y": config.CredentialOAuth,
+	} {
+		parsed, err := Parse(value)
+		if err != nil || parsed.Type != kind {
+			t.Fatalf("valid raw credential = %q, %v", parsed.Type, err)
+		}
+	}
+}
+
 func TestEnvironmentNeverYieldsAManagedOrRefreshCredential(t *testing.T) {
 	t.Setenv(EnvironmentToken, mustEncode(t, testSession(t)))
 	if _, _, err := Resolve(&memoryStore{}, "default"); err == nil {
 		t.Fatal("environment accepted a session record")
+	}
+	compact := testSession(t)
+	readOnly := *compact.Session
+	readOnly.Scopes = []string{"character:read"}
+	compact.Session = &readOnly
+	t.Setenv(EnvironmentToken, mustEncode(t, compact))
+	if _, _, err := Resolve(&memoryStore{}, "default"); err == nil {
+		t.Fatal("environment accepted a compact session record")
 	}
 	t.Setenv(EnvironmentToken, sessionRefresh)
 	if _, _, err := Resolve(&memoryStore{}, "default"); err == nil {

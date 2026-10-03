@@ -478,11 +478,16 @@ func (a *application) profile() (config.Config, string, config.Profile, error) {
 			name,
 		)
 	}
+	// Use the canonical origin everywhere: validation accepts equivalent forms
+	// such as a trailing slash, while trust mapping and session binding
+	// compare exact strings.
+	apiURL := profile.APIURL
 	if a.apiURLFlag != "" {
-		profile.APIURL, err = config.NormalizeAPIURL(a.apiURLFlag)
-		if err != nil {
-			return config.Config{}, "", config.Profile{}, err
-		}
+		apiURL = a.apiURLFlag
+	}
+	profile.APIURL, err = config.NormalizeAPIURL(apiURL)
+	if err != nil {
+		return config.Config{}, "", config.Profile{}, err
 	}
 	if a.workspaceFlag != "" {
 		profile.WorkspaceID = a.workspaceFlag

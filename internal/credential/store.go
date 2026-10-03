@@ -99,12 +99,21 @@ func Parse(value string) (Credential, error) {
 	if strings.ContainsFunc(value, isUnsafeRune) {
 		return Credential{}, errors.New("credential must not contain whitespace or control characters")
 	}
+	// A serialized browser-login record is never an opaque bearer credential.
+	// Without this check, a compact record could fall through to the API-key
+	// type and be sent whole, refresh token included, to an arbitrary API URL.
+	if strings.ContainsAny(value, `{}[]"`) {
+		return Credential{}, errors.New("use an API key, PAT, or OAuth access token, not a stored browser-login value")
+	}
 	kind := config.CredentialAPIKey
 	if strings.HasPrefix(value, "cvpat_") {
 		kind = config.CredentialPAT
 	} else if strings.HasPrefix(value, "cvoat_") {
 		kind = config.CredentialOAuth
-	} else if strings.HasPrefix(value, "cvort_") || strings.HasPrefix(value, "cvoac_") || strings.Count(value, ".") == 2 {
+	} else if strings.HasPrefix(value, "cvort_") || strings.HasPrefix(value, "cvoac_") || strings.Count(value, ".") == 2 ||
+		// Typed PAT and access secrets are random and may contain these
+		// markers; only the untyped API-key fallback must not carry one.
+		strings.Contains(value, "cvort_") || strings.Contains(value, "cvoac_") {
 		return Credential{}, errors.New("use an API key, PAT, or OAuth access token, not a refresh, authorization-code, or runtime token")
 	}
 	return Credential{Type: kind, Value: value}, nil
