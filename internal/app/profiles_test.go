@@ -269,3 +269,46 @@ func TestOnPremConcurrentRefreshAndUntrustedCA(t *testing.T) {
 		t.Fatal("untrusted issuer received code or refresh")
 	}
 }
+
+func TestOAuthRefreshPreservesEquivalentStoredAPIOrigin(t *testing.T) {
+	for _, custom := range []bool{false, true} {
+		name := "SaaS"
+		if custom {
+			name = "custom"
+		}
+		t.Run(name, func(t *testing.T) {
+			var f *oauthFixture
+			if custom {
+				f = newOnPremFixture(t)
+			} else {
+				f = newOAuthFixture(t)
+			}
+			if _, _, err := f.exec("auth", "login"); err != nil {
+				t.Fatal(err)
+			}
+			first, _ := f.store.stored("default")
+			f.configs.edit(t, func(cfg *config.Config) {
+				p := cfg.Profiles["default"]
+				p.APIURL += "/"
+				cfg.Profiles["default"] = p
+			})
+			f.advance(time.Hour)
+			if _, _, err := f.exec("doctor"); err != nil {
+				t.Fatal(err)
+			}
+			next, ok := f.store.stored("default")
+			if !ok || next.Value == first.Value || next.Session.APIURL != first.Session.APIURL || len(f.auth.revokedTokens()) != 0 {
+				t.Fatal("equivalent origin discarded the rotated session")
+			}
+			if _, refresh := f.auth.counts(); refresh != 1 {
+				t.Fatalf("refresh count = %d", refresh)
+			}
+			if !strings.HasSuffix(f.configs.current(t).Profiles["default"].APIURL, "/") {
+				t.Fatal("refresh rewrote profile metadata")
+			}
+			if _, _, err := f.exec("auth", "logout"); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}

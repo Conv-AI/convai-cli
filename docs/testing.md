@@ -101,13 +101,17 @@ import through direct REST with raw ID/runtime/refresh token rejection.
 Transport tests reject unknown CAs, wrong hostnames, invalid/missing/oversized
 bundles, key material, insecure certificate settings and hostname substitution.
 Existing SaaS lifecycle/rotation/concurrency/secret-redaction tests remain intact.
+Equivalent stored origin spellings preserve refresh sessions in SaaS and custom
+profiles. `.gitattributes` preserves the checksum-pinned OpenAPI snapshot's LF
+bytes during Windows checkout; checksum validation is not relaxed.
 The loopback receipt regression proves no redirect/script/secret echo; it does
 not reproduce Brave policy or establish a browser root cause.
 
 `make release-check` and the native archive CI matrix verify all five archive
 checksums/contents and the installed native executable without publication.
 Archive regression tests reject duplicate/unexpected/traversing paths and
-invalid checksum manifests. These source and snapshot tests do not prove live
+invalid checksum manifests, and keep the temporary binary separate from Linux
+XDG configuration paths. These source and snapshot tests do not prove live
 on-prem OAuth, AD authorization, published artifact provenance, customer
 installation or both CPU architectures on every supported OS.
 

@@ -534,6 +534,11 @@ func (a *application) credentialFor(ctx context.Context, name string, profile co
 // checkBinding prevents a stored browser login from being forwarded to any API
 // origin, issuer, client, or audience other than the one it was issued for.
 func (a *application) checkBinding(name string, value credential.Credential, profile config.Profile) (loginTrust, error) {
+	apiURL, err := config.NormalizeAPIURL(profile.APIURL)
+	if err != nil {
+		return loginTrust{}, err
+	}
+	profile.APIURL = apiURL
 	session := value.Session
 	if session.APIURL != profile.APIURL {
 		return loginTrust{}, fmt.Errorf("the browser login for profile %s was issued for %s, not %s; run `convai auth login --profile %s` for this API", name, session.APIURL, profile.APIURL, name)

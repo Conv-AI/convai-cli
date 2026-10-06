@@ -27,10 +27,10 @@ make release-check
 `release-check` validates configuration, builds local unpublished snapshots,
 and checks all five SHA256 checksums and archive members. It rejects traversal,
 duplicate/unexpected members, links, missing binaries and non-executable Unix
-binaries. The native archive's executable is installed in a temporary prefix,
-then tested for exact version, help, metadata-only profile import/readback and
-missing credentials. Environment/config and profile name are isolated. It does
-not log in, write native credentials or make an API request. Temporary installs
+binaries. The native archive's executable is installed in a temporary prefix's
+`bin` directory, then tested for exact version, help, metadata-only profile
+import/readback and missing credentials. Environment/config and profile name
+are isolated. It does not log in, write native credentials or make an API request. Temporary installs
 are removed.
 
 CI runs native race tests and archive installation checks on macOS, Linux and

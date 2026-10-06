@@ -88,11 +88,8 @@ func verify(dir string) error {
 		return err
 	}
 	defer os.RemoveAll(prefix)
-	executable := filepath.Join(prefix, "convai")
-	if runtime.GOOS == "windows" {
-		executable += ".exe"
-	}
-	if err := os.WriteFile(executable, installed, 0o700); err != nil {
+	executable, err := installBinary(prefix, installed)
+	if err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
@@ -135,6 +132,19 @@ func verify(dir string) error {
 		return fmt.Errorf("fresh installation unexpectedly has credentials: %s", output)
 	}
 	return nil
+}
+
+func installBinary(prefix string, binary []byte) (string, error) {
+	dir := filepath.Join(prefix, "bin")
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return "", err
+	}
+	name := "convai"
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
+	executable := filepath.Join(dir, name)
+	return executable, os.WriteFile(executable, binary, 0o700)
 }
 
 func readChecksums(path string) (map[string]string, error) {

@@ -66,3 +66,25 @@ func TestChecksumManifestValidation(t *testing.T) {
 		}
 	}
 }
+
+func TestInstallationKeepsBinaryAndXDGConfigSeparate(t *testing.T) {
+	prefix := t.TempDir()
+	installed, err := installBinary(prefix, []byte("binary"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if filepath.Dir(installed) != filepath.Join(prefix, "bin") {
+		t.Fatal("binary is not in the installation's bin directory")
+	}
+	data, err := os.ReadFile(installed)
+	if err != nil || string(data) != "binary" {
+		t.Fatal("installation did not preserve binary contents")
+	}
+	config := filepath.Join(prefix, "convai", "config.yaml")
+	if err := os.MkdirAll(filepath.Dir(config), 0o700); err != nil {
+		t.Fatal("binary collided with the XDG configuration directory:", err)
+	}
+	if err := os.WriteFile(config, []byte("profiles: {}\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
