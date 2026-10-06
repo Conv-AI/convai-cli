@@ -1,9 +1,11 @@
 package config
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"path/filepath"
@@ -19,6 +21,7 @@ const (
 	DefaultProfileName = "default"
 	DefaultAPIURL      = "https://api2.convai.com"
 	StagingAPIURL      = "https://api2-stg.convai.com"
+	PreviewAPIURL      = "https://api2-preview.convai.com"
 )
 
 type CredentialType string
@@ -33,6 +36,17 @@ type Profile struct {
 	APIURL         string         `yaml:"api_url" json:"api_url"`
 	CredentialType CredentialType `yaml:"credential_type" json:"credential_type"`
 	WorkspaceID    string         `yaml:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+	OAuth          OAuthTrust     `yaml:"oauth,omitempty" json:"oauth,omitempty"`
+	CABundle       string         `yaml:"ca_bundle,omitempty" json:"ca_bundle,omitempty"`
+}
+
+// OAuthTrust is an operator-approved mapping, never inferred from discovery.
+// APIURL is repeated deliberately: changing the profile origin alone must not
+// transfer an issuer's authority to a different resource server.
+type OAuthTrust struct {
+	APIURL   string `yaml:"api_url" json:"api_url"`
+	Issuer   string `yaml:"issuer" json:"issuer"`
+	Resource string `yaml:"resource" json:"resource"`
 }
 
 type Config struct {
@@ -155,8 +169,14 @@ func (s *FileStore) Load() (Config, error) {
 		return Config{}, fmt.Errorf("read config: %w", err)
 	}
 	var cfg Config
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return Config{}, fmt.Errorf("parse config: %w", err)
+	decoder := yaml.NewDecoder(bytes.NewReader(data))
+	decoder.KnownFields(true)
+	if err := decoder.Decode(&cfg); err != nil {
+		return Config{}, errors.New("parse config: only supported non-secret fields are accepted")
+	}
+	var extra any
+	if !errors.Is(decoder.Decode(&extra), io.EOF) {
+		return Config{}, errors.New("parse config: expected exactly one YAML document")
 	}
 	if err := Validate(cfg); err != nil {
 		return Config{}, err
@@ -226,6 +246,9 @@ func Validate(cfg Config) error {
 		if err := ValidateWorkspaceID(profile.WorkspaceID); err != nil {
 			return err
 		}
+		if err := ValidateTrust(profile); err != nil {
+			return fmt.Errorf("invalid profile %q trust: %w", name, err)
+		}
 	}
 	return nil
 }
@@ -268,7 +291,7 @@ func NormalizeAPIURL(raw string) (string, error) {
 	if parsed.User != nil {
 		return "", errors.New("API URL must not contain credentials")
 	}
-	if parsed.RawQuery != "" || parsed.Fragment != "" {
+	if parsed.RawQuery != "" || parsed.ForceQuery || parsed.Fragment != "" {
 		return "", errors.New("API URL must not contain a query string or fragment")
 	}
 	if parsed.Scheme != "https" && !(parsed.Scheme == "http" && isLoopback(parsed.Hostname())) {

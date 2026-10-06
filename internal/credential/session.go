@@ -23,26 +23,30 @@ const sessionRecordKind = "oauth_session"
 // token stays in Credential.Value so every REST caller uses one bearer path.
 // Binding fields are not secret; they decide where the tokens may be sent.
 type Session struct {
-	RefreshToken string
-	ExpiresAt    time.Time
-	Scopes       []string
-	Issuer       string
-	ClientID     string
-	Audience     string
-	APIURL       string
+	RefreshToken  string
+	ExpiresAt     time.Time
+	Scopes        []string
+	Issuer        string
+	ClientID      string
+	Audience      string
+	APIURL        string
+	Resource      string
+	CAFingerprint string
 }
 
 type sessionRecord struct {
-	Version      int    `json:"convai_credential_version"`
-	Kind         string `json:"kind"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	ExpiresAt    string `json:"expires_at"`
-	Scope        string `json:"scope"`
-	Issuer       string `json:"issuer"`
-	ClientID     string `json:"client_id"`
-	Audience     string `json:"audience"`
-	APIURL       string `json:"api_url"`
+	Version       int    `json:"convai_credential_version"`
+	Kind          string `json:"kind"`
+	AccessToken   string `json:"access_token"`
+	RefreshToken  string `json:"refresh_token"`
+	ExpiresAt     string `json:"expires_at"`
+	Scope         string `json:"scope"`
+	Issuer        string `json:"issuer"`
+	ClientID      string `json:"client_id"`
+	Audience      string `json:"audience"`
+	APIURL        string `json:"api_url"`
+	Resource      string `json:"resource,omitempty"`
+	CAFingerprint string `json:"ca_fingerprint,omitempty"`
 }
 
 // Managed reports whether the credential is a refreshable browser login.
@@ -101,16 +105,18 @@ func encodeSession(credential Credential) (string, error) {
 	}
 	s := credential.Session
 	data, err := json.Marshal(sessionRecord{
-		Version:      sessionRecordVersion,
-		Kind:         sessionRecordKind,
-		AccessToken:  credential.Value,
-		RefreshToken: s.RefreshToken,
-		ExpiresAt:    s.ExpiresAt.UTC().Format(time.RFC3339),
-		Scope:        strings.Join(s.Scopes, " "),
-		Issuer:       s.Issuer,
-		ClientID:     s.ClientID,
-		Audience:     s.Audience,
-		APIURL:       s.APIURL,
+		Version:       sessionRecordVersion,
+		Kind:          sessionRecordKind,
+		AccessToken:   credential.Value,
+		RefreshToken:  s.RefreshToken,
+		ExpiresAt:     s.ExpiresAt.UTC().Format(time.RFC3339),
+		Scope:         strings.Join(s.Scopes, " "),
+		Issuer:        s.Issuer,
+		ClientID:      s.ClientID,
+		Audience:      s.Audience,
+		APIURL:        s.APIURL,
+		Resource:      s.Resource,
+		CAFingerprint: s.CAFingerprint,
 	})
 	if err != nil {
 		return "", fmt.Errorf("encode browser login record: %w", err)
@@ -136,12 +142,14 @@ func decodeStored(value string) (Credential, error) {
 		return Credential{}, errors.New("stored browser login record has an invalid expiry")
 	}
 	return NewSession(record.AccessToken, Session{
-		RefreshToken: record.RefreshToken,
-		ExpiresAt:    expires,
-		Scopes:       strings.Fields(record.Scope),
-		Issuer:       record.Issuer,
-		ClientID:     record.ClientID,
-		Audience:     record.Audience,
-		APIURL:       record.APIURL,
+		RefreshToken:  record.RefreshToken,
+		ExpiresAt:     expires,
+		Scopes:        strings.Fields(record.Scope),
+		Issuer:        record.Issuer,
+		ClientID:      record.ClientID,
+		Audience:      record.Audience,
+		APIURL:        record.APIURL,
+		Resource:      record.Resource,
+		CAFingerprint: record.CAFingerprint,
 	})
 }

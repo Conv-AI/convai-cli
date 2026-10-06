@@ -110,6 +110,29 @@ func mustEncode(t *testing.T, value Credential) string {
 	return encoded
 }
 
+func TestKeyringRoundTripsCustomResourceAndCAWithoutChangingSaaSRecords(t *testing.T) {
+	keyring.MockInit()
+	store := KeyringStore{}
+	custom := testSession(t)
+	custom.Session.APIURL = "https://api.customer.test"
+	custom.Session.Issuer = "https://login.customer.test"
+	custom.Session.Resource = "https://api.customer.test/authoring"
+	custom.Session.Audience = custom.Session.Resource
+	custom.Session.CAFingerprint = strings.Repeat("a", 64)
+	if err := store.Set("custom", custom); err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := store.Get("custom")
+	if err != nil || loaded.Session.Resource != custom.Session.Resource || loaded.Session.CAFingerprint != custom.Session.CAFingerprint || loaded.Session.Audience != custom.Session.Audience {
+		t.Fatal("custom keychain binding was not preserved")
+	}
+	for _, field := range []string{"resource", "ca_fingerprint"} {
+		if strings.Contains(mustEncode(t, testSession(t)), `"`+field+`"`) {
+			t.Fatal("changed legacy SaaS record encoding")
+		}
+	}
+}
+
 func TestParseRejectsSerializedSessionsAndEmbeddedRefreshTokens(t *testing.T) {
 	t.Parallel()
 	compact := testSession(t)

@@ -9,11 +9,17 @@ authorization, entitlements, validation, ownership, and writes.
 
 > Status: private pre-release. No public binary version or installer is published.
 
+For explicit private API/OAuth mappings and customer CA setup, see
+[On-Prem Profiles](docs/onprem-profiles.md). Portable on-prem OAuth and backend
+eligibility enforcement are external dependencies, not activated by a profile.
+See [Release Verification](docs/releases.md) for local archive checks and
+separate publication/installation gates.
+
 ## Commands
 
 ```text
 convai auth login|status|logout
-convai config get|set|use
+convai config get|set|use|import
 convai character list|get|create|update|delete|clone
 convai character version list|release|promote|fork|deprecate|discard-draft|revert|diff
 convai voice list

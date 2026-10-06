@@ -44,6 +44,7 @@ type fakeAuth struct {
 	deny          bool
 	grant         func(requested []string) []string
 	refreshReply  func(http.ResponseWriter) bool
+	resource      string
 }
 
 type fakeCode struct {
@@ -125,7 +126,8 @@ func (f *fakeAuth) token(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(map[string]string{"error": code})
 	}
-	if form.Get("client_id") != oauth.ClientID || form.Has("resource") || form.Has("client_secret") {
+	if form.Get("client_id") != oauth.ClientID || form.Get("resource") != f.resource ||
+		(f.resource == "" && form.Has("resource")) || form.Has("client_secret") {
 		f.t.Errorf("token request binding = %v", form)
 		fail("invalid_request")
 		return
@@ -184,7 +186,8 @@ func (f *fakeAuth) visit(raw string) {
 	redirect := query.Get("redirect_uri")
 	callback := url.Values{"state": {query.Get("state")}}
 	if parsed.Path != "/auth/oauth/authorize" || query.Get("client_id") != oauth.ClientID || query.Get("response_type") != "code" ||
-		query.Get("code_challenge_method") != "S256" || len(query.Get("code_challenge")) != 43 || query.Has("resource") ||
+		query.Get("code_challenge_method") != "S256" || len(query.Get("code_challenge")) != 43 ||
+		query.Get("resource") != f.resource || (f.resource == "" && query.Has("resource")) ||
 		!strings.HasPrefix(redirect, "http://127.0.0.1:") || !strings.HasSuffix(redirect, "/callback") {
 		f.t.Errorf("authorization request = %s", raw)
 	}
@@ -391,6 +394,7 @@ type oauthFixture struct {
 	interactive bool
 	browser     func(string) error
 	timeout     time.Duration
+	custom      bool
 }
 
 func newOAuthFixture(t *testing.T) *oauthFixture {
@@ -430,15 +434,22 @@ func (f *oauthFixture) clock() time.Time {
 func (f *oauthFixture) run(ctx context.Context, stdin string, args ...string) (string, string, error) {
 	f.t.Helper()
 	var stdout, stderr bytes.Buffer
+	httpClient := f.auth.server.Client()
+	environments := []oauth.Environment{
+		{APIURL: f.rest.server.URL, Issuer: f.auth.server.URL},
+		{APIURL: f.other.server.URL, Issuer: f.auth.server.URL},
+	}
+	if f.custom {
+		// Exercise the actual approved-profile path, not a test trust mapping
+		// or the test server's pre-trusted transport.
+		httpClient, environments = nil, nil
+	}
 	root, err := New(Options{
 		Stdin: strings.NewReader(stdin), Stdout: &stdout, Stderr: &stderr,
-		ConfigStore: f.configs, CredentialStore: f.store, HTTPClient: f.auth.server.Client(),
+		ConfigStore: f.configs, CredentialStore: f.store, HTTPClient: httpClient,
 		Locker: credential.FileLocker{Dir: f.lockDir}, OpenBrowser: f.browser,
 		Interactive: func() bool { return f.interactive }, Now: f.clock, LoginTimeout: f.timeout,
-		OAuthEnvironments: []oauth.Environment{
-			{APIURL: f.rest.server.URL, Issuer: f.auth.server.URL},
-			{APIURL: f.other.server.URL, Issuer: f.auth.server.URL},
-		},
+		OAuthEnvironments: environments,
 	})
 	if err != nil {
 		f.t.Fatal(err)
