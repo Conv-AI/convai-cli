@@ -1,0 +1,2 @@
+# Preserve the checksum-pinned owner's bytes on every native release platform.
+api/character.openapi.json text eol=lf

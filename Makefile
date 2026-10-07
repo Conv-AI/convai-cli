@@ -2,8 +2,9 @@ GO ?= go
 GOFMT ?= gofmt
 OAPI_CODEGEN_VERSION ?= v2.8.0
 GOVULNCHECK_VERSION ?= v1.6.0
+GORELEASER ?= goreleaser
 
-.PHONY: build test vet vuln fmt-check generate generate-check verify contract-check e2e e2e-auth
+.PHONY: build test vet vuln fmt-check generate generate-check verify contract-check release-check e2e e2e-auth
 
 build:
 	$(GO) build -trimpath -o bin/convai ./cmd/convai
@@ -41,3 +42,9 @@ contract-check:
 	$(GO) run ./tools/check-contract https://api2-stg.convai.com/openapi.json
 
 verify: fmt-check vet test generate-check build
+
+# Snapshot archives are local only: no tag, publication, or release credentials.
+release-check:
+	$(GORELEASER) check
+	$(GORELEASER) release --snapshot --clean --skip=publish
+	$(GO) run ./tools/verify-release -dir dist

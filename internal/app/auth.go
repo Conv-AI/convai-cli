@@ -49,7 +49,8 @@ func (a *application) authLoginCommand() *cobra.Command {
 		Short: "Sign in with your browser, or import an API key, PAT, or OAuth access token",
 		Long: "Without flags, login opens your browser to sign in to Convai and stores a refreshable\n" +
 			"session in the OS keychain. Browser login is available for the Convai staging, Preview,\n" +
-			"and production APIs. Use --method token (or --token-stdin in CI) to import an API key,\n" +
+			"and production APIs, or an explicitly approved custom OAuth profile.\n" +
+			"Use --method token (or --token-stdin in CI) to import an API key,\n" +
 			"PAT, or already-issued OAuth access token instead.",
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -133,12 +134,13 @@ func (a *application) loginScopes(requested string, readOnly bool) ([]string, er
 // concurrent changes and to detect conflicting ones.
 type loginBase struct {
 	name, apiURL, currentProfile string
+	profile                      config.Profile
 }
 
 func newLoginBase(cfg config.Config, name string) loginBase {
 	// Loaded configurations are validated, so the stored URL normalizes.
 	apiURL, _ := config.NormalizeAPIURL(cfg.Profiles[name].APIURL)
-	return loginBase{name: name, apiURL: apiURL, currentProfile: cfg.CurrentProfile}
+	return loginBase{name: name, apiURL: apiURL, currentProfile: cfg.CurrentProfile, profile: cfg.Profiles[name]}
 }
 
 // conflict reports a concurrent change that a login must not overwrite: the
@@ -152,23 +154,27 @@ func (b loginBase) conflict(cfg config.Config) error {
 	if current, _ := config.NormalizeAPIURL(saved.APIURL); current != b.apiURL {
 		return fmt.Errorf("the API URL of profile %s changed to %s while signing in; nothing was saved. Run `convai auth login --profile %s` again", b.name, current, b.name)
 	}
+	if !sameProfileTrust(saved, b.profile) {
+		return fmt.Errorf("the trust of profile %s changed while signing in; nothing was saved. Log in again", b.name)
+	}
 	return nil
 }
 
 func (a *application) browserLogin(cmd *cobra.Command, base loginBase, profile config.Profile, scopes []string, noVerify bool) error {
 	ctx := cmd.Context()
 	name := base.name
-	issuer, trusted := oauth.IssuerFor(a.environments, profile.APIURL)
-	if !trusted {
-		return fmt.Errorf("browser login is available only for the Convai-hosted APIs (%s); for %s use `convai auth login --method token`", a.trustedAPIs(), profile.APIURL)
+	trust, err := a.loginTrust(profile)
+	if err != nil {
+		return err
 	}
 	if !a.interactive() {
 		return fmt.Errorf("browser login needs an interactive terminal; in CI set %s or run `convai auth login --method token --token-stdin`", credential.EnvironmentToken)
 	}
-	client, err := oauth.Discover(ctx, a.httpClient, issuer, a.now)
+	client, err := oauth.Discover(ctx, trust.httpClient, trust.issuer, a.now)
 	if err != nil {
 		return err
 	}
+	client = client.WithResource(trust.resource)
 	state, err := oauth.Random()
 	if err != nil {
 		return err
@@ -177,7 +183,7 @@ func (a *application) browserLogin(cmd *cobra.Command, base loginBase, profile c
 	if err != nil {
 		return err
 	}
-	callback, err := oauth.StartCallback(state, issuer, client.Metadata().IssuerInCallback)
+	callback, err := oauth.StartCallback(state, trust.issuer, client.Metadata().IssuerInCallback)
 	if err != nil {
 		return err
 	}
@@ -206,13 +212,15 @@ func (a *application) browserLogin(cmd *cobra.Command, base loginBase, profile c
 	}
 	revoke := func(ctx context.Context) error { return client.RevokeAll(ctx, tokens) }
 	session, err := credential.NewSession(tokens.AccessToken, credential.Session{
-		RefreshToken: tokens.RefreshToken,
-		ExpiresAt:    tokens.ExpiresAt,
-		Scopes:       tokens.Scopes,
-		Issuer:       issuer,
-		ClientID:     oauth.ClientID,
-		Audience:     oauth.Audience,
-		APIURL:       profile.APIURL,
+		RefreshToken:  tokens.RefreshToken,
+		ExpiresAt:     tokens.ExpiresAt,
+		Scopes:        tokens.Scopes,
+		Issuer:        trust.issuer,
+		ClientID:      oauth.ClientID,
+		Audience:      trust.audience,
+		APIURL:        profile.APIURL,
+		Resource:      trust.resource,
+		CAFingerprint: trust.caFingerprint,
 	})
 	if err != nil {
 		return a.revokeAfterFailure(ctx, err, revoke)
@@ -259,6 +267,11 @@ func (a *application) storeLogin(
 	if err := base.conflict(latest); err != nil {
 		return fail(err)
 	}
+	if value.Managed() {
+		if _, err := a.checkBinding(name, value, profile); err != nil {
+			return fail(err)
+		}
+	}
 	previous, previousErr := a.credentialStore.Get(name)
 	if previousErr != nil && !errors.Is(previousErr, credential.ErrNotFound) {
 		return fail(previousErr)
@@ -303,6 +316,11 @@ func (a *application) storeLogin(
 		if err := base.conflict(*cfg); err != nil {
 			return err
 		}
+		if value.Managed() {
+			if _, err := a.checkBinding(name, value, profile); err != nil {
+				return err
+			}
+		}
 		saved := cfg.Profiles[name]
 		saved.APIURL = profile.APIURL
 		saved.CredentialType = value.Type
@@ -336,7 +354,7 @@ func (a *application) verifyLogin(ctx context.Context, profile config.Profile, v
 	if value.Managed() && !slices.Contains(value.Session.Scopes, verificationScope) {
 		return nil
 	}
-	client, err := api.New(profile.APIURL, value, a.httpClient)
+	client, err := a.newAPIClient("login", profile, value)
 	if err != nil {
 		return err
 	}
@@ -401,11 +419,14 @@ func (a *application) authStatusCommand() *cobra.Command {
 				status["issuer"] = session.Issuer
 				status["client_id"] = session.ClientID
 				status["bound_api_url"] = session.APIURL
+				status["audience"] = session.Audience
+				status["resource"] = session.Resource
+				status["ca_fingerprint"] = session.CAFingerprint
 				status["scopes"] = session.Scopes
 				status["expires_at"] = session.ExpiresAt.UTC().Format(time.RFC3339)
 			}
 			if check {
-				client, err := api.New(profile.APIURL, resolved, a.httpClient)
+				client, err := a.newAPIClient(profileName, profile, resolved)
 				if err != nil {
 					return err
 				}
@@ -445,12 +466,22 @@ func (a *application) authLogoutCommand() *cobra.Command {
 		Long: "Logout revokes a browser login through Convai sign-in, then removes it from the OS keychain.\n" +
 			"If revocation fails, the credential is kept so logout can be retried; --local removes only\n" +
 			"the local copy. API keys, PATs, and imported tokens are removed locally; revoke them where\n" +
-			"they were issued.",
+			"they were issued. With --local --profile NAME, local cleanup does not load profile metadata.",
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			_, profileName, _, err := a.profile()
-			if err != nil {
-				return err
+			profileName := a.profileFlag
+			if local && cmd.Flags().Changed("profile") {
+				// Explicit local recovery addresses only the keychain namespace,
+				// even when obsolete metadata or a stored secret cannot be decoded.
+				if err := config.ValidateProfileName(profileName); err != nil {
+					return err
+				}
+			} else {
+				_, name, _, err := a.profile()
+				if err != nil {
+					return err
+				}
+				profileName = name
 			}
 			ctx := cmd.Context()
 			unlock, err := a.lockCredential(ctx, profileName)
@@ -458,28 +489,36 @@ func (a *application) authLogoutCommand() *cobra.Command {
 				return err
 			}
 			defer unlock()
+			if local {
+				err := a.credentialStore.Delete(profileName)
+				if errors.Is(err, credential.ErrNotFound) {
+					fmt.Fprintf(cmd.OutOrStdout(), "No stored credential for profile %s\n", profileName)
+					return nil
+				}
+				if err != nil {
+					return err
+				}
+				fmt.Fprintf(cmd.OutOrStdout(), "Removed local credential for profile %s\n", profileName)
+				fmt.Fprintln(a.stderr, "Warning: any browser login was not revoked; remote credentials may remain valid. Revoke them through their issuer.")
+				return nil
+			}
 			current, getErr := a.credentialStore.Get(profileName)
 			if errors.Is(getErr, credential.ErrNotFound) {
 				fmt.Fprintf(cmd.OutOrStdout(), "No stored credential for profile %s\n", profileName)
 				return nil
 			}
-			if !local {
-				if getErr != nil {
-					return fmt.Errorf("%w; run `convai auth logout --local` to remove it without server revocation", getErr)
-				}
-				if current.Managed() {
-					if err := a.revokeSession(ctx, profileName, current); err != nil {
-						return fmt.Errorf("revoke browser login for profile %s: %w; the local credential was kept so logout can be retried, or run `convai auth logout --local` to remove only the local copy", profileName, err)
-					}
+			if getErr != nil {
+				return fmt.Errorf("%w; run `convai auth logout --local --profile %s` to remove it without server revocation", getErr, profileName)
+			}
+			if current.Managed() {
+				if err := a.revokeSession(ctx, profileName, current); err != nil {
+					return fmt.Errorf("revoke browser login for profile %s: %w; the local credential was kept so logout can be retried, or run `convai auth logout --local --profile %s` to remove only the local copy", profileName, err, profileName)
 				}
 			}
 			if err := a.credentialStore.Delete(profileName); err != nil && !errors.Is(err, credential.ErrNotFound) {
 				return err
 			}
 			switch {
-			case local && (getErr != nil || current.Managed()):
-				fmt.Fprintf(cmd.OutOrStdout(), "Removed local credential for profile %s\n", profileName)
-				fmt.Fprintln(a.stderr, "Warning: any browser login was not revoked and stays valid until it expires.")
 			case current.Managed():
 				fmt.Fprintf(cmd.OutOrStdout(), "Revoked browser login and removed credential for profile %s\n", profileName)
 			default:
@@ -500,28 +539,37 @@ func (a *application) credentialFor(ctx context.Context, name string, profile co
 	if err != nil || !resolved.Managed() {
 		return resolved, source, err
 	}
-	if err := a.checkBinding(name, resolved, profile.APIURL); err != nil {
+	if _, err := a.checkBinding(name, resolved, profile); err != nil {
 		return credential.Credential{}, "", err
 	}
 	if !a.needsRefresh(resolved) {
 		return resolved, source, nil
 	}
-	refreshed, err := a.refresh(ctx, name, profile.APIURL)
+	refreshed, err := a.refresh(ctx, name, profile)
 	return refreshed, source, err
 }
 
 // checkBinding prevents a stored browser login from being forwarded to any API
 // origin, issuer, client, or audience other than the one it was issued for.
-func (a *application) checkBinding(name string, value credential.Credential, apiURL string) error {
+func (a *application) checkBinding(name string, value credential.Credential, profile config.Profile) (loginTrust, error) {
+	apiURL, err := config.NormalizeAPIURL(profile.APIURL)
+	if err != nil {
+		return loginTrust{}, err
+	}
+	profile.APIURL = apiURL
 	session := value.Session
-	if session.APIURL != apiURL {
-		return fmt.Errorf("the browser login for profile %s was issued for %s, not %s; run `convai auth login --profile %s` for this API", name, session.APIURL, apiURL, name)
+	if session.APIURL != profile.APIURL {
+		return loginTrust{}, fmt.Errorf("the browser login for profile %s was issued for %s, not %s; run `convai auth login --profile %s` for this API", name, session.APIURL, profile.APIURL, name)
 	}
-	issuer, trusted := oauth.IssuerFor(a.environments, apiURL)
-	if !trusted || session.Issuer != issuer || session.ClientID != oauth.ClientID || session.Audience != oauth.Audience {
-		return fmt.Errorf("the browser login for profile %s does not match this CLI's trusted sign-in configuration; run `convai auth login --profile %s`", name, name)
+	trust, err := a.loginTrust(profile)
+	if err != nil {
+		return loginTrust{}, err
 	}
-	return nil
+	if session.Issuer != trust.issuer || session.ClientID != oauth.ClientID || session.Audience != trust.audience ||
+		session.Resource != trust.resource || session.CAFingerprint != trust.caFingerprint {
+		return loginTrust{}, fmt.Errorf("the browser login for profile %s does not match this CLI's trusted sign-in configuration; run `convai auth login --profile %s`", name, name)
+	}
+	return trust, nil
 }
 
 func (a *application) needsRefresh(value credential.Credential) bool {
@@ -531,7 +579,7 @@ func (a *application) needsRefresh(value credential.Credential) bool {
 // refresh rotates the stored grant while holding the cross-process lock for
 // the keychain entry. It re-reads under the lock so a concurrent process's
 // rotation is reused instead of replaying the consumed refresh token.
-func (a *application) refresh(ctx context.Context, name, apiURL string) (credential.Credential, error) {
+func (a *application) refresh(ctx context.Context, name string, profile config.Profile) (credential.Credential, error) {
 	unlock, err := a.lockCredential(ctx, name)
 	if err != nil {
 		return credential.Credential{}, err
@@ -545,17 +593,26 @@ func (a *application) refresh(ctx context.Context, name, apiURL string) (credent
 		// Another process replaced the login with an imported credential.
 		return current, nil
 	}
-	if err := a.checkBinding(name, current, apiURL); err != nil {
+	cfg, err := a.configStore.Load()
+	if err != nil {
+		return credential.Credential{}, err
+	}
+	if saved, ok := cfg.Profiles[name]; !ok || !sameProfileTrust(saved, profile) {
+		return credential.Credential{}, errors.New("profile trust changed before refresh; log in again")
+	}
+	trust, err := a.checkBinding(name, current, profile)
+	if err != nil {
 		return credential.Credential{}, err
 	}
 	if !a.needsRefresh(current) {
 		return current, nil
 	}
 	session := current.Session
-	client, err := oauth.Discover(ctx, a.httpClient, session.Issuer, a.now)
+	client, err := oauth.Discover(ctx, trust.httpClient, session.Issuer, a.now)
 	if err != nil {
 		return credential.Credential{}, fmt.Errorf("refresh browser login for profile %s: %w", name, err)
 	}
+	client = client.WithResource(trust.resource)
 	tokens, err := client.Refresh(ctx, session.RefreshToken, session.Scopes)
 	if err != nil {
 		if oauth.InvalidGrant(err) || errors.Is(err, oauth.ErrInvalidResponse) {
@@ -572,16 +629,18 @@ func (a *application) refresh(ctx context.Context, name, apiURL string) (credent
 		return credential.Credential{}, fmt.Errorf("refresh browser login for profile %s: %w; it was not retried, and if the next command reports that the login is no longer valid, run `convai auth login --profile %s`", name, err, name)
 	}
 	next, err := credential.NewSession(tokens.AccessToken, credential.Session{
-		RefreshToken: tokens.RefreshToken,
-		ExpiresAt:    tokens.ExpiresAt,
-		Scopes:       tokens.Scopes,
-		Issuer:       session.Issuer,
-		ClientID:     session.ClientID,
-		Audience:     session.Audience,
-		APIURL:       session.APIURL,
+		RefreshToken:  tokens.RefreshToken,
+		ExpiresAt:     tokens.ExpiresAt,
+		Scopes:        tokens.Scopes,
+		Issuer:        session.Issuer,
+		ClientID:      session.ClientID,
+		Audience:      session.Audience,
+		APIURL:        session.APIURL,
+		Resource:      session.Resource,
+		CAFingerprint: session.CAFingerprint,
 	})
 	if err == nil {
-		err = a.credentialStore.Set(name, next)
+		err = a.saveRefreshed(ctx, name, profile, next)
 	}
 	if err != nil {
 		// The previous refresh token is consumed. Revoke the unsaved pair and
@@ -604,10 +663,23 @@ func (a *application) refresh(ctx context.Context, name, apiURL string) (credent
 // Its refresh token is sent only to the issuer trusted for its bound API.
 func (a *application) revokeSession(ctx context.Context, name string, value credential.Credential) error {
 	session := value.Session
-	if err := a.checkBinding(name, value, session.APIURL); err != nil {
+	cfg, err := a.configStore.Load()
+	if err != nil {
+		return err
+	}
+	profile, ok := cfg.Profiles[name]
+	if !ok {
+		return errors.New("profile was removed; use `convai auth logout --local`")
+	}
+	profile.APIURL, err = config.NormalizeAPIURL(profile.APIURL)
+	if err != nil {
+		return err
+	}
+	trust, err := a.checkBinding(name, value, profile)
+	if err != nil {
 		return fmt.Errorf("%w; it cannot be revoked by this CLI, so use `convai auth logout --local` to remove it", err)
 	}
-	client, err := oauth.Discover(ctx, a.httpClient, session.Issuer, a.now)
+	client, err := oauth.Discover(ctx, trust.httpClient, session.Issuer, a.now)
 	if err != nil {
 		return err
 	}

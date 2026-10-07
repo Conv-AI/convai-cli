@@ -78,6 +78,15 @@ type Client struct {
 	http     *http.Client
 	metadata Metadata
 	now      func() time.Time
+	resource string
+}
+
+// WithResource binds every authorization and token grant to an explicitly
+// approved RFC 8707 resource. SaaS keeps its legacy default-audience behavior.
+func (c *Client) WithResource(resource string) *Client {
+	copy := *c
+	copy.resource = resource
+	return &copy
 }
 
 // NewHTTPClient copies a base client and disables redirects. OAuth requests
@@ -155,8 +164,8 @@ func sameOriginEndpoint(issuer *url.URL, raw string) bool {
 func (c *Client) Metadata() Metadata { return c.metadata }
 
 // AuthorizationURL builds the browser URL. It carries the PKCE challenge and
-// state, never a credential. The optional resource parameter is omitted so
-// Auth issues its default audience.
+// state, never a credential. SaaS omits resource for its default audience;
+// custom profiles explicitly bind all grants to their approved resource URI.
 func (c *Client) AuthorizationURL(redirectURI, state, challenge string, scopes []string) string {
 	values := url.Values{
 		"response_type":         {"code"},
@@ -166,6 +175,9 @@ func (c *Client) AuthorizationURL(redirectURI, state, challenge string, scopes [
 		"state":                 {state},
 		"code_challenge":        {challenge},
 		"code_challenge_method": {"S256"},
+	}
+	if c.resource != "" {
+		values.Set("resource", c.resource)
 	}
 	return c.metadata.AuthorizationEndpoint + "?" + values.Encode()
 }
@@ -228,6 +240,9 @@ func (c *Client) revoke(ctx context.Context, refresh, access []string) error {
 }
 
 func (c *Client) token(ctx context.Context, form url.Values, requested []string) (Tokens, error) {
+	if c.resource != "" {
+		form.Set("resource", c.resource)
+	}
 	request, err := c.form(ctx, c.metadata.TokenEndpoint, form)
 	if err != nil {
 		return Tokens{}, err
@@ -252,6 +267,21 @@ func (c *Client) token(ctx context.Context, form url.Values, requested []string)
 	}
 	if err == nil {
 		tokens, issued, err = parseTokens(data, requested, issuedAt)
+		if err == nil {
+			// Tokens are opaque. Optional protocol assertions must agree with
+			// the approved mapping; only the resource owner can introspect the
+			// actual token audience and authorize the caller.
+			fields, _, _ := tokenFields(data)
+			for field, expected := range map[string]string{"iss": c.metadata.Issuer, "resource": c.resource} {
+				if raw, present := fields[field]; present {
+					var actual string
+					if jsonwire.Decode(raw, &actual) != nil || actual != expected {
+						err = fmt.Errorf("token response %s does not match the trusted mapping", field)
+						break
+					}
+				}
+			}
+		}
 		if err == nil {
 			return tokens, nil
 		}

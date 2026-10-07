@@ -77,28 +77,34 @@ convai auth login
   path, the exact `Host`, one GET, and a 256-bit `state`. PKCE S256 is
   mandatory and there is no client secret. The Codex and MCP client identities
   are not reused.
-- Audience: requests omit the optional `resource` parameter, so Auth issues its
+- SaaS audience: requests omit the optional `resource` parameter, so Auth issues its
   default audience `convai-api`, which Character API already accepts through
   introspection. `convai-api` is not an RFC 8707 URI and is never sent.
-- Trust: only the staging, Preview, and production API URLs map to their
-  fixed issuers. API URLs from config or `--api-url` are compared in canonical
-  form (lower-case host, no trailing slash or scheme-default port). Discovery must return that exact issuer, S256 support, and
+- Trust: staging, Preview, and production API URLs retain their
+  fixed issuers. Custom profiles require an operator-approved API-origin,
+  issuer and resource mapping imported together; they cannot replace SaaS
+  mappings. API URLs from config or `--api-url` are compared in canonical
+  form (lower-case host, validated numeric ports in `1..65535` normalized to
+  decimal, no trailing slash or scheme-default port). Empty/invalid ports are
+  rejected before canonicalization. Discovery must return that exact issuer, S256 support, and
   token, authorization, and revocation endpoints on the issuer's HTTPS origin
   without userinfo, query, fragment, encoded path, or another port. OAuth
-  requests never follow redirects. Custom API URLs support token import only.
+  requests never follow redirects. Custom OAuth sends the approved resource on
+  authorization, code exchange and refresh. Origin-only issuers and same-origin
+  endpoints are deliberate portability limits of this slice.
 - Scopes: the default is the union of the owner-declared `requiredScopes` of
   the curated command catalog (`character:read character:write`), and
   `--read-only` keeps operations that need only read scopes. Auth's other
   scopes, such as `chat-history:read`, are never requested by default. Grants
   wider than the request are revoked and rejected; narrower grants are stored
   as granted.
-- Storage: access token, refresh token, expiry, scopes, and the non-secret
-  issuer, client, audience, and API URL binding form one versioned keychain
-  record. Raw entries from earlier versions still parse. Config files keep only
-  `credential_type: oauth_access_token`.
-- Binding: a session is used only when its API URL, issuer, client, and
-  audience match the effective profile and trusted mapping; otherwise the
-  command fails before any request and asks for a new login. `CONVAI_TOKEN`
+- Storage: access token, refresh token, expiry, scopes, and non-secret issuer,
+  client, audience, API URL, resource and configured-CA SHA256 binding form one
+  versioned keychain record. Raw entries from earlier versions still parse.
+  Config files keep profile metadata only, including explicit custom trust.
+- Binding: a session is used only when its API URL, issuer, client,
+  audience, resource and CA contents match the effective profile and trusted
+  mapping; otherwise the command fails before any request and asks for a new login. `CONVAI_TOKEN`
   still takes precedence and is never refreshed.
 - Refresh: every REST command, `auth status --check`, and `doctor` resolve
   credentials through one path, which rotates a session within two minutes of
@@ -112,8 +118,9 @@ convai auth login
   revoked. A transport failure whose outcome at Auth is unknown is reported
   and not retried in that command. An HTTP 401 from REST is returned as-is; no
   request, including a mutation, is replayed.
-- Configuration: `config set`, `config use`, and login's final metadata write
-  each do one read-modify-write under a second OS file lock beside the
+- Configuration: `config set`, `config use`, metadata-only `config import` and
+  login's final metadata write each do one read-modify-write under a second
+  OS file lock beside the
   configuration file. Its identity is the canonical file (absolute, directory
   and file symlinks resolved), and load, save, and lock all use that same
   path, so a symlinked configuration is updated in place rather than replaced.
@@ -124,14 +131,20 @@ convai auth login
   configuration: concurrent Workspace, other-profile, and current-profile
   changes are kept, and the profile becomes current only if no one else
   changed the current profile meanwhile. If the profile was removed or its
-  saved API URL changed during sign-in, login fails, revokes the new grant,
+  saved API URL or trust changed during sign-in, login fails, revokes the new grant,
   and writes nothing. Logout does not write the configuration. Lock order is
   fixed: the per-profile credential lock is taken first, the configuration
   lock inside it; configuration writers never take a credential lock.
+  Refresh also rechecks current trust under that lock before saving a rotated
+  grant; changed trust revokes the unsaved pair and discards the consumed one.
 - Logout and replacement: logout revokes the refresh and access tokens through
   RFC 7009 before deleting the record, after validating every binding; on
   failure the record is kept for retry, and `--local` removes only the local
-  copy. A new login revokes the previous browser grant before replacing it and
+  copy. Explicit `--local --profile NAME` validates the namespace name and takes
+  its credential lock, but does not load metadata, decode a stored record or
+  send HTTP. This bounded recovery does not repair invalid profile metadata;
+  ordinary commands and remote revocation still require validated profiles.
+  A new login revokes the previous browser grant before replacing it and
   keeps it if that revocation fails. Every failure after issuance (invalid
   response, verification 401, keychain or config failure) revokes the new grant
   and reports any rollback failure.
@@ -143,6 +156,13 @@ Activation requires the `convai-cli` client registration in each
 environment's Auth `OAUTH_CLIENTS` (staging first) and a passing staging
 customer E2E before Preview and production. The CLI does not provide a PAT
 management UI.
+
+Customer CA trust applies through one profile-local verified transport to REST,
+discovery, code exchange, refresh and revocation. It does not install browser
+trust or disable TLS checks. The explicit on-prem mapping does not implement
+portable Auth, introspection identity, issuer registration or AD eligibility.
+See [On-Prem Profiles](onprem-profiles.md) for protocol limits and activation
+dependencies and [Release Verification](releases.md) for archive/install gates.
 
 The staging test harness may obtain disposable OAuth credentials using the
 already-registered staging `codex` client and MCP resource, then inject the

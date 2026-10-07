@@ -89,6 +89,40 @@ configuration load, save, and lock through symlinked file and directory paths
 strict record decoding, and a child-process test proving the file lock blocks
 another process for the same profile, case-insensitively.
 
+## On-Prem Offline Coverage
+
+`TestOnPrem*` exercises production custom-profile selection (no injected trust
+mapping) against TLS Auth/REST mocks with an approved CA. Coverage includes
+strict profile import and readback; resource on authorization/code/refresh;
+login/read/doctor/status/rotation/logout; wrong origin/issuer/audience/resource/
+client/CA bindings; changed issuer/resource/CA configuration; trust changes
+during consent and refresh with unsaved-grant revocation; and Personal-key
+import through direct REST with raw ID/runtime/refresh token rejection.
+Transport tests reject unknown CAs, wrong hostnames, invalid/missing/oversized
+bundles, key material, insecure certificate settings and hostname substitution.
+Existing SaaS lifecycle/rotation/concurrency/secret-redaction tests remain intact.
+Equivalent profile origin spellings preserve canonically bound refresh sessions
+in SaaS and custom profiles. Port regressions cover numeric bounds/empty ports,
+IPv6, leading-zero default/custom ports, all three protected SaaS mappings,
+persisted import/config-set rejection and obsolete stored-record rejection.
+Explicit `auth logout --local --profile NAME` recovery tests cover malformed,
+missing and invalid metadata, malformed stored records, missing entries, invalid
+names and failed deletion, with no credential reads/writes or HTTP. Remote
+logout and ordinary profile commands still fail closed on invalid metadata.
+These tests use synthetic memory stores, not the real OS keychain or grants.
+`.gitattributes` preserves the checksum-pinned OpenAPI snapshot's LF
+bytes during Windows checkout; checksum validation is not relaxed.
+The loopback receipt regression proves no redirect/script/secret echo; it does
+not reproduce Brave policy or establish a browser root cause.
+
+`make release-check` and the native archive CI matrix verify all five archive
+checksums/contents and the installed native executable without publication.
+Archive regression tests reject duplicate/unexpected/traversing paths and
+invalid checksum manifests, and keep the temporary binary separate from Linux
+XDG configuration paths. These source and snapshot tests do not prove live
+on-prem OAuth, AD authorization, published artifact provenance, customer
+installation or both CPU architectures on every supported OS.
+
 ## Opt-In Staging E2E
 
 Inject `CONVAI_E2E_TOKEN` from a local secret store or CI secret, not a command

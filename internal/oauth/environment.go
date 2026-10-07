@@ -24,12 +24,11 @@ type Environment struct {
 	Issuer string
 }
 
-// Environments are the only API origins eligible for browser login. Custom API
-// URLs keep token import; the CLI never guesses an issuer for them or sends a
-// refresh token to an arbitrary host.
+// Environments are the immutable SaaS mappings. Custom profiles require an
+// explicit operator-approved mapping; the CLI never guesses an issuer.
 var Environments = []Environment{
 	{APIURL: config.StagingAPIURL, Issuer: "https://login-stg.convai.com"},
-	{APIURL: "https://api2-preview.convai.com", Issuer: "https://login-preview.convai.com"},
+	{APIURL: config.PreviewAPIURL, Issuer: "https://login-preview.convai.com"},
 	{APIURL: config.DefaultAPIURL, Issuer: "https://login.convai.com"},
 }
 

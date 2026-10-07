@@ -166,7 +166,7 @@ func (a *application) rootCommand() *cobra.Command {
 
 func (a *application) configCommand() *cobra.Command {
 	command := &cobra.Command{Use: "config", Short: "Manage CLI profiles"}
-	command.AddCommand(a.configGetCommand(), a.configUseCommand(), a.configSetCommand())
+	command.AddCommand(a.configGetCommand(), a.configUseCommand(), a.configSetCommand(), a.configImportCommand())
 	return command
 }
 
@@ -185,6 +185,8 @@ func (a *application) configGetCommand() *cobra.Command {
 				"api_url":         profile.APIURL,
 				"credential_type": profile.CredentialType,
 				"workspace_id":    profile.WorkspaceID,
+				"oauth":           profile.OAuth,
+				"ca_bundle":       profile.CABundle,
 			}
 			format, err := output.Parse(a.outputFlag)
 			if err != nil {
@@ -192,6 +194,12 @@ func (a *application) configGetCommand() *cobra.Command {
 			}
 			if format == output.Table {
 				fmt.Fprintf(cmd.OutOrStdout(), "Profile: %s\nAPI URL: %s\nWorkspace: %s\nCredential type: %s\n", name, profile.APIURL, workspaceLabel(profile.WorkspaceID), profile.CredentialType)
+				if profile.OAuth != (config.OAuthTrust{}) {
+					fmt.Fprintf(cmd.OutOrStdout(), "OAuth issuer: %s\nOAuth resource: %s\n", profile.OAuth.Issuer, profile.OAuth.Resource)
+				}
+				if profile.CABundle != "" {
+					fmt.Fprintf(cmd.OutOrStdout(), "CA bundle: %s\n", profile.CABundle)
+				}
 				return nil
 			}
 			return output.Structured(cmd.OutOrStdout(), format, value)
@@ -429,7 +437,7 @@ func (a *application) doctorCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			client, err := api.New(profile.APIURL, resolved, a.httpClient)
+			client, err := a.newAPIClient(name, profile, resolved)
 			if err != nil {
 				return err
 			}
@@ -498,6 +506,9 @@ func (a *application) profile() (config.Config, string, config.Profile, error) {
 	if err := config.ValidateWorkspaceID(profile.WorkspaceID); err != nil {
 		return config.Config{}, "", config.Profile{}, err
 	}
+	if err := config.ValidateTrust(profile); err != nil {
+		return config.Config{}, "", config.Profile{}, err
+	}
 	return cfg, name, profile, nil
 }
 
@@ -542,7 +553,7 @@ func (a *application) apiClient(ctx context.Context) (*api.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	client, err := api.New(profile.APIURL, resolved, a.httpClient)
+	client, err := a.newAPIClient(name, profile, resolved)
 	if err != nil {
 		return nil, err
 	}
