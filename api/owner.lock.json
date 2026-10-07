@@ -1,6 +1,6 @@
 {
   "repository": "Conv-AI/convai-character-apis",
-  "commit": "610418a1b3ec3a1b3d60fa24a9300bbeb753890b",
+  "commit": "525d4fa9efa59199ffd56bee07dc8a4d17ec745c",
   "path": "contracts/openapi/character-mcp.v1.json",
-  "sha256": "ea7829563ef611c7bf3f86fec94cb26d2da953932cb23e8fff8035b4c008b5ad"
+  "sha256": "55ce52eb98ffe4751046d5a340dcbadc1f6be96b267c46fbdf43f464521c1be1"
 }

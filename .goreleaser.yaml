@@ -48,3 +48,5 @@ changelog:
 
 release:
   prerelease: auto
+  extra_files:
+    - glob: ./dist/metadata.json
