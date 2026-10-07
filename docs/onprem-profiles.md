@@ -75,6 +75,38 @@ rotating refresh grants, scoped opaque Convai `cvoat_`/`cvort_` credentials, and
 RFC 7009 revocation. Browser CA trust must be provisioned separately; a CLI CA
 file does not change browser certificate trust.
 
+Explicit ports must be numeric and in `1..65535`. Empty, zero, malformed and
+out-of-range ports are rejected before origin canonicalization. IPv6 addresses
+must use valid bracketed authorities. API origins normalize case and numeric
+ports (for example `:08443` becomes `:8443`, and HTTPS `:0443` is omitted);
+HTTP loopback `:0080` is also omitted. Protected SaaS mappings cannot be replaced
+through alternate port spellings. Approved OAuth mapping fields must already
+use their canonical origins; they are never silently rewritten.
+
+Tradeoff: older noncanonical origin-bound credentials or trust profiles may be
+rejected and need owner re-review, corrected metadata and re-login. The
+CLI does not silently rebind credentials or grandfather a custom issuer on a
+protected SaaS origin. Healthy canonical profiles are unchanged. No credential
+is changed by metadata import; invalid trust may also prevent remote logout.
+For local cleanup even with invalid/malformed metadata or an obsolete stored
+record, explicitly run `convai auth logout --local --profile NAME`. This validates
+the name and deletes only that OS account's named credential under its existing
+lock, without loading profiles, decoding the credential or sending HTTP. It
+does not change metadata or environment credentials, and does not revoke the
+server grant; arrange remote revocation through the authorized owner. Remote
+logout still requires valid metadata and the original approved binding.
+
+`config import`, `config set` and ordinary profile selection validate the entire
+existing configuration. Re-import cannot repair an already-invalid file. Close
+other CLI processes, back up the non-secret configuration at the OS user config
+directory's `convai/config.yaml`, and have the authorized owner correct/remove
+invalid profiles while preserving other approved profiles and a valid
+`current_profile`. Review origin/issuer/resource/CA approval again, then import
+only the corrected canonical profile and re-login. Do not copy/rewrite old
+credential records, weaken validation or restore the unapproved SaaS mapping.
+Local cleanup does not perform this metadata recovery, and neither recovery nor
+re-import is server revocation.
+
 The managed keychain record binds API origin, exact issuer, client, resource,
 audience and configured CA file contents (SHA256). Changed bindings fail before
 access, refresh or revocation secrets are sent. Discovery cannot substitute an
@@ -86,7 +118,7 @@ audience/scope enforcement and eligibility remain backend duties.
 Log out before changing trust while the old approved mapping/CA is available.
 Import does not change credentials or revoke old grants. Restore the approved
 old profile to revoke an existing session, or explicitly use `auth logout
---local` and arrange server-side revocation through the authorized owner.
+--local --profile NAME` and arrange server-side revocation through the authorized owner.
 Changing even CA file contents requires re-login for managed OAuth; system trust
 remains controlled by the OS administrator. Trust changes during consent or
 refresh reject persistence and revoke newly issued pairs using the original
@@ -97,6 +129,12 @@ SaaS staging/Preview/Production mappings remain unchanged: fixed Convai issuers,
 omitted `resource`, and the legacy `convai-api` audience.
 
 ## Dependencies And Activation Gates
+
+Authority: [On-Prem MCP and CLI delivery](https://convaixr.atlassian.net/wiki/spaces/Engineerin/pages/568229892)
+and [AD RFC](https://convaixr.atlassian.net/wiki/spaces/Engineerin/pages/556728326).
+The [portable Auth source foundation](https://github.com/Conv-AI/ConvAI-Authentication/pull/103)
+is deliberately unwired; it is not an enabled HTTP OAuth service or a verified
+SSO/AD-policy adapter.
 
 Local mocks prove CLI protocol behavior only. They do not activate on-prem
 OAuth or certify a customer environment. Auth must provide reviewed portable

@@ -291,18 +291,22 @@ func NormalizeAPIURL(raw string) (string, error) {
 	if parsed.User != nil {
 		return "", errors.New("API URL must not contain credentials")
 	}
+	port, err := validateAuthority(parsed)
+	if err != nil {
+		return "", err
+	}
 	if parsed.RawQuery != "" || parsed.ForceQuery || parsed.Fragment != "" {
 		return "", errors.New("API URL must not contain a query string or fragment")
 	}
 	if parsed.Scheme != "https" && !(parsed.Scheme == "http" && isLoopback(parsed.Hostname())) {
 		return "", errors.New("API URL must use HTTPS unless it targets loopback")
 	}
-	if parsed.Path != "" && parsed.Path != "/" {
+	if parsed.RawPath != "" || (parsed.Path != "" && parsed.Path != "/") {
 		return "", errors.New("API URL must not contain a path")
 	}
 	// Canonical origin: lower-case host and no scheme-default port, so trust
 	// lookup and credential binding can compare equivalent URLs exactly.
-	host, port := strings.ToLower(parsed.Hostname()), parsed.Port()
+	host := strings.ToLower(parsed.Hostname())
 	if (parsed.Scheme == "https" && port == "443") || (parsed.Scheme == "http" && port == "80") {
 		port = ""
 	}

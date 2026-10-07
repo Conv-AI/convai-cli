@@ -466,12 +466,22 @@ func (a *application) authLogoutCommand() *cobra.Command {
 		Long: "Logout revokes a browser login through Convai sign-in, then removes it from the OS keychain.\n" +
 			"If revocation fails, the credential is kept so logout can be retried; --local removes only\n" +
 			"the local copy. API keys, PATs, and imported tokens are removed locally; revoke them where\n" +
-			"they were issued.",
+			"they were issued. With --local --profile NAME, local cleanup does not load profile metadata.",
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			_, profileName, _, err := a.profile()
-			if err != nil {
-				return err
+			profileName := a.profileFlag
+			if local && cmd.Flags().Changed("profile") {
+				// Explicit local recovery addresses only the keychain namespace,
+				// even when obsolete metadata or a stored secret cannot be decoded.
+				if err := config.ValidateProfileName(profileName); err != nil {
+					return err
+				}
+			} else {
+				_, name, _, err := a.profile()
+				if err != nil {
+					return err
+				}
+				profileName = name
 			}
 			ctx := cmd.Context()
 			unlock, err := a.lockCredential(ctx, profileName)
@@ -479,28 +489,36 @@ func (a *application) authLogoutCommand() *cobra.Command {
 				return err
 			}
 			defer unlock()
+			if local {
+				err := a.credentialStore.Delete(profileName)
+				if errors.Is(err, credential.ErrNotFound) {
+					fmt.Fprintf(cmd.OutOrStdout(), "No stored credential for profile %s\n", profileName)
+					return nil
+				}
+				if err != nil {
+					return err
+				}
+				fmt.Fprintf(cmd.OutOrStdout(), "Removed local credential for profile %s\n", profileName)
+				fmt.Fprintln(a.stderr, "Warning: any browser login was not revoked; remote credentials may remain valid. Revoke them through their issuer.")
+				return nil
+			}
 			current, getErr := a.credentialStore.Get(profileName)
 			if errors.Is(getErr, credential.ErrNotFound) {
 				fmt.Fprintf(cmd.OutOrStdout(), "No stored credential for profile %s\n", profileName)
 				return nil
 			}
-			if !local {
-				if getErr != nil {
-					return fmt.Errorf("%w; run `convai auth logout --local` to remove it without server revocation", getErr)
-				}
-				if current.Managed() {
-					if err := a.revokeSession(ctx, profileName, current); err != nil {
-						return fmt.Errorf("revoke browser login for profile %s: %w; the local credential was kept so logout can be retried, or run `convai auth logout --local` to remove only the local copy", profileName, err)
-					}
+			if getErr != nil {
+				return fmt.Errorf("%w; run `convai auth logout --local --profile %s` to remove it without server revocation", getErr, profileName)
+			}
+			if current.Managed() {
+				if err := a.revokeSession(ctx, profileName, current); err != nil {
+					return fmt.Errorf("revoke browser login for profile %s: %w; the local credential was kept so logout can be retried, or run `convai auth logout --local --profile %s` to remove only the local copy", profileName, err, profileName)
 				}
 			}
 			if err := a.credentialStore.Delete(profileName); err != nil && !errors.Is(err, credential.ErrNotFound) {
 				return err
 			}
 			switch {
-			case local && (getErr != nil || current.Managed()):
-				fmt.Fprintf(cmd.OutOrStdout(), "Removed local credential for profile %s\n", profileName)
-				fmt.Fprintln(a.stderr, "Warning: any browser login was not revoked and stays valid until it expires.")
 			case current.Managed():
 				fmt.Fprintf(cmd.OutOrStdout(), "Revoked browser login and removed credential for profile %s\n", profileName)
 			default:

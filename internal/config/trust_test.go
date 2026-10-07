@@ -69,3 +69,66 @@ func TestProfileImportIsStrictAndNonSecret(t *testing.T) {
 		t.Fatalf("round trip = %+v, %v", loaded, err)
 	}
 }
+
+func TestCustomTrustPortBoundariesAndProfileImport(t *testing.T) {
+	for _, port := range []string{"", ":8443", ":1", ":65535"} {
+		for _, host := range []string{"api.customer.test", "[2001:db8::1]"} {
+			origin := "https://" + host + port
+			p := Profile{APIURL: origin, CredentialType: CredentialAPIKey,
+				OAuth: OAuthTrust{APIURL: origin, Issuer: origin, Resource: origin + "/authoring"}}
+			if err := ValidateTrust(p); err != nil {
+				t.Fatalf("valid explicit origin %q rejected: %v", origin, err)
+			}
+		}
+	}
+	for _, origin := range []string{
+		"https://api.customer.test:0", "https://api.customer.test:65536", "https://api.customer.test:",
+		"https://api.customer.test:99999999999999999999999", "https://api.customer.test:abc",
+		"https://api.customer.test:-1", "https://api.customer.test:+443",
+		"https://[::1]:0", "https://[::1]:65536", "https://[::1]:", "https://::1",
+		"https://api.customer.test?", "https://api.customer.test#", "https://api.customer.test/%2f",
+	} {
+		for _, field := range []string{"api", "issuer", "resource"} {
+			t.Run(field+"/"+origin, func(t *testing.T) {
+				p := Profile{APIURL: "https://api.customer.test", CredentialType: CredentialAPIKey,
+					OAuth: OAuthTrust{APIURL: "https://api.customer.test", Issuer: "https://login.customer.test", Resource: "https://api.customer.test/authoring"}}
+				switch field {
+				case "api":
+					p.APIURL, p.OAuth.APIURL = origin, origin
+				case "issuer":
+					p.OAuth.Issuer = origin
+				case "resource":
+					p.OAuth.Resource = origin
+				}
+				if err := ValidateTrust(p); err == nil {
+					t.Fatal("invalid authority accepted in actual trust validation")
+				}
+				data := "api_url: " + p.APIURL + "\noauth:\n  api_url: " + p.OAuth.APIURL + "\n  issuer: " + p.OAuth.Issuer + "\n  resource: " + p.OAuth.Resource + "\n"
+				if _, err := DecodeProfile([]byte(data)); err == nil {
+					t.Fatal("invalid authority accepted by profile import")
+				}
+				if field == "api" {
+					if _, err := DecodeProfile([]byte("api_url: " + origin + "\n")); err == nil {
+						t.Fatal("API-only import normalized away an invalid authority")
+					}
+				}
+			})
+		}
+	}
+}
+
+func TestZeroPaddedPortsCannotReplaceFixedSaaSMappings(t *testing.T) {
+	for _, api := range []string{DefaultAPIURL, StagingAPIURL, PreviewAPIURL} {
+		for _, port := range []string{":0443", ":000443"} {
+			raw := api + port
+			p := Profile{APIURL: raw, CredentialType: CredentialAPIKey,
+				OAuth: OAuthTrust{APIURL: raw, Issuer: "https://login.customer.test", Resource: "https://api.customer.test/authoring"}}
+			if err := ValidateTrust(p); err == nil {
+				t.Errorf("physical SaaS origin %q accepted custom issuer", raw)
+			}
+			if got, err := NormalizeAPIURL(raw); err != nil || got != api {
+				t.Errorf("physical SaaS origin %q = %q, %v; want %q", raw, got, err, api)
+			}
+		}
+	}
+}

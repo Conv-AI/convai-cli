@@ -101,8 +101,16 @@ import through direct REST with raw ID/runtime/refresh token rejection.
 Transport tests reject unknown CAs, wrong hostnames, invalid/missing/oversized
 bundles, key material, insecure certificate settings and hostname substitution.
 Existing SaaS lifecycle/rotation/concurrency/secret-redaction tests remain intact.
-Equivalent stored origin spellings preserve refresh sessions in SaaS and custom
-profiles. `.gitattributes` preserves the checksum-pinned OpenAPI snapshot's LF
+Equivalent profile origin spellings preserve canonically bound refresh sessions
+in SaaS and custom profiles. Port regressions cover numeric bounds/empty ports,
+IPv6, leading-zero default/custom ports, all three protected SaaS mappings,
+persisted import/config-set rejection and obsolete stored-record rejection.
+Explicit `auth logout --local --profile NAME` recovery tests cover malformed,
+missing and invalid metadata, malformed stored records, missing entries, invalid
+names and failed deletion, with no credential reads/writes or HTTP. Remote
+logout and ordinary profile commands still fail closed on invalid metadata.
+These tests use synthetic memory stores, not the real OS keychain or grants.
+`.gitattributes` preserves the checksum-pinned OpenAPI snapshot's LF
 bytes during Windows checkout; checksum validation is not relaxed.
 The loopback receipt regression proves no redirect/script/secret echo; it does
 not reproduce Brave policy or establish a browser root cause.

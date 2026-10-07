@@ -133,6 +133,24 @@ func TestKeyringRoundTripsCustomResourceAndCAWithoutChangingSaaSRecords(t *testi
 	}
 }
 
+func TestStoredSessionNoncanonicalAuthoritiesAreNotRebound(t *testing.T) {
+	encoded := mustEncode(t, testSession(t))
+	for _, origin := range []string{
+		"https://api2-stg.convai.com:0443", "https://api.customer.test:08443",
+		"https://api.customer.test:0", "https://api.customer.test:65536", "https://api.customer.test:",
+	} {
+		raw := strings.Replace(encoded, `"api_url":"https://api2-stg.convai.com"`, `"api_url":"`+origin+`"`, 1)
+		if _, err := decodeStored(raw); err == nil {
+			t.Fatal("old stored binding was silently rebound")
+		} else if strings.Contains(err.Error(), sessionAccess) || strings.Contains(err.Error(), sessionRefresh) {
+			t.Fatal("binding error exposed credential material")
+		}
+	}
+	if got, err := decodeStored(encoded); err != nil || got.Session.APIURL != "https://api2-stg.convai.com" {
+		t.Fatal("healthy canonical stored session changed", err)
+	}
+}
+
 func TestParseRejectsSerializedSessionsAndEmbeddedRefreshTokens(t *testing.T) {
 	t.Parallel()
 	compact := testSession(t)

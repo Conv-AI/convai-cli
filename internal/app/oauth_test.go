@@ -606,13 +606,16 @@ func TestEquivalentStoredAPIURLUsesTrustedMappingAndBinding(t *testing.T) {
 func TestProductionAPIURLEquivalentsUseTrustedMapping(t *testing.T) {
 	t.Parallel()
 	for apiURL, trusted := range map[string]bool{
-		"https://api2.convai.com":             true,
-		"HTTPS://API2.CONVAI.COM/":            true,
-		"https://Api2-Stg.Convai.com:443":     true,
-		"https://api2-preview.convai.com:443": true,
-		"https://api2.convai.com:8443":        false,
-		"https://api2.convai.com.":            false,
-		"https://api2.convai.com.example.com": false,
+		"https://api2.convai.com":              true,
+		"HTTPS://API2.CONVAI.COM/":             true,
+		"https://Api2-Stg.Convai.com:443":      true,
+		"https://api2-preview.convai.com:443":  true,
+		"https://api2.convai.com:0443":         true,
+		"https://api2-stg.convai.com:000443":   true,
+		"https://api2-preview.convai.com:0443": true,
+		"https://api2.convai.com:8443":         false,
+		"https://api2.convai.com.":             false,
+		"https://api2.convai.com.example.com":  false,
 	} {
 		root, err := New(Options{
 			Stdin: strings.NewReader(""), Stdout: io.Discard, Stderr: io.Discard,

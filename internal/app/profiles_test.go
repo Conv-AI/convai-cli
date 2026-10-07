@@ -3,8 +3,10 @@ package app
 import (
 	"context"
 	"encoding/pem"
+	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -271,14 +273,18 @@ func TestOnPremConcurrentRefreshAndUntrustedCA(t *testing.T) {
 }
 
 func TestOAuthRefreshPreservesEquivalentStoredAPIOrigin(t *testing.T) {
-	for _, custom := range []bool{false, true} {
-		name := "SaaS"
-		if custom {
-			name = "custom"
-		}
-		t.Run(name, func(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		custom     bool
+		paddedPort bool
+	}{
+		{name: "SaaS"}, {name: "custom", custom: true},
+		{name: "SaaS padded port", paddedPort: true},
+		{name: "custom padded port", custom: true, paddedPort: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
 			var f *oauthFixture
-			if custom {
+			if tc.custom {
 				f = newOnPremFixture(t)
 			} else {
 				f = newOAuthFixture(t)
@@ -287,9 +293,19 @@ func TestOAuthRefreshPreservesEquivalentStoredAPIOrigin(t *testing.T) {
 				t.Fatal(err)
 			}
 			first, _ := f.store.stored("default")
+			var storedOrigin string
 			f.configs.edit(t, func(cfg *config.Config) {
 				p := cfg.Profiles["default"]
+				if tc.paddedPort {
+					parsed, err := url.Parse(p.APIURL)
+					if err != nil || parsed.Port() == "" {
+						t.Fatal("fixture requires an explicit port", err)
+					}
+					parsed.Host = net.JoinHostPort(parsed.Hostname(), "0"+parsed.Port())
+					p.APIURL = parsed.String()
+				}
 				p.APIURL += "/"
+				storedOrigin = p.APIURL
 				cfg.Profiles["default"] = p
 			})
 			f.advance(time.Hour)
@@ -303,7 +319,7 @@ func TestOAuthRefreshPreservesEquivalentStoredAPIOrigin(t *testing.T) {
 			if _, refresh := f.auth.counts(); refresh != 1 {
 				t.Fatalf("refresh count = %d", refresh)
 			}
-			if !strings.HasSuffix(f.configs.current(t).Profiles["default"].APIURL, "/") {
+			if f.configs.current(t).Profiles["default"].APIURL != storedOrigin {
 				t.Fatal("refresh rewrote profile metadata")
 			}
 			if _, _, err := f.exec("auth", "logout"); err != nil {

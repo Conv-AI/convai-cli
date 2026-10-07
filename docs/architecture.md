@@ -84,7 +84,9 @@ convai auth login
   fixed issuers. Custom profiles require an operator-approved API-origin,
   issuer and resource mapping imported together; they cannot replace SaaS
   mappings. API URLs from config or `--api-url` are compared in canonical
-  form (lower-case host, no trailing slash or scheme-default port). Discovery must return that exact issuer, S256 support, and
+  form (lower-case host, validated numeric ports in `1..65535` normalized to
+  decimal, no trailing slash or scheme-default port). Empty/invalid ports are
+  rejected before canonicalization. Discovery must return that exact issuer, S256 support, and
   token, authorization, and revocation endpoints on the issuer's HTTPS origin
   without userinfo, query, fragment, encoded path, or another port. OAuth
   requests never follow redirects. Custom OAuth sends the approved resource on
@@ -138,7 +140,11 @@ convai auth login
 - Logout and replacement: logout revokes the refresh and access tokens through
   RFC 7009 before deleting the record, after validating every binding; on
   failure the record is kept for retry, and `--local` removes only the local
-  copy. A new login revokes the previous browser grant before replacing it and
+  copy. Explicit `--local --profile NAME` validates the namespace name and takes
+  its credential lock, but does not load metadata, decode a stored record or
+  send HTTP. This bounded recovery does not repair invalid profile metadata;
+  ordinary commands and remote revocation still require validated profiles.
+  A new login revokes the previous browser grant before replacing it and
   keeps it if that revocation fails. Every failure after issuance (invalid
   response, verification 401, keychain or config failure) revokes the new grant
   and reports any rollback failure.

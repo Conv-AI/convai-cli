@@ -12,6 +12,10 @@ authorization, entitlements, validation, ownership, and writes.
 For explicit private API/OAuth mappings and customer CA setup, see
 [On-Prem Profiles](docs/onprem-profiles.md). Portable on-prem OAuth and backend
 eligibility enforcement are external dependencies, not activated by a profile.
+API origins reject invalid/empty ports before canonicalizing numeric port
+spellings; fixed SaaS mappings cannot be replaced through default-port aliases.
+The profile runbook covers owner-reviewed metadata recovery, explicit local
+cleanup and re-login limits for older noncanonical bindings.
 See [Release Verification](docs/releases.md) for local archive checks and
 separate publication/installation gates.
 
@@ -87,7 +91,9 @@ sign-in issuer:
 | `https://api2-preview.convai.com` | `https://login-preview.convai.com` |
 | `https://api2.convai.com` | `https://login.convai.com` |
 
-Other API URLs support token import only. By default the CLI requests the scopes
+Other API URLs support token import, or browser login only with the explicitly
+approved mapping and backend dependencies in [On-Prem Profiles](docs/onprem-profiles.md).
+By default the CLI requests the scopes
 that its commands use, `character:read character:write`. Narrow them with
 `--read-only` (`character:read`) or `--scopes character:read`; Convai sign-in may
 also grant fewer scopes than requested. The REST API enforces scopes, Workspace
