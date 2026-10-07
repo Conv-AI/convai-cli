@@ -2,11 +2,52 @@ package main
 
 import (
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 
 	"gopkg.in/yaml.v3"
 )
+
+func TestReleaseSBOMHasLeastPrivilegeArtifactDownloadPermissions(t *testing.T) {
+	data, err := os.ReadFile("../../.github/workflows/release.yml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var workflow struct {
+		Permissions map[string]string `yaml:"permissions"`
+		Jobs        map[string]struct {
+			Permissions map[string]string `yaml:"permissions"`
+			Steps       []struct {
+				Uses string         `yaml:"uses"`
+				With map[string]any `yaml:"with"`
+			} `yaml:"steps"`
+		} `yaml:"jobs"`
+	}
+	if err := yaml.Unmarshal(data, &workflow); err != nil {
+		t.Fatal(err)
+	}
+	job := workflow.Jobs["release"]
+	permissions := workflow.Permissions
+	if job.Permissions != nil {
+		permissions = job.Permissions
+	}
+	// Explicit GitHub permissions deny omitted scopes; the SBOM action downloads
+	// its Actions artifact before attaching it to the release.
+	want := map[string]string{
+		"actions": "read", "contents": "write",
+		"id-token": "write", "attestations": "write",
+	}
+	if !reflect.DeepEqual(permissions, want) {
+		t.Fatalf("release permissions = %v, want least-privilege scopes %v", permissions, want)
+	}
+	for _, step := range job.Steps {
+		if strings.HasPrefix(step.Uses, "anchore/sbom-action@") && step.With["upload-release-assets"] == true {
+			return
+		}
+	}
+	t.Fatal("release must continue publishing the SBOM; disabling it is not a permissions fix")
+}
 
 func TestReleasePublishesVerifierMetadataAndChecksOwnerBeforePublication(t *testing.T) {
 	data, err := os.ReadFile("../../.goreleaser.yaml")
