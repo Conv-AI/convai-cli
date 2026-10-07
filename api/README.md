@@ -3,13 +3,19 @@
 `character.openapi.json` is the pinned Character REST API contract used to
 generate the low-level Go client. It is copied byte-for-byte from Character API's
 reviewed `contracts/openapi/character-mcp.v1.json` at commit
-`610418a1b3ec3a1b3d60fa24a9300bbeb753890b`. `owner.lock.json` records the exact
+`525d4fa9efa59199ffd56bee07dc8a4d17ec745c`. `owner.lock.json` records the exact
 repository, commit, path, and SHA-256; loading the catalog verifies the checksum.
 
 `catalog.yaml` is the reviewed command catalog. It selects operations for the
 hand-authored CLI. The owner artifact supplies approval, scopes, safety, and
 wire-schema constraints; authorization remains in REST. The catalog selects 38
 operations plus four association commands mapped to `character_update`.
+
+This pin includes the optional character-version `note` from Character API
+#310. Requests may omit it or provide null; string notes have the owner's
+500-character limit. Responses from older owners without a note remain valid.
+The artifact also carries owner additions to chat history, but this refresh
+does not add commands or scopes to the curated CLI surface.
 
 Regenerate the client after updating the contract:
 

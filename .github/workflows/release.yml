@@ -31,6 +31,9 @@ jobs:
       - name: Scan reachable Go vulnerabilities
         run: make vuln
 
+      - name: Check upstream Character API contract drift
+        run: make contract-check
+
       - name: Preflight local release archives without publishing
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
@@ -67,4 +70,5 @@ jobs:
             dist/*.tar.gz
             dist/*.zip
             dist/checksums.txt
+            dist/metadata.json
             dist/convai-cli.spdx.json

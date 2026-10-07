@@ -670,8 +670,9 @@ type CharacterUpdate_MetadataFilter_AdditionalProperties struct {
 
 // CharacterVersionCreate defines model for CharacterVersionCreate.
 type CharacterVersionCreate struct {
-	MakeLatest *bool  `json:"make_latest,omitempty"`
-	Version    string `json:"version"`
+	MakeLatest *bool   `json:"make_latest,omitempty"`
+	Note       *string `json:"note,omitempty"`
+	Version    string  `json:"version"`
 }
 
 // CharacterVersionDeprecate defines model for CharacterVersionDeprecate.
@@ -730,6 +731,7 @@ type CharacterVersionItem struct {
 	DeprecatedAt *string `json:"deprecated_at"`
 	IsDeprecated bool    `json:"is_deprecated"`
 	IsLatest     bool    `json:"is_latest"`
+	Note         *string `json:"note,omitempty"`
 	RevisionId   string  `json:"revision_id"`
 	Version      string  `json:"version"`
 }

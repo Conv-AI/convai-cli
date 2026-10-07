@@ -21,6 +21,7 @@ remain proposals, not available installers.
 ```bash
 make verify
 make vuln
+make contract-check
 make release-check
 ```
 
@@ -38,7 +39,8 @@ Windows, alongside the existing five-target build matrix. Those runners certify
 their actual native architecture only; foreign archive checks do not prove
 execution on both CPU architectures.
 
-The release workflow runs an unpublished snapshot preflight, then its existing
+The release workflow checks the upstream owner contract and runs an unpublished
+snapshot preflight, then its existing
 tag-based GoReleaser publication, source SPDX SBOM upload and GitHub provenance
 attestation. Preflight does **not** prove actual published archive download or
 successful subsequent SBOM/attestation jobs. A source SBOM is not a per-binary
@@ -49,7 +51,17 @@ publishing credentials, tag or customer installation was added.
 
 Before customer handoff, verify reviewed tag/source SHA, green native/archive/
 contract CI, successful SBOM/provenance jobs, and actual downloaded archives
-and checksum manifest. Independently verify provenance against
+and checksum manifest. Download `metadata.json` as well; the release publishes
+and attests it so the same archive verifier can check the exact installed
+version after download, not just in a local build directory:
+
+```bash
+gh release download v0.1.0-beta.1 --repo Conv-AI/convai-cli --dir downloaded
+go run ./tools/verify-release -dir downloaded
+```
+
+Run the verifier from the reviewed source revision that built the release.
+Independently verify provenance against
 `Conv-AI/convai-cli` using the approved verification process; checksums alone do
 not establish publisher trust. Confirm OS/CPU/client versions and signing
 requirements.

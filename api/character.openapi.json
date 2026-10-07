@@ -2822,6 +2822,18 @@
             "title": "Make Latest",
             "type": "boolean"
           },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
           "version": {
             "title": "Version",
             "type": "string"
@@ -3051,6 +3063,17 @@
           "is_latest": {
             "title": "Is Latest",
             "type": "boolean"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
           },
           "revision_id": {
             "title": "Revision Id",
@@ -3499,6 +3522,21 @@
             "title": "Filter Type",
             "type": "string"
           },
+          "history_scope": {
+            "default": "revision",
+            "description": "revision preserves exact selector semantics. draft requires an explicit -draft reference and groups its current revision with saved revisions that have no released version tag. Unknown/legacy revision attribution is excluded.",
+            "enum": [
+              "revision",
+              "draft"
+            ],
+            "title": "History Scope",
+            "type": "string"
+          },
+          "include_identities": {
+            "default": false,
+            "title": "Include Identities",
+            "type": "boolean"
+          },
           "limit": {
             "default": 50,
             "maximum": 500.0,
@@ -3595,6 +3633,16 @@
               }
             ],
             "title": "Character Id"
+          },
+          "identity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HistoryIdentityProjection"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "interaction_count": {
             "title": "Interaction Count",
@@ -4306,6 +4354,73 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HistoryIdentity": {
+        "properties": {
+          "actor_user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor User Id"
+          },
+          "end_user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End User Id"
+          },
+          "kind": {
+            "enum": [
+              "self",
+              "convai_account",
+              "end_user",
+              "unknown"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "HistoryIdentity",
+        "type": "object"
+      },
+      "HistoryIdentityProjection": {
+        "properties": {
+          "identities": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryIdentity"
+            },
+            "title": "Identities",
+            "type": "array"
+          },
+          "relationship": {
+            "enum": [
+              "self",
+              "external",
+              "mixed",
+              "unknown"
+            ],
+            "title": "Relationship",
+            "type": "string"
+          }
+        },
+        "required": [
+          "relationship"
+        ],
+        "title": "HistoryIdentityProjection",
         "type": "object"
       },
       "LanguageItem": {
@@ -5626,6 +5741,22 @@
               "default": false,
               "title": "Include Tool Results",
               "type": "boolean"
+            }
+          },
+          {
+            "description": "revision preserves exact selector semantics. draft requires an explicit -draft reference and groups its current revision with saved revisions that have no released version tag. Unknown/legacy revision attribution is excluded.",
+            "in": "query",
+            "name": "history_scope",
+            "required": false,
+            "schema": {
+              "default": "revision",
+              "description": "revision preserves exact selector semantics. draft requires an explicit -draft reference and groups its current revision with saved revisions that have no released version tag. Unknown/legacy revision attribution is excluded.",
+              "enum": [
+                "revision",
+                "draft"
+              ],
+              "title": "History Scope",
+              "type": "string"
             }
           }
         ],
@@ -17047,7 +17178,7 @@
   },
   "x-convai-catalog-version": 1,
   "x-convai-provenance": {
-    "contentSha256": "ccb10ff5f3813011ef6a1a64c83439030aa212b57f48353570d3cc7fda26aeab",
+    "contentSha256": "59af676a41f04bf9b7fd2dc2d1e7a3c4bda6425a7d4ca79ed02481898bf0e946",
     "generatedBy": "uv run python tools/generate_mcp_openapi.py",
     "owner": "Conv-AI/convai-character-apis",
     "sourceBaseCommit": "13760e5253787e6386933b00eef93f6a736b6a09",
