@@ -32,6 +32,9 @@ jobs:
       - name: Scan reachable Go vulnerabilities
         run: make vuln
 
+      - name: Verify redistribution notices for all release targets
+        run: make license-check
+
       - name: Check upstream Character API contract drift
         run: make contract-check
 

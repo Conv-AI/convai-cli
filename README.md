@@ -7,7 +7,8 @@ safe developer workflows.
 The CLI does not call the hosted MCP server. REST remains authoritative for
 authorization, entitlements, validation, ownership, and writes.
 
-> Status: private pre-release. No public binary version or installer is published.
+Native beta binaries are published through [GitHub Releases](https://github.com/Conv-AI/convai-cli/releases).
+See [Release Verification](docs/releases.md) for supported platforms and verification.
 
 For explicit private API/OAuth mappings and customer CA setup, see
 [On-Prem Profiles](docs/onprem-profiles.md). Portable on-prem OAuth and backend
@@ -47,7 +48,14 @@ JSON stdin. Updates, deletes, promotion, draft replacement, and association
 changes require a terminal confirmation or `--yes`. No automatic mutation retry
 is performed.
 
-## Build
+## License
+
+Convai CLI is licensed under [Apache-2.0](LICENSE), with attribution in
+[NOTICE](NOTICE). Bundled dependencies retain their own licenses, reproduced
+in [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). This license applies to
+this CLI repository, not to separate Convai services or trademarks.
+
+## Build From Source
 
 Go 1.27.3 or newer:
 
