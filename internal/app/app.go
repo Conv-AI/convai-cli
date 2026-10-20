@@ -176,7 +176,7 @@ func (a *application) configGetCommand() *cobra.Command {
 		Short: "Show profile metadata",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			_, name, profile, err := a.profile()
+			_, name, profile, err := a.profile(cmd.Context())
 			if err != nil {
 				return err
 			}
@@ -429,7 +429,7 @@ func (a *application) doctorCommand() *cobra.Command {
 		Short: "Verify configuration, credential access, and Character API connectivity",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			_, name, profile, err := a.profile()
+			_, name, profile, err := a.profile(cmd.Context())
 			if err != nil {
 				return err
 			}
@@ -466,8 +466,8 @@ func (a *application) doctorCommand() *cobra.Command {
 	}
 }
 
-func (a *application) profile() (config.Config, string, config.Profile, error) {
-	cfg, err := a.configStore.Load()
+func (a *application) profile(ctx context.Context) (config.Config, string, config.Profile, error) {
+	cfg, err := a.readConfig(ctx)
 	if err != nil {
 		return config.Config{}, "", config.Profile{}, err
 	}
@@ -512,6 +512,20 @@ func (a *application) profile() (config.Config, string, config.Profile, error) {
 	return cfg, name, profile, nil
 }
 
+// Readers share the writers' lock: on Windows a read can otherwise overlap
+// replacement of config.yaml and fail with a sharing violation. Release it
+// before any user interaction, credential lock, or network request.
+func (a *application) readConfig(ctx context.Context) (config.Config, error) {
+	ctx, cancel := context.WithTimeout(ctx, lockTimeout)
+	defer cancel()
+	unlock, err := a.configStore.Lock(ctx)
+	if err != nil {
+		return config.Config{}, err
+	}
+	defer unlock()
+	return a.configStore.Load()
+}
+
 // updateConfig applies one read-modify-write under the cross-process
 // configuration lock, so concurrent CLI processes do not lose each other's
 // changes. Callers must not perform network calls or wait for the user inside
@@ -542,7 +556,7 @@ func workspaceLabel(value string) string {
 }
 
 func (a *application) apiClient(ctx context.Context) (*api.Client, error) {
-	_, name, profile, err := a.profile()
+	_, name, profile, err := a.profile(ctx)
 	if err != nil {
 		return nil, err
 	}

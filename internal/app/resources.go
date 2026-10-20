@@ -112,7 +112,7 @@ func (a *application) resourceCommand(definition contract.Command, operation con
 					query[parameter.Name] = parsed
 				}
 			}
-			_, _, profile, err := a.profile()
+			_, _, profile, err := a.profile(cmd.Context())
 			if err != nil {
 				return err
 			}
@@ -232,7 +232,7 @@ func (a *application) confirm(cmd *cobra.Command, yes bool, targets ...map[strin
 	if !ok || !term.IsTerminal(int(file.Fd())) {
 		return errors.New("destructive operation requires --yes when stdin is not a terminal")
 	}
-	_, name, profile, err := a.profile()
+	_, name, profile, err := a.profile(cmd.Context())
 	if err != nil {
 		return err
 	}
@@ -298,7 +298,7 @@ func (a *application) associationCommands(group, collection, idName string) *cob
 				body := map[string]any{collection: []any{item}}
 				query := map[string]any{"character_id": args[0]}
 				op, _ := a.spec.Find("character_update")
-				_, _, profile, err := a.profile()
+				_, _, profile, err := a.profile(cmd.Context())
 				if err != nil {
 					return err
 				}
