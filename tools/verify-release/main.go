@@ -31,6 +31,8 @@ var archiveNames = []string{
 
 const maxBinaryBytes = 100 << 20
 
+var legalFiles = []string{"LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.txt"}
+
 func main() {
 	dir := flag.String("dir", "dist", "local GoReleaser output directory")
 	flag.Parse()
@@ -176,11 +178,17 @@ func readArchive(name string, data []byte) ([]byte, error) {
 	seen := map[string]bool{}
 	var binary []byte
 	member := func(name string, regular bool, mode os.FileMode, reader io.Reader) error {
-		if seen[name] || !regular || (name != binaryName && name != "README.md" && name != "LICENSE" && name != "CHANGELOG.md") {
+		if seen[name] || !regular || (name != binaryName && name != "README.md" && name != "LICENSE" && name != "NOTICE" && name != "THIRD_PARTY_NOTICES.txt" && name != "CHANGELOG.md") {
 			return fmt.Errorf("unexpected archive member %q", name)
 		}
 		seen[name] = true
 		if name != binaryName {
+			if name == "LICENSE" || name == "NOTICE" || name == "THIRD_PARTY_NOTICES.txt" {
+				data, err := io.ReadAll(io.LimitReader(reader, (4<<20)+1))
+				if err != nil || len(bytes.TrimSpace(data)) == 0 || len(data) > 4<<20 {
+					return fmt.Errorf("invalid or empty archive legal file %s", name)
+				}
+			}
 			return nil
 		}
 		if binaryName == "convai" && mode&0o111 == 0 {
@@ -231,6 +239,11 @@ func readArchive(name string, data []byte) ([]byte, error) {
 	}
 	if binary == nil {
 		return nil, errors.New("archive has no executable")
+	}
+	for _, name := range legalFiles {
+		if !seen[name] {
+			return nil, fmt.Errorf("archive has no %s", name)
+		}
 	}
 	return binary, nil
 }

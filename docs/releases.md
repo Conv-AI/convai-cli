@@ -22,6 +22,7 @@ remain proposals, not available installers.
 make verify
 make vuln
 make contract-check
+make license-check
 make release-check
 ```
 
@@ -33,6 +34,17 @@ binaries. The native archive's executable is installed in a temporary prefix's
 import/readback and missing credentials. Environment/config and profile name
 are isolated. It does not log in, write native credentials or make an API request. Temporary installs
 are removed.
+
+Every archive must contain `LICENSE`, `NOTICE`, and `THIRD_PARTY_NOTICES.txt`.
+The last file is generated with pinned `google/go-licenses` v2.0.1 across every
+configured OS/CPU target, plus Go's license, patent grant and vendored notices.
+After dependency, Go toolchain or release-target changes, run
+`make license-notices`, review the complete notice diff, then run
+`make license-check`. CI and publication fail on stale notices. This collection
+is redistribution attribution, not a replacement for reviewing new license terms.
+The archive verifier rejects missing or empty legal files; preserve them when
+redistributing binaries. Releases predating this packaging change are not a
+licensed public handoff; preserve their immutable tags and publish a successor.
 
 CI runs native race tests and archive installation checks on macOS, Linux and
 Windows, alongside the existing five-target build matrix. Those runners certify
@@ -63,7 +75,7 @@ and attests it so the same archive verifier can check the exact installed
 version after download, not just in a local build directory:
 
 ```bash
-gh release download v0.1.0-beta.1 --repo Conv-AI/convai-cli --dir downloaded
+gh release download APPROVED_VERSION --repo Conv-AI/convai-cli --dir downloaded
 go run ./tools/verify-release -dir downloaded
 ```
 

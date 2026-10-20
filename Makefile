@@ -2,12 +2,22 @@ GO ?= go
 GOFMT ?= gofmt
 OAPI_CODEGEN_VERSION ?= v2.8.0
 GOVULNCHECK_VERSION ?= v1.6.0
+GO_LICENSES_VERSION ?= v2.0.1
 GORELEASER ?= goreleaser
 
-.PHONY: build test vet vuln fmt-check generate generate-check verify contract-check release-check e2e e2e-auth
+.PHONY: build test vet vuln fmt-check generate generate-check verify contract-check release-check e2e e2e-auth license-tool license-notices license-check
 
 build:
 	$(GO) build -trimpath -o bin/convai ./cmd/convai
+
+license-tool:
+	GOBIN="$(CURDIR)/.tools" $(GO) install github.com/google/go-licenses/v2@$(GO_LICENSES_VERSION)
+
+license-notices: license-tool
+	$(GO) run ./tools/license-notices
+
+license-check: license-tool
+	$(GO) run ./tools/license-notices --check
 
 test:
 	$(GO) test -race ./...

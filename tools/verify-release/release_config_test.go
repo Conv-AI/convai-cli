@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 
@@ -55,6 +56,9 @@ func TestReleasePublishesVerifierMetadataAndChecksOwnerBeforePublication(t *test
 		t.Fatal(err)
 	}
 	var release struct {
+		Archives []struct {
+			Files []string `yaml:"files"`
+		} `yaml:"archives"`
 		Release struct {
 			ExtraFiles []struct {
 				Glob string `yaml:"glob"`
@@ -63,6 +67,16 @@ func TestReleasePublishesVerifierMetadataAndChecksOwnerBeforePublication(t *test
 	}
 	if err := yaml.Unmarshal(data, &release); err != nil {
 		t.Fatal(err)
+	}
+	if len(release.Archives) == 0 {
+		t.Fatal("release must configure licensed archives")
+	}
+	for _, archive := range release.Archives {
+		for _, name := range legalFiles {
+			if !slices.Contains(archive.Files, name) {
+				t.Fatalf("archive configuration must include %s", name)
+			}
+		}
 	}
 	metadataPublished := false
 	for _, file := range release.Release.ExtraFiles {
@@ -89,11 +103,14 @@ func TestReleasePublishesVerifierMetadataAndChecksOwnerBeforePublication(t *test
 	if err := yaml.Unmarshal(data, &workflow); err != nil {
 		t.Fatal(err)
 	}
-	contractGate, publication := -1, -1
+	contractGate, licenseGate, publication := -1, -1, -1
 	metadataAttested := false
 	for index, step := range workflow.Jobs["release"].Steps {
 		if step.Run == "make contract-check" {
 			contractGate = index
+		}
+		if step.Run == "make license-check" {
+			licenseGate = index
 		}
 		if step.Name == "Publish GitHub release" {
 			publication = index
@@ -104,6 +121,9 @@ func TestReleasePublishesVerifierMetadataAndChecksOwnerBeforePublication(t *test
 	}
 	if contractGate < 0 || publication <= contractGate {
 		t.Fatal("release must check the reviewed owner contract before publication")
+	}
+	if licenseGate < 0 || publication <= licenseGate {
+		t.Fatal("release must check current redistribution notices before publication")
 	}
 	if !metadataAttested {
 		t.Fatal("published verifier metadata must have provenance")
