@@ -72,7 +72,7 @@ func (a *application) authLoginCommand() *cobra.Command {
 			default:
 				return errors.New("--method must be browser or token")
 			}
-			cfg, profileName, profile, err := a.profile()
+			cfg, profileName, profile, err := a.profile(cmd.Context())
 			if err != nil {
 				return err
 			}
@@ -260,7 +260,7 @@ func (a *application) storeLogin(
 	defer unlock()
 	// Detect a conflicting configuration change before touching the previous
 	// credential; the locked save below re-checks it authoritatively.
-	latest, err := a.configStore.Load()
+	latest, err := a.readConfig(ctx)
 	if err != nil {
 		return fail(err)
 	}
@@ -387,7 +387,7 @@ func (a *application) authStatusCommand() *cobra.Command {
 		Short: "Show credential metadata without exposing the credential",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			_, profileName, profile, err := a.profile()
+			_, profileName, profile, err := a.profile(cmd.Context())
 			if err != nil {
 				return err
 			}
@@ -477,7 +477,7 @@ func (a *application) authLogoutCommand() *cobra.Command {
 					return err
 				}
 			} else {
-				_, name, _, err := a.profile()
+				_, name, _, err := a.profile(cmd.Context())
 				if err != nil {
 					return err
 				}
@@ -593,7 +593,7 @@ func (a *application) refresh(ctx context.Context, name string, profile config.P
 		// Another process replaced the login with an imported credential.
 		return current, nil
 	}
-	cfg, err := a.configStore.Load()
+	cfg, err := a.readConfig(ctx)
 	if err != nil {
 		return credential.Credential{}, err
 	}
@@ -663,7 +663,7 @@ func (a *application) refresh(ctx context.Context, name string, profile config.P
 // Its refresh token is sent only to the issuer trusted for its bound API.
 func (a *application) revokeSession(ctx context.Context, name string, value credential.Credential) error {
 	session := value.Session
-	cfg, err := a.configStore.Load()
+	cfg, err := a.readConfig(ctx)
 	if err != nil {
 		return err
 	}

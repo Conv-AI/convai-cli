@@ -57,8 +57,9 @@ type Config struct {
 type Store interface {
 	Load() (Config, error)
 	Save(Config) error
-	// Lock serializes read-modify-write of this configuration across
-	// processes. Callers hold it only around local reads and saves.
+	// Lock serializes reads and read-modify-write across processes. Callers
+	// must hold it for Load and Save, including read-only snapshots, and
+	// release it before user interaction, credential locks, or network calls.
 	Lock(ctx context.Context) (unlock func(), err error)
 }
 

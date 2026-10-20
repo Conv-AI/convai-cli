@@ -70,7 +70,10 @@ binding and mismatched issuer, client, or audience records; logout failure and
 and `config use` commands (merged), conflicting API URL changes and profile
 removal (rejected and revoked), and concurrent configuration writers on
 different profiles alongside a login (no lost update), all on a temporary-file
-configuration with its real lock; `invalid_grant`, oversized, truncated, and unsaved refresh responses
+configuration with its real lock. Read-only snapshots use that lock as well,
+preventing Windows file-sharing races during replacement. Tests check lock
+ownership across login/refresh/logout, cancellation while another process holds
+the lock, and release before network/browser interaction. `invalid_grant`, oversized, truncated, and unsaved refresh responses
 with no later replay; an ambiguous transport failure; concurrent CLI instances
 refreshing once; `auth status --check` and `doctor` refresh; `CONVAI_TOKEN`
 precedence without refresh; and no mutation replay after HTTP 401. Every
