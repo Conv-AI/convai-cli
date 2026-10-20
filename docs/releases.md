@@ -47,6 +47,13 @@ successful subsequent SBOM/attestation jobs. A source SBOM is not a per-binary
 SBOM. macOS signing/notarization and Windows signing are not configured. No
 publishing credentials, tag or customer installation was added.
 
+The SBOM action downloads its uploaded Actions artifact before attaching it to
+the release, so the publishing job requires `actions: read` in addition to
+release and attestation permissions. A partially uploaded release is not ready
+for handoff if this step or provenance fails. Preserve its tag; publish a new
+approved version from reviewed source instead of moving the old tag or skipping
+the failed security gates.
+
 ## Authorized Release Acceptance
 
 Before customer handoff, verify reviewed tag/source SHA, green native/archive/
