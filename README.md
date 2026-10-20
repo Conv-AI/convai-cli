@@ -49,7 +49,7 @@ is performed.
 
 ## Build
 
-Go 1.27.0 or newer:
+Go 1.27.3 or newer:
 
 ```bash
 make generate
