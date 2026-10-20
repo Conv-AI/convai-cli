@@ -176,7 +176,7 @@ func (c *Client) CreateCharacter(
 	if err := validateTypedInput("character_create", nil, request); err != nil {
 		return characterapi.CharacterCreateResponse{}, c.safeError(err)
 	}
-	response, err := c.generated.CharacterCreate(ctx, request)
+	response, err := c.generated.CharacterCreate(ctx, nil, request)
 	if err != nil {
 		return characterapi.CharacterCreateResponse{}, c.safeError(transportError(err))
 	}

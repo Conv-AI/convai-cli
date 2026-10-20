@@ -1644,6 +1644,32 @@
             ],
             "title": "Allowed Moderation Filters"
           },
+          "avatarId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Select a visible avatar for the character and its owned Creator Experience. Requires a Creator Experience; Shared Workspace avatars must be public.",
+            "title": "Avatar Id"
+          },
+          "avatar_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Select a visible avatar for the character and its owned Creator Experience. Requires a Creator Experience; Shared Workspace avatars must be public.",
+            "title": "Avatar Id"
+          },
           "backstory": {
             "anyOf": [
               {
@@ -2368,6 +2394,28 @@
             ],
             "title": "Metadata Filter"
           },
+          "modelLink": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Link"
+          },
+          "modelPlaceholder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Placeholder"
+          },
           "modelType": {
             "anyOf": [
               {
@@ -2391,6 +2439,28 @@
               }
             ],
             "title": "Model Group Name"
+          },
+          "model_link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Link"
+          },
+          "model_placeholder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Placeholder"
           },
           "model_type": {
             "anyOf": [
@@ -3524,7 +3594,7 @@
           },
           "history_scope": {
             "default": "revision",
-            "description": "revision preserves exact selector semantics. draft requires an explicit -draft reference and groups its current revision with saved revisions that have no released version tag. Unknown/legacy revision attribution is excluded.",
+            "description": "revision preserves exact selector semantics with recorded selector migration lineage. draft requires an explicit -draft reference and groups its current revision with saved revisions that have no released version tag. Unknown/legacy revision attribution is excluded.",
             "enum": [
               "revision",
               "draft"
@@ -5744,13 +5814,13 @@
             }
           },
           {
-            "description": "revision preserves exact selector semantics. draft requires an explicit -draft reference and groups its current revision with saved revisions that have no released version tag. Unknown/legacy revision attribution is excluded.",
+            "description": "revision preserves exact selector semantics with recorded selector migration lineage. draft requires an explicit -draft reference and groups its current revision with saved revisions that have no released version tag. Unknown/legacy revision attribution is excluded.",
             "in": "query",
             "name": "history_scope",
             "required": false,
             "schema": {
               "default": "revision",
-              "description": "revision preserves exact selector semantics. draft requires an explicit -draft reference and groups its current revision with saved revisions that have no released version tag. Unknown/legacy revision attribution is excluded.",
+              "description": "revision preserves exact selector semantics with recorded selector migration lineage. draft requires an explicit -draft reference and groups its current revision with saved revisions that have no released version tag. Unknown/legacy revision attribution is excluded.",
               "enum": [
                 "revision",
                 "draft"
@@ -5827,7 +5897,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -6018,7 +6088,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "body"
@@ -6032,6 +6102,26 @@
     "/character/clone": {
       "post": {
         "operationId": "character_clone",
+        "parameters": [
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6138,7 +6228,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "body"
@@ -6152,6 +6242,26 @@
     "/character/create": {
       "post": {
         "operationId": "character_create",
+        "parameters": [
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -6476,7 +6586,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "body"
@@ -6518,6 +6628,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -6597,7 +6725,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -6743,7 +6871,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "conditional",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -6869,7 +6997,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -6992,7 +7120,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -7142,7 +7270,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -7173,6 +7301,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -7267,7 +7413,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -7298,6 +7444,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -7392,7 +7556,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -7423,6 +7587,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -7517,7 +7699,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -7558,6 +7740,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -7657,7 +7857,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -7708,6 +7908,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -7778,7 +7996,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -7898,7 +8116,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -8013,7 +8231,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -8064,6 +8282,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -8179,7 +8415,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -8220,6 +8456,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -8316,7 +8570,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -8367,6 +8621,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -8437,7 +8709,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -8557,7 +8829,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -8672,7 +8944,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -8723,6 +8995,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -8835,7 +9125,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -8866,6 +9156,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -8967,7 +9275,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -9098,7 +9406,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -9147,6 +9455,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -9209,6 +9535,30 @@
                       "required": [
                         "model_type",
                         "modelType"
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "required": [
+                        "avatar_id",
+                        "avatarId"
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "required": [
+                        "model_link",
+                        "modelLink"
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "required": [
+                        "model_placeholder",
+                        "modelPlaceholder"
                       ]
                     }
                   },
@@ -10728,6 +11078,16 @@
                   },
                   {
                     "required": [
+                      "avatarId"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "avatar_id"
+                    ]
+                  },
+                  {
+                    "required": [
                       "backstory"
                     ]
                   },
@@ -10998,12 +11358,32 @@
                   },
                   {
                     "required": [
+                      "modelLink"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "modelPlaceholder"
+                    ]
+                  },
+                  {
+                    "required": [
                       "modelType"
                     ]
                   },
                   {
                     "required": [
                       "model_group_name"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "model_link"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "model_placeholder"
                     ]
                   },
                   {
@@ -11269,6 +11649,16 @@
                       "type": "string"
                     },
                     "type": "array"
+                  },
+                  "avatarId": {
+                    "not": {
+                      "type": "null"
+                    }
+                  },
+                  "avatar_id": {
+                    "not": {
+                      "type": "null"
+                    }
                   },
                   "backstory": {
                     "minLength": 1,
@@ -11774,6 +12164,30 @@
                           "required": [
                             "model_type",
                             "modelType"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "required": [
+                            "avatar_id",
+                            "avatarId"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "required": [
+                            "model_link",
+                            "modelLink"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "required": [
+                            "model_placeholder",
+                            "modelPlaceholder"
                           ]
                         }
                       },
@@ -13375,6 +13789,24 @@
                           }
                         }
                       },
+                      "avatarId": {
+                        "properties": {
+                          "avatarId": {
+                            "not": {
+                              "type": "null"
+                            }
+                          }
+                        }
+                      },
+                      "avatar_id": {
+                        "properties": {
+                          "avatar_id": {
+                            "not": {
+                              "type": "null"
+                            }
+                          }
+                        }
+                      },
                       "backstory": {
                         "properties": {
                           "backstory": {
@@ -14081,7 +14513,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "body",
@@ -14123,6 +14555,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -14221,7 +14671,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -14263,6 +14713,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -14358,7 +14826,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -14557,7 +15025,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -14601,6 +15069,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -14694,7 +15180,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -14736,6 +15222,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -14834,7 +15338,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -14955,7 +15459,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -14996,6 +15500,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -15094,7 +15616,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -15138,6 +15660,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -15247,7 +15787,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -15278,6 +15818,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -15417,7 +15975,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -15448,6 +16006,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -15534,7 +16110,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -15651,7 +16227,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -15782,7 +16358,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -15908,7 +16484,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "workspace.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -16053,7 +16629,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -16084,6 +16660,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -16252,7 +16846,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -16283,6 +16877,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -16394,7 +17006,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -16425,6 +17037,24 @@
               "format": "uuid",
               "title": "Workspace Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.",
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -16536,7 +17166,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.write",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -16671,7 +17301,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -16793,7 +17423,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -16973,7 +17603,7 @@
         },
         "x-convai-workspace": {
           "authorization_capability": "character.read",
-          "contract_version": "2026-09-29.v1",
+          "contract_version": "2026-09-30.v1",
           "scope": {
             "accepted_locations": [
               "query"
@@ -17178,7 +17808,7 @@
   },
   "x-convai-catalog-version": 1,
   "x-convai-provenance": {
-    "contentSha256": "59af676a41f04bf9b7fd2dc2d1e7a3c4bda6425a7d4ca79ed02481898bf0e946",
+    "contentSha256": "8a84c2b96b62653276cc1ab332252112f4ade8c3d5ee9a8b0ee8bcac6cc2b674",
     "generatedBy": "uv run python tools/generate_mcp_openapi.py",
     "owner": "Conv-AI/convai-character-apis",
     "sourceBaseCommit": "13760e5253787e6386933b00eef93f6a736b6a09",

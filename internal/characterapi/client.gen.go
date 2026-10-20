@@ -547,35 +547,41 @@ type CharacterUpdate struct {
 	ActionsContractWire616374696f6e735f636f6e7472616374 *string `json:"actions_contract,omitempty"`
 
 	// ActionsEnabledWire616374696f6e735f656e61626c6564 Controls whether Core enables the character's backend Actions prompt. Omit the field to preserve the stored setting.
-	ActionsEnabledWire616374696f6e735f656e61626c6564                                 *bool                            `json:"actions_enabled,omitempty"`
-	AllowedModerationFiltersWire616c6c6f7765644d6f6465726174696f6e46696c74657273     *[]string                        `json:"allowedModerationFilters,omitempty"`
-	AllowedModerationFiltersWire616c6c6f7765645f6d6f6465726174696f6e5f66696c74657273 *[]string                        `json:"allowed_moderation_filters,omitempty"`
-	Backstory                                                                        *string                          `json:"backstory,omitempty"`
-	BlockedWordsWire626c6f636b6564576f726473                                         *[]string                        `json:"blockedWords,omitempty"`
-	BlockedWordsWire626c6f636b65645f776f726473                                       *[]string                        `json:"blocked_words,omitempty"`
-	BoostedWords                                                                     *[]BoostedWordInput              `json:"boosted_words,omitempty"`
-	CharID                                                                           *openapi_types.UUID              `json:"charID,omitempty"`
-	CharName                                                                         *string                          `json:"charName,omitempty"`
-	CharacterIdWire6368617261637465724964                                            *openapi_types.UUID              `json:"characterId,omitempty"`
-	CharacterTraitsWire636861726163746572547261697473                                *map[string]interface{}          `json:"characterTraits,omitempty"`
-	CharacterActions                                                                 *[]string                        `json:"character_actions,omitempty"`
-	CharacterIdWire6368617261637465725f6964                                          *openapi_types.UUID              `json:"character_id,omitempty"`
-	CharacterName                                                                    *string                          `json:"character_name,omitempty"`
-	CharacterTraitsWire6368617261637465725f747261697473                              *map[string]interface{}          `json:"character_traits,omitempty"`
-	CollectionNameWire636f6c6c656374696f6e4e616d65                                   *string                          `json:"collectionName,omitempty"`
-	CollectionNameWire636f6c6c656374696f6e5f6e616d65                                 *string                          `json:"collection_name,omitempty"`
-	CuriosityLevelWire637572696f736974794c6576656c                                   *int                             `json:"curiosityLevel,omitempty"`
-	CuriosityLevelWire637572696f736974795f6c6576656c                                 *int                             `json:"curiosity_level,omitempty"`
-	CustomGuardrailsEnabledWire637573746f6d47756172647261696c73456e61626c6564        *bool                            `json:"customGuardrailsEnabled,omitempty"`
-	CustomGuardrailsEnabledWire637573746f6d5f67756172647261696c735f656e61626c6564    *bool                            `json:"custom_guardrails_enabled,omitempty"`
-	Description                                                                      *string                          `json:"description,omitempty"`
-	Docs                                                                             *[]CharacterDocumentStatusUpdate `json:"docs,omitempty"`
-	DocumentStoreFileLinkWire646f63756d656e7453746f726546696c654c696e6b              *string                          `json:"documentStoreFileLink,omitempty"`
-	DocumentStoreFileLinkWire646f63756d656e745f73746f72655f66696c655f6c696e6b        *string                          `json:"document_store_file_link,omitempty"`
-	DynamicInfoTokenLimitWire64796e616d6963496e666f546f6b656e4c696d6974              *int                             `json:"dynamicInfoTokenLimit,omitempty"`
-	DynamicInfoTokenLimitWire64796e616d69635f696e666f5f746f6b656e5f6c696d6974        *int                             `json:"dynamic_info_token_limit,omitempty"`
-	EmbodimentClothesDescription                                                     *string                          `json:"embodiment_clothes_description,omitempty"`
-	EmbodimentLooksDescription                                                       *string                          `json:"embodiment_looks_description,omitempty"`
+	ActionsEnabledWire616374696f6e735f656e61626c6564                                 *bool     `json:"actions_enabled,omitempty"`
+	AllowedModerationFiltersWire616c6c6f7765644d6f6465726174696f6e46696c74657273     *[]string `json:"allowedModerationFilters,omitempty"`
+	AllowedModerationFiltersWire616c6c6f7765645f6d6f6465726174696f6e5f66696c74657273 *[]string `json:"allowed_moderation_filters,omitempty"`
+
+	// AvatarIdWire6176617461724964 Select a visible avatar for the character and its owned Creator Experience. Requires a Creator Experience; Shared Workspace avatars must be public.
+	AvatarIdWire6176617461724964 *openapi_types.UUID `json:"avatarId,omitempty"`
+
+	// AvatarIdWire6176617461725f6964 Select a visible avatar for the character and its owned Creator Experience. Requires a Creator Experience; Shared Workspace avatars must be public.
+	AvatarIdWire6176617461725f6964                                                *openapi_types.UUID              `json:"avatar_id,omitempty"`
+	Backstory                                                                     *string                          `json:"backstory,omitempty"`
+	BlockedWordsWire626c6f636b6564576f726473                                      *[]string                        `json:"blockedWords,omitempty"`
+	BlockedWordsWire626c6f636b65645f776f726473                                    *[]string                        `json:"blocked_words,omitempty"`
+	BoostedWords                                                                  *[]BoostedWordInput              `json:"boosted_words,omitempty"`
+	CharID                                                                        *openapi_types.UUID              `json:"charID,omitempty"`
+	CharName                                                                      *string                          `json:"charName,omitempty"`
+	CharacterIdWire6368617261637465724964                                         *openapi_types.UUID              `json:"characterId,omitempty"`
+	CharacterTraitsWire636861726163746572547261697473                             *map[string]interface{}          `json:"characterTraits,omitempty"`
+	CharacterActions                                                              *[]string                        `json:"character_actions,omitempty"`
+	CharacterIdWire6368617261637465725f6964                                       *openapi_types.UUID              `json:"character_id,omitempty"`
+	CharacterName                                                                 *string                          `json:"character_name,omitempty"`
+	CharacterTraitsWire6368617261637465725f747261697473                           *map[string]interface{}          `json:"character_traits,omitempty"`
+	CollectionNameWire636f6c6c656374696f6e4e616d65                                *string                          `json:"collectionName,omitempty"`
+	CollectionNameWire636f6c6c656374696f6e5f6e616d65                              *string                          `json:"collection_name,omitempty"`
+	CuriosityLevelWire637572696f736974794c6576656c                                *int                             `json:"curiosityLevel,omitempty"`
+	CuriosityLevelWire637572696f736974795f6c6576656c                              *int                             `json:"curiosity_level,omitempty"`
+	CustomGuardrailsEnabledWire637573746f6d47756172647261696c73456e61626c6564     *bool                            `json:"customGuardrailsEnabled,omitempty"`
+	CustomGuardrailsEnabledWire637573746f6d5f67756172647261696c735f656e61626c6564 *bool                            `json:"custom_guardrails_enabled,omitempty"`
+	Description                                                                   *string                          `json:"description,omitempty"`
+	Docs                                                                          *[]CharacterDocumentStatusUpdate `json:"docs,omitempty"`
+	DocumentStoreFileLinkWire646f63756d656e7453746f726546696c654c696e6b           *string                          `json:"documentStoreFileLink,omitempty"`
+	DocumentStoreFileLinkWire646f63756d656e745f73746f72655f66696c655f6c696e6b     *string                          `json:"document_store_file_link,omitempty"`
+	DynamicInfoTokenLimitWire64796e616d6963496e666f546f6b656e4c696d6974           *int                             `json:"dynamicInfoTokenLimit,omitempty"`
+	DynamicInfoTokenLimitWire64796e616d69635f696e666f5f746f6b656e5f6c696d6974     *int                             `json:"dynamic_info_token_limit,omitempty"`
+	EmbodimentClothesDescription                                                  *string                          `json:"embodiment_clothes_description,omitempty"`
+	EmbodimentLooksDescription                                                    *string                          `json:"embodiment_looks_description,omitempty"`
 
 	// ExpectedExperienceIdWire6578706563746564457870657269656e63654964 Optional compare-and-set precondition for experience_id. Explicit null requires the character to still be unlinked.
 	ExpectedExperienceIdWire6578706563746564457870657269656e63654964 *openapi_types.UUID `json:"expectedExperienceId,omitempty"`
@@ -611,8 +617,12 @@ type CharacterUpdate struct {
 	MemorySettingsWire6d656d6f72795f73657474696e6773                                      *map[string]interface{}                                         `json:"memory_settings,omitempty"`
 	MetadataFilterWire6d6574616461746146696c746572                                        *map[string]CharacterUpdate_MetadataFilter_AdditionalProperties `json:"metadataFilter,omitempty"`
 	MetadataFilterWire6d657461646174615f66696c746572                                      *map[string]CharacterUpdate_MetadataFilter_AdditionalProperties `json:"metadata_filter,omitempty"`
+	ModelLinkWire6d6f64656c4c696e6b                                                       *string                                                         `json:"modelLink,omitempty"`
+	ModelPlaceholderWire6d6f64656c506c616365686f6c646572                                  *string                                                         `json:"modelPlaceholder,omitempty"`
 	ModelTypeWire6d6f64656c54797065                                                       *string                                                         `json:"modelType,omitempty"`
 	ModelGroupName                                                                        *string                                                         `json:"model_group_name,omitempty"`
+	ModelLinkWire6d6f64656c5f6c696e6b                                                     *string                                                         `json:"model_link,omitempty"`
+	ModelPlaceholderWire6d6f64656c5f706c616365686f6c646572                                *string                                                         `json:"model_placeholder,omitempty"`
 	ModelTypeWire6d6f64656c5f74797065                                                     *string                                                         `json:"model_type,omitempty"`
 	ModerationEnabledWire6d6f6465726174696f6e456e61626c6564                               *bool                                                           `json:"moderationEnabled,omitempty"`
 	ModerationEnabledWire6d6f6465726174696f6e5f656e61626c6564                             *bool                                                           `json:"moderation_enabled,omitempty"`
@@ -1149,10 +1159,25 @@ type VoiceItem struct {
 	VoiceValue      string    `json:"voice_value"`
 }
 
+// CharacterCloneParams defines parameters for CharacterClone.
+type CharacterCloneParams struct {
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
+}
+
+// CharacterCreateParams defines parameters for CharacterCreate.
+type CharacterCreateParams struct {
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
+}
+
 // CharacterDeleteParams defines parameters for CharacterDelete.
 type CharacterDeleteParams struct {
 	CharacterId openapi_types.UUID  `form:"character_id" json:"character_id"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // CharacterGetParams defines parameters for CharacterGet.
@@ -1177,22 +1202,34 @@ type CharacterListParamsSort string
 // AddDecisionCharacterNarrativeAddDecisionPostParams defines parameters for AddDecisionCharacterNarrativeAddDecisionPost.
 type AddDecisionCharacterNarrativeAddDecisionPostParams struct {
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // DeleteDecisionCharacterNarrativeDeleteDecisionPostParams defines parameters for DeleteDecisionCharacterNarrativeDeleteDecisionPost.
 type DeleteDecisionCharacterNarrativeDeleteDecisionPostParams struct {
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // EditDecisionCharacterNarrativeEditDecisionPostParams defines parameters for EditDecisionCharacterNarrativeEditDecisionPost.
 type EditDecisionCharacterNarrativeEditDecisionPostParams struct {
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // CreateSectionCharacterNarrativeSectionsCreatePostParams defines parameters for CreateSectionCharacterNarrativeSectionsCreatePost.
 type CreateSectionCharacterNarrativeSectionsCreatePostParams struct {
 	CharacterId string              `form:"character_id" json:"character_id"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // DeleteSectionCharacterNarrativeSectionsDeletePostParams defines parameters for DeleteSectionCharacterNarrativeSectionsDeletePost.
@@ -1200,6 +1237,9 @@ type DeleteSectionCharacterNarrativeSectionsDeletePostParams struct {
 	CharacterId string              `form:"character_id" json:"character_id"`
 	SectionId   openapi_types.UUID  `form:"section_id" json:"section_id"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // GetSectionCharacterNarrativeSectionsGetGetParams defines parameters for GetSectionCharacterNarrativeSectionsGetGet.
@@ -1220,12 +1260,18 @@ type UpdateSectionCharacterNarrativeSectionsUpdatePostParams struct {
 	CharacterId string              `form:"character_id" json:"character_id"`
 	SectionId   openapi_types.UUID  `form:"section_id" json:"section_id"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // CreateTriggerCharacterNarrativeTriggersCreatePostParams defines parameters for CreateTriggerCharacterNarrativeTriggersCreatePost.
 type CreateTriggerCharacterNarrativeTriggersCreatePostParams struct {
 	CharacterId string              `form:"character_id" json:"character_id"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // DeleteTriggerCharacterNarrativeTriggersDeletePostParams defines parameters for DeleteTriggerCharacterNarrativeTriggersDeletePost.
@@ -1233,6 +1279,9 @@ type DeleteTriggerCharacterNarrativeTriggersDeletePostParams struct {
 	CharacterId string              `form:"character_id" json:"character_id"`
 	TriggerId   openapi_types.UUID  `form:"trigger_id" json:"trigger_id"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // GetTriggerCharacterNarrativeTriggersGetGetParams defines parameters for GetTriggerCharacterNarrativeTriggersGetGet.
@@ -1253,11 +1302,17 @@ type UpdateTriggerCharacterNarrativeTriggersUpdatePostParams struct {
 	CharacterId string              `form:"character_id" json:"character_id"`
 	TriggerId   openapi_types.UUID  `form:"trigger_id" json:"trigger_id"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams defines parameters for UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPost.
 type UpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostParams struct {
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // CharacterListSupportedModelsParams defines parameters for CharacterListSupportedModels.
@@ -1270,18 +1325,27 @@ type CharacterListSupportedModelsParams struct {
 type CharacterUpdateParams struct {
 	CharacterId *string             `form:"character_id,omitempty" json:"character_id,omitempty"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // CharacterVersionCreateParams defines parameters for CharacterVersionCreate.
 type CharacterVersionCreateParams struct {
 	CharacterId string              `form:"character_id" json:"character_id"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // CharacterVersionDeprecateParams defines parameters for CharacterVersionDeprecate.
 type CharacterVersionDeprecateParams struct {
 	CharacterId openapi_types.UUID  `form:"character_id" json:"character_id"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // CharacterVersionDiffParams defines parameters for CharacterVersionDiff.
@@ -1313,12 +1377,18 @@ type CharacterVersionDiscardDraftParams struct {
 	// CharacterId Bare character UUID without a version selector
 	CharacterId openapi_types.UUID  `form:"character_id" json:"character_id"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // CharacterVersionForkParams defines parameters for CharacterVersionFork.
 type CharacterVersionForkParams struct {
 	CharacterId openapi_types.UUID  `form:"character_id" json:"character_id"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // CharacterVersionListParams defines parameters for CharacterVersionList.
@@ -1331,6 +1401,9 @@ type CharacterVersionListParams struct {
 type CharacterVersionPromoteParams struct {
 	CharacterId string              `form:"character_id" json:"character_id"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // CharacterVersionRevertDraftChangeParams defines parameters for CharacterVersionRevertDraftChange.
@@ -1338,16 +1411,25 @@ type CharacterVersionRevertDraftChangeParams struct {
 	// CharacterId Bare character UUID without a version selector
 	CharacterId openapi_types.UUID  `form:"character_id" json:"character_id"`
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // CreateFunctionFunctionsCreatePostParams defines parameters for CreateFunctionFunctionsCreatePost.
 type CreateFunctionFunctionsCreatePostParams struct {
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // DeleteFunctionFunctionsDeletePostParams defines parameters for DeleteFunctionFunctionsDeletePost.
 type DeleteFunctionFunctionsDeletePostParams struct {
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // GetFunctionFunctionsGetPostParams defines parameters for GetFunctionFunctionsGetPost.
@@ -1382,6 +1464,9 @@ type TestFunctionFunctionsTestPostParams struct {
 // UpdateFunctionFunctionsUpdatePostParams defines parameters for UpdateFunctionFunctionsUpdatePost.
 type UpdateFunctionFunctionsUpdatePostParams struct {
 	WorkspaceId *openapi_types.UUID `form:"workspace_id,omitempty" json:"workspace_id,omitempty"`
+
+	// IdempotencyKey The client's canonical original operation UUID, sent once per logical version/authoring operation and reused unchanged on every retry. Parsing it is not authorization and never activates a feature.
+	IdempotencyKey *string `json:"Idempotency-Key,omitempty"`
 }
 
 // GetAvailableVoicesTtsGetAvailableVoicesGetParams defines parameters for GetAvailableVoicesTtsGetAvailableVoicesGet.
@@ -1914,28 +1999,28 @@ type ClientInterface interface {
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /character/clone (the `CharacterClone` operationId).
-	CharacterCloneWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	CharacterCloneWithBody(ctx context.Context, params *CharacterCloneParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CharacterClone Clone a character
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /character/clone (the `CharacterClone` operationId).
-	CharacterClone(ctx context.Context, body CharacterCloneJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	CharacterClone(ctx context.Context, params *CharacterCloneParams, body CharacterCloneJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CharacterCreateWithBody Create a character with explicit or automatically selected voice
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /character/create (the `CharacterCreate` operationId).
-	CharacterCreateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	CharacterCreateWithBody(ctx context.Context, params *CharacterCreateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CharacterCreate Create a character with explicit or automatically selected voice
 	//
 	// Takes a body of the `application/json` content type.
 	//
 	// Corresponds with POST /character/create (the `CharacterCreate` operationId).
-	CharacterCreate(ctx context.Context, body CharacterCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	CharacterCreate(ctx context.Context, params *CharacterCreateParams, body CharacterCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CharacterDelete Delete an owned character and its metadata
 	//
@@ -2323,8 +2408,8 @@ type ClientInterface interface {
 // Takes any type of body and a specified content type.
 //
 // Corresponds with POST /character/clone (the `CharacterClone` operationId).
-func (c *Client) CharacterCloneWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCharacterCloneRequestWithBody(c.Server, contentType, body)
+func (c *Client) CharacterCloneWithBody(ctx context.Context, params *CharacterCloneParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterCloneRequestWithBody(c.Server, params, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2340,8 +2425,8 @@ func (c *Client) CharacterCloneWithBody(ctx context.Context, contentType string,
 // Takes a body of the `application/json` content type.
 //
 // Corresponds with POST /character/clone (the `CharacterClone` operationId).
-func (c *Client) CharacterClone(ctx context.Context, body CharacterCloneJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCharacterCloneRequest(c.Server, body)
+func (c *Client) CharacterClone(ctx context.Context, params *CharacterCloneParams, body CharacterCloneJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterCloneRequest(c.Server, params, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2357,8 +2442,8 @@ func (c *Client) CharacterClone(ctx context.Context, body CharacterCloneJSONRequ
 // Takes any type of body and a specified content type.
 //
 // Corresponds with POST /character/create (the `CharacterCreate` operationId).
-func (c *Client) CharacterCreateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCharacterCreateRequestWithBody(c.Server, contentType, body)
+func (c *Client) CharacterCreateWithBody(ctx context.Context, params *CharacterCreateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterCreateRequestWithBody(c.Server, params, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2374,8 +2459,8 @@ func (c *Client) CharacterCreateWithBody(ctx context.Context, contentType string
 // Takes a body of the `application/json` content type.
 //
 // Corresponds with POST /character/create (the `CharacterCreate` operationId).
-func (c *Client) CharacterCreate(ctx context.Context, body CharacterCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCharacterCreateRequest(c.Server, body)
+func (c *Client) CharacterCreate(ctx context.Context, params *CharacterCreateParams, body CharacterCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCharacterCreateRequest(c.Server, params, body)
 	if err != nil {
 		return nil, err
 	}
@@ -3347,18 +3432,18 @@ func (c *Client) GetAvailableVoicesTtsGetAvailableVoicesGet(ctx context.Context,
 }
 
 // NewCharacterCloneRequest calls the generic CharacterClone builder with application/json body
-func NewCharacterCloneRequest(server string, body CharacterCloneJSONRequestBody) (*http.Request, error) {
+func NewCharacterCloneRequest(server string, params *CharacterCloneParams, body CharacterCloneJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewCharacterCloneRequestWithBody(server, "application/json", bodyReader)
+	return NewCharacterCloneRequestWithBody(server, params, "application/json", bodyReader)
 }
 
 // NewCharacterCloneRequestWithBody constructs an http.Request for the CharacterClone method, with any body, and a specified content type
-func NewCharacterCloneRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+func NewCharacterCloneRequestWithBody(server string, params *CharacterCloneParams, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -3383,22 +3468,37 @@ func NewCharacterCloneRequestWithBody(server string, contentType string, body io
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
 // NewCharacterCreateRequest calls the generic CharacterCreate builder with application/json body
-func NewCharacterCreateRequest(server string, body CharacterCreateJSONRequestBody) (*http.Request, error) {
+func NewCharacterCreateRequest(server string, params *CharacterCreateParams, body CharacterCreateJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewCharacterCreateRequestWithBody(server, "application/json", bodyReader)
+	return NewCharacterCreateRequestWithBody(server, params, "application/json", bodyReader)
 }
 
 // NewCharacterCreateRequestWithBody constructs an http.Request for the CharacterCreate method, with any body, and a specified content type
-func NewCharacterCreateRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+func NewCharacterCreateRequestWithBody(server string, params *CharacterCreateParams, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -3422,6 +3522,21 @@ func NewCharacterCreateRequestWithBody(server string, contentType string, body i
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
 
 	return req, nil
 }
@@ -3483,6 +3598,21 @@ func NewCharacterDeleteRequest(server string, params *CharacterDeleteParams) (*h
 	req, err := http.NewRequest(http.MethodPost, queryURL.String(), nil)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
 	}
 
 	return req, nil
@@ -3704,6 +3834,21 @@ func NewAddDecisionCharacterNarrativeAddDecisionPostRequestWithBody(server strin
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
@@ -3771,6 +3916,21 @@ func NewDeleteDecisionCharacterNarrativeDeleteDecisionPostRequestWithBody(server
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
@@ -3837,6 +3997,21 @@ func NewEditDecisionCharacterNarrativeEditDecisionPostRequestWithBody(server str
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
 
 	return req, nil
 }
@@ -3913,6 +4088,21 @@ func NewCreateSectionCharacterNarrativeSectionsCreatePostRequestWithBody(server 
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
@@ -3981,6 +4171,21 @@ func NewDeleteSectionCharacterNarrativeSectionsDeletePostRequest(server string, 
 	req, err := http.NewRequest(http.MethodPost, queryURL.String(), nil)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
 	}
 
 	return req, nil
@@ -4198,6 +4403,21 @@ func NewUpdateSectionCharacterNarrativeSectionsUpdatePostRequestWithBody(server 
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
@@ -4273,6 +4493,21 @@ func NewCreateTriggerCharacterNarrativeTriggersCreatePostRequestWithBody(server 
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
@@ -4341,6 +4576,21 @@ func NewDeleteTriggerCharacterNarrativeTriggersDeletePostRequest(server string, 
 	req, err := http.NewRequest(http.MethodPost, queryURL.String(), nil)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
 	}
 
 	return req, nil
@@ -4558,6 +4808,21 @@ func NewUpdateTriggerCharacterNarrativeTriggersUpdatePostRequestWithBody(server 
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
@@ -4624,6 +4889,21 @@ func NewUpdateStartSectionIdCharacterNarrativeUpdateStartSectionIdPostRequestWit
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
 
 	return req, nil
 }
@@ -4770,6 +5050,21 @@ func NewCharacterUpdateRequestWithBody(server string, params *CharacterUpdatePar
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
@@ -4845,6 +5140,21 @@ func NewCharacterVersionCreateRequestWithBody(server string, params *CharacterVe
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
@@ -4919,6 +5229,21 @@ func NewCharacterVersionDeprecateRequestWithBody(server string, params *Characte
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
 
 	return req, nil
 }
@@ -5085,6 +5410,21 @@ func NewCharacterVersionDiscardDraftRequestWithBody(server string, params *Chara
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
@@ -5159,6 +5499,21 @@ func NewCharacterVersionForkRequestWithBody(server string, params *CharacterVers
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
 
 	return req, nil
 }
@@ -5297,6 +5652,21 @@ func NewCharacterVersionPromoteRequestWithBody(server string, params *CharacterV
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
@@ -5372,6 +5742,21 @@ func NewCharacterVersionRevertDraftChangeRequestWithBody(server string, params *
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
@@ -5439,6 +5824,21 @@ func NewCreateFunctionFunctionsCreatePostRequestWithBody(server string, params *
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
@@ -5505,6 +5905,21 @@ func NewDeleteFunctionFunctionsDeletePostRequestWithBody(server string, params *
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
 
 	return req, nil
 }
@@ -5841,6 +6256,21 @@ func NewUpdateFunctionFunctionsUpdatePostRequestWithBody(server string, params *
 
 	req.Header.Add("Content-Type", contentType)
 
+	if params != nil {
+
+		if params.IdempotencyKey != nil {
+			var headerParam0 string
+
+			headerParam0, err = runtime.StyleParamWithOptions("simple", false, "Idempotency-Key", *params.IdempotencyKey, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationHeader, Type: "", Format: ""})
+			if err != nil {
+				return nil, err
+			}
+
+			req.Header.Set("Idempotency-Key", headerParam0)
+		}
+
+	}
+
 	return req, nil
 }
 
@@ -5998,28 +6428,28 @@ type ClientWithResponsesInterface interface {
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /character/clone (the `CharacterClone` operationId).
-	CharacterCloneWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterCloneResp, error)
+	CharacterCloneWithBodyWithResponse(ctx context.Context, params *CharacterCloneParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterCloneResp, error)
 
 	// CharacterCloneWithResponse Clone a character
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /character/clone (the `CharacterClone` operationId).
-	CharacterCloneWithResponse(ctx context.Context, body CharacterCloneJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterCloneResp, error)
+	CharacterCloneWithResponse(ctx context.Context, params *CharacterCloneParams, body CharacterCloneJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterCloneResp, error)
 
 	// CharacterCreateWithBodyWithResponse Create a character with explicit or automatically selected voice
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /character/create (the `CharacterCreate` operationId).
-	CharacterCreateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterCreateResp, error)
+	CharacterCreateWithBodyWithResponse(ctx context.Context, params *CharacterCreateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterCreateResp, error)
 
 	// CharacterCreateWithResponse Create a character with explicit or automatically selected voice
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /character/create (the `CharacterCreate` operationId).
-	CharacterCreateWithResponse(ctx context.Context, body CharacterCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterCreateResp, error)
+	CharacterCreateWithResponse(ctx context.Context, params *CharacterCreateParams, body CharacterCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterCreateResp, error)
 
 	// CharacterDeleteWithResponse Delete an owned character and its metadata
 	//
@@ -8259,8 +8689,8 @@ func (r GetAvailableVoicesTtsGetAvailableVoicesGetResp) ContentType() string {
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
 // Corresponds with POST /character/clone (the `CharacterClone` operationId).
-func (c *ClientWithResponses) CharacterCloneWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterCloneResp, error) {
-	rsp, err := c.CharacterCloneWithBody(ctx, contentType, body, reqEditors...)
+func (c *ClientWithResponses) CharacterCloneWithBodyWithResponse(ctx context.Context, params *CharacterCloneParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterCloneResp, error) {
+	rsp, err := c.CharacterCloneWithBody(ctx, params, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8272,8 +8702,8 @@ func (c *ClientWithResponses) CharacterCloneWithBodyWithResponse(ctx context.Con
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
 // Corresponds with POST /character/clone (the `CharacterClone` operationId).
-func (c *ClientWithResponses) CharacterCloneWithResponse(ctx context.Context, body CharacterCloneJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterCloneResp, error) {
-	rsp, err := c.CharacterClone(ctx, body, reqEditors...)
+func (c *ClientWithResponses) CharacterCloneWithResponse(ctx context.Context, params *CharacterCloneParams, body CharacterCloneJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterCloneResp, error) {
+	rsp, err := c.CharacterClone(ctx, params, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8285,8 +8715,8 @@ func (c *ClientWithResponses) CharacterCloneWithResponse(ctx context.Context, bo
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
 // Corresponds with POST /character/create (the `CharacterCreate` operationId).
-func (c *ClientWithResponses) CharacterCreateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterCreateResp, error) {
-	rsp, err := c.CharacterCreateWithBody(ctx, contentType, body, reqEditors...)
+func (c *ClientWithResponses) CharacterCreateWithBodyWithResponse(ctx context.Context, params *CharacterCreateParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CharacterCreateResp, error) {
+	rsp, err := c.CharacterCreateWithBody(ctx, params, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8298,8 +8728,8 @@ func (c *ClientWithResponses) CharacterCreateWithBodyWithResponse(ctx context.Co
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
 // Corresponds with POST /character/create (the `CharacterCreate` operationId).
-func (c *ClientWithResponses) CharacterCreateWithResponse(ctx context.Context, body CharacterCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterCreateResp, error) {
-	rsp, err := c.CharacterCreate(ctx, body, reqEditors...)
+func (c *ClientWithResponses) CharacterCreateWithResponse(ctx context.Context, params *CharacterCreateParams, body CharacterCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*CharacterCreateResp, error) {
+	rsp, err := c.CharacterCreate(ctx, params, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
