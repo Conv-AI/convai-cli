@@ -24,7 +24,11 @@ func (c *Client) dispatch(ctx context.Context, operation string, query map[strin
 		}
 		return c.generated.CharacterGet(ctx, &params)
 	case "character_create":
-		return c.generated.CharacterCreateWithBody(ctx, "application/json", bytes.NewReader(body))
+		var params characterapi.CharacterCreateParams
+		if err := decodeQuery(query, &params); err != nil {
+			return nil, err
+		}
+		return c.generated.CharacterCreateWithBody(ctx, &params, "application/json", bytes.NewReader(body))
 	case "character_update":
 		var params characterapi.CharacterUpdateParams
 		if err := decodeQuery(query, &params); err != nil {
@@ -38,7 +42,11 @@ func (c *Client) dispatch(ctx context.Context, operation string, query map[strin
 		}
 		return c.generated.CharacterDelete(ctx, &params)
 	case "character_clone":
-		return c.generated.CharacterCloneWithBody(ctx, "application/json", bytes.NewReader(body))
+		var params characterapi.CharacterCloneParams
+		if err := decodeQuery(query, &params); err != nil {
+			return nil, err
+		}
+		return c.generated.CharacterCloneWithBody(ctx, &params, "application/json", bytes.NewReader(body))
 	case "character_version_list":
 		var params characterapi.CharacterVersionListParams
 		if err := decodeQuery(query, &params); err != nil {
